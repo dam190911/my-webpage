@@ -1,334 +1,332 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>나의 시작 페이지</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --ink: #14161F;
-    --ink-soft: #1B1E2A;
-    --paper: #EAE7DD;
-    --gold: #C9A227;
-    --muted: #8A8D9E;
-    --line: #2A2D3A;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>나의 시작 홈페이지</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      color: #2f3542;
+      background: linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 18px;
+    }
+    .container {
+      width: min(920px, 100%);
+    }
+    .greeting {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .greeting h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 5vw, 42px);
+      letter-spacing: -1.5px;
+    }
+    .greeting p {
+      margin: 0;
+      color: #7a8293;
+      font-size: 15px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      gap: 18px;
+    }
+    .card {
+      background: rgba(255,255,255,.88);
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 12px 35px rgba(67, 76, 103, .09);
+      backdrop-filter: blur(8px);
+    }
+    .time-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 230px;
+    }
+    .label {
+      color: #8a92a3;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    #time {
+      font-size: clamp(38px, 7vw, 62px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+    #date {
+      margin-top: 13px;
+      color: #687185;
+      font-size: 15px;
+    }
+    .search-card {
+      grid-column: 1 / -1;
+    }
+    .search-box {
+      display: flex;
+      gap: 10px;
+    }
+    .search-box input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid #dfe3ec;
+      border-radius: 13px;
+      padding: 14px 16px;
+      font-size: 15px;
+      outline: none;
+      transition: .2s;
+    }
+    .search-box input:focus {
+      border-color: #91a9ff;
+      box-shadow: 0 0 0 3px rgba(145,169,255,.15);
+    }
+    button {
+      border: 0;
+      border-radius: 13px;
+      padding: 0 20px;
+      background: #617be8;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s, opacity .15s;
+    }
+    button:hover { opacity: .9; }
+    button:active { transform: scale(.97); }
 
-  *{ box-sizing: border-box; }
-
-  body{
-    margin:0;
-    min-height:100vh;
-    background: var(--ink);
-    color: var(--paper);
-    font-family: 'Inter', sans-serif;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding: 32px 20px;
-  }
-
-  main{
-    width:100%;
-    max-width: 520px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    text-align:center;
-  }
-
-  /* 시계 */
-  .clock{
-    font-family:'Fraunces', serif;
-    font-weight:300;
-    font-size: clamp(64px, 14vw, 108px);
-    line-height:1;
-    color: var(--gold);
-    letter-spacing: -0.01em;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .date{
-    margin-top: 10px;
-    font-size: 15px;
-    color: var(--muted);
-    letter-spacing: 0.02em;
-  }
-
-  .divider{
-    width:100%;
-    height:1px;
-    background: var(--line);
-    margin: 32px 0;
-    border:none;
-  }
-
-  /* 검색 */
-  .search-form{
-    width:100%;
-    display:flex;
-    align-items:center;
-    gap: 10px;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 10px;
-    transition: border-color .2s ease;
-  }
-  .search-form:focus-within{
-    border-color: var(--gold);
-  }
-  .search-form svg{
-    flex-shrink:0;
-    opacity:.6;
-  }
-  .search-form input[type="text"]{
-    flex:1;
-    background:none;
-    border:none;
-    outline:none;
-    color: var(--paper);
-    font-family:'Inter', sans-serif;
-    font-size: 16px;
-    padding: 6px 0;
-  }
-  .search-form input[type="text"]::placeholder{
-    color: var(--muted);
-  }
-
-  /* 할 일 */
-  .todo{
-    width:100%;
-    margin-top: 40px;
-    text-align:left;
-  }
-  .todo h2{
-    font-size: 13px;
-    font-weight:600;
-    color: var(--muted);
-    margin: 0 0 14px 2px;
-    letter-spacing: 0.02em;
-  }
-
-  .todo-add{
-    display:flex;
-    gap: 10px;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 10px;
-    margin-bottom: 16px;
-  }
-  .todo-add input{
-    flex:1;
-    background:none;
-    border:none;
-    outline:none;
-    color: var(--paper);
-    font-family:'Inter', sans-serif;
-    font-size: 15px;
-    padding: 4px 0;
-  }
-  .todo-add input::placeholder{ color: var(--muted); }
-  .todo-add button{
-    background:none;
-    border:none;
-    color: var(--gold);
-    font-size: 20px;
-    line-height:1;
-    cursor:pointer;
-    padding: 0 4px;
-  }
-  .todo-add button:hover{ opacity:.75; }
-
-  ul.todo-list{
-    list-style:none;
-    margin:0;
-    padding:0;
-    display:flex;
-    flex-direction:column;
-    gap: 2px;
-  }
-
-  .todo-item{
-    display:flex;
-    align-items:center;
-    gap: 12px;
-    padding: 9px 2px;
-    border-bottom: 1px solid var(--ink-soft);
-  }
-  .todo-item:last-child{ border-bottom:none; }
-
-  .todo-item .check{
-    width:16px;
-    height:16px;
-    border-radius:50%;
-    border: 1.5px solid var(--muted);
-    flex-shrink:0;
-    cursor:pointer;
-    position:relative;
-    transition: border-color .15s ease, background .15s ease;
-  }
-  .todo-item.done .check{
-    border-color: var(--gold);
-    background: var(--gold);
-  }
-  .todo-item.done .check::after{
-    content:"";
-    position:absolute;
-    left:4px; top:1px;
-    width:4px; height:8px;
-    border-right: 1.5px solid var(--ink);
-    border-bottom: 1.5px solid var(--ink);
-    transform: rotate(45deg);
-  }
-
-  .todo-item span{
-    flex:1;
-    font-size: 15px;
-    color: var(--paper);
-    word-break: break-word;
-  }
-  .todo-item.done span{
-    color: var(--muted);
-    text-decoration: line-through;
-  }
-
-  .todo-item .remove{
-    opacity:0;
-    background:none;
-    border:none;
-    color: var(--muted);
-    font-size: 15px;
-    cursor:pointer;
-    padding: 2px 6px;
-    transition: opacity .15s ease;
-  }
-  .todo-item:hover .remove{ opacity:1; }
-
-  .todo-empty{
-    color: var(--muted);
-    font-size: 14px;
-    padding: 10px 2px;
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    *{ transition:none !important; }
-  }
-</style>
+    .todo-card {
+      min-height: 230px;
+    }
+    .todo-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .todo-title h2 {
+      margin: 0;
+      font-size: 19px;
+    }
+    #count {
+      color: #8a92a3;
+      font-size: 12px;
+    }
+    .add-todo {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    .add-todo input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid #dfe3ec;
+      border-radius: 11px;
+      padding: 11px 13px;
+      outline: none;
+      font-size: 14px;
+    }
+    .add-todo button {
+      padding: 0 15px;
+      border-radius: 11px;
+    }
+    #todoList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 8px;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 11px;
+      border-radius: 11px;
+      background: #f7f8fc;
+      font-size: 14px;
+    }
+    .todo-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: #617be8;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+    .todo-text {
+      flex: 1;
+      word-break: break-word;
+    }
+    .todo-item.done .todo-text {
+      text-decoration: line-through;
+      color: #a2a8b5;
+    }
+    .delete {
+      border: 0;
+      background: transparent;
+      color: #a2a8b5;
+      padding: 3px 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .empty {
+      text-align: center;
+      color: #a2a8b5;
+      font-size: 13px;
+      padding: 12px 0;
+    }
+    @media (max-width: 680px) {
+      .grid { grid-template-columns: 1fr; }
+      .search-card { grid-column: auto; }
+      .time-card, .todo-card { min-height: auto; }
+    }
+  </style>
 </head>
 <body>
+  <main class="container">
+    <header class="greeting">
+      <h1>안녕하세요 👋</h1>
+      <p>오늘도 차근차근, 하고 싶은 일을 시작해 보세요.</p>
+    </header>
 
-<main>
-  <div class="clock" id="clock">00:00</div>
-  <div class="date" id="date">-</div>
+    <section class="grid">
+      <div class="card time-card">
+        <div class="label">TODAY</div>
+        <div id="time">00:00:00</div>
+        <div id="date">날짜를 불러오는 중...</div>
+      </div>
 
-  <hr class="divider">
+      <div class="card todo-card">
+        <div class="todo-title">
+          <h2>오늘의 할 일</h2>
+          <span id="count">0개</span>
+        </div>
+        <div class="add-todo">
+          <input id="todoInput" type="text" placeholder="할 일을 입력하세요" maxlength="100">
+          <button id="addBtn">추가</button>
+        </div>
+        <ul id="todoList"></ul>
+      </div>
 
-  <form class="search-form" id="searchForm">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8D9E" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" id="searchInput" placeholder="Google 검색" autocomplete="off">
-  </form>
+      <div class="card search-card">
+        <div class="label">GOOGLE SEARCH</div>
+        <form class="search-box" id="searchForm">
+          <input id="searchInput" type="search" placeholder="Google에서 검색하기" autocomplete="off">
+          <button type="submit">검색</button>
+        </form>
+      </div>
+    </section>
+  </main>
 
-  <section class="todo">
-    <h2>오늘 할 일</h2>
-    <form class="todo-add" id="todoForm">
-      <input type="text" id="todoInput" placeholder="할 일을 입력하고 Enter" autocomplete="off">
-      <button type="submit" aria-label="추가">+</button>
-    </form>
-    <ul class="todo-list" id="todoList"></ul>
-  </section>
-</main>
-
-<script>
-  // 시계 & 날짜
-  const clockEl = document.getElementById('clock');
-  const dateEl = document.getElementById('date');
-  const days = ['일','월','화','수','목','금','토'];
-
-  function tick(){
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2,'0');
-    const mm = String(now.getMinutes()).padStart(2,'0');
-    clockEl.textContent = `${hh}:${mm}`;
-    dateEl.textContent = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 ${days[now.getDay()]}요일`;
-  }
-  tick();
-  setInterval(tick, 1000);
-
-  // 검색
-  const searchForm = document.getElementById('searchForm');
-  const searchInput = document.getElementById('searchInput');
-
-  searchForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const query = searchInput.value.trim();
-    if(!query) return;
-    const url = 'https://www.google.com/search?q=' + encodeURIComponent(query);
-    window.open(url, '_blank', 'noopener,noreferrer');
-  });
-
-  // 할 일 목록 (이 세션 동안 메모리에 보관)
-  const listEl = document.getElementById('todoList');
-  const formEl = document.getElementById('todoForm');
-  const inputEl = document.getElementById('todoInput');
-
-  function saveTodos(){ /* 브라우저 저장 없이 메모리에만 유지 */ }
-
-  let todos = [];
-
-  function render(){
-    listEl.innerHTML = '';
-    if(todos.length === 0){
-      const empty = document.createElement('li');
-      empty.className = 'todo-empty';
-      empty.textContent = '아직 할 일이 없어요.';
-      listEl.appendChild(empty);
-      return;
+  <script>
+    // 현재 날짜와 시간
+    function updateClock() {
+      const now = new Date();
+      const time = now.toLocaleTimeString("ko-KR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+      const date = now.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long"
+      });
+      document.getElementById("time").textContent = time;
+      document.getElementById("date").textContent = date;
     }
-    todos.forEach((todo, idx) => {
-      const li = document.createElement('li');
-      li.className = 'todo-item' + (todo.done ? ' done' : '');
+    updateClock();
+    setInterval(updateClock, 1000);
 
-      const check = document.createElement('div');
-      check.className = 'check';
-      check.addEventListener('click', () => {
-        todos[idx].done = !todos[idx].done;
-        saveTodos(todos);
-        render();
-      });
-
-      const span = document.createElement('span');
-      span.textContent = todo.text;
-
-      const remove = document.createElement('button');
-      remove.className = 'remove';
-      remove.type = 'button';
-      remove.textContent = '삭제';
-      remove.addEventListener('click', () => {
-        todos.splice(idx, 1);
-        saveTodos(todos);
-        render();
-      });
-
-      li.appendChild(check);
-      li.appendChild(span);
-      li.appendChild(remove);
-      listEl.appendChild(li);
+    // Google 검색
+    document.getElementById("searchForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const query = document.getElementById("searchInput").value.trim();
+      if (query) {
+        window.location.href =
+          "https://www.google.com/search?q=" + encodeURIComponent(query);
+      }
     });
-  }
 
-  formEl.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const text = inputEl.value.trim();
-    if(!text) return;
-    todos.push({ text, done:false });
-    saveTodos(todos);
-    inputEl.value = '';
-    render();
-  });
+    // 오늘의 할 일: 브라우저 localStorage에 저장
+    const input = document.getElementById("todoInput");
+    const list = document.getElementById("todoList");
+    const count = document.getElementById("count");
+    let todos = JSON.parse(localStorage.getItem("myTodos") || "[]");
 
-  render();
-</script>
+    function saveTodos() {
+      localStorage.setItem("myTodos", JSON.stringify(todos));
+    }
 
+    function renderTodos() {
+      list.innerHTML = "";
+      const remaining = todos.filter(todo => !todo.done).length;
+      count.textContent = remaining + "개 남음";
+
+      if (todos.length === 0) {
+        list.innerHTML = '<li class="empty">오늘 할 일을 추가해 보세요 ✨</li>';
+        return;
+      }
+
+      todos.forEach((todo, index) => {
+        const li = document.createElement("li");
+        li.className = "todo-item" + (todo.done ? " done" : "");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = todo.done;
+        checkbox.addEventListener("change", () => {
+          todos[index].done = checkbox.checked;
+          saveTodos();
+          renderTodos();
+        });
+
+        const span = document.createElement("span");
+        span.className = "todo-text";
+        span.textContent = todo.text;
+
+        const del = document.createElement("button");
+        del.className = "delete";
+        del.textContent = "×";
+        del.title = "삭제";
+        del.addEventListener("click", () => {
+          todos.splice(index, 1);
+          saveTodos();
+          renderTodos();
+        });
+
+        li.append(checkbox, span, del);
+        list.appendChild(li);
+      });
+    }
+
+    function addTodo() {
+      const text = input.value.trim();
+      if (!text) return;
+      todos.push({ text, done: false });
+      input.value = "";
+      saveTodos();
+      renderTodos();
+      input.focus();
+    }
+
+    document.getElementById("addBtn").addEventListener("click", addTodo);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addTodo();
+    });
+
+    renderTodos();
+  </script>
 </body>
 </html>
