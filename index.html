@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 시작 페이지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #14161F;
+    --ink-soft: #1B1E2A;
+    --paper: #EAE7DD;
+    --gold: #C9A227;
+    --muted: #8A8D9E;
+    --line: #2A2D3A;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Inter', sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 32px 20px;
+  }
+
+  main{
+    width:100%;
+    max-width: 520px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+  }
+
+  /* 시계 */
+  .clock{
+    font-family:'Fraunces', serif;
+    font-weight:300;
+    font-size: clamp(64px, 14vw, 108px);
+    line-height:1;
+    color: var(--gold);
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .date{
+    margin-top: 10px;
+    font-size: 15px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+
+  .divider{
+    width:100%;
+    height:1px;
+    background: var(--line);
+    margin: 32px 0;
+    border:none;
+  }
+
+  /* 검색 */
+  .search-form{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+    transition: border-color .2s ease;
+  }
+  .search-form:focus-within{
+    border-color: var(--gold);
+  }
+  .search-form svg{
+    flex-shrink:0;
+    opacity:.6;
+  }
+  .search-form input[type="text"]{
+    flex:1;
+    background:none;
+    border:none;
+    outline:none;
+    color: var(--paper);
+    font-family:'Inter', sans-serif;
+    font-size: 16px;
+    padding: 6px 0;
+  }
+  .search-form input[type="text"]::placeholder{
+    color: var(--muted);
+  }
+
+  /* 할 일 */
+  .todo{
+    width:100%;
+    margin-top: 40px;
+    text-align:left;
+  }
+  .todo h2{
+    font-size: 13px;
+    font-weight:600;
+    color: var(--muted);
+    margin: 0 0 14px 2px;
+    letter-spacing: 0.02em;
+  }
+
+  .todo-add{
+    display:flex;
+    gap: 10px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+  }
+  .todo-add input{
+    flex:1;
+    background:none;
+    border:none;
+    outline:none;
+    color: var(--paper);
+    font-family:'Inter', sans-serif;
+    font-size: 15px;
+    padding: 4px 0;
+  }
+  .todo-add input::placeholder{ color: var(--muted); }
+  .todo-add button{
+    background:none;
+    border:none;
+    color: var(--gold);
+    font-size: 20px;
+    line-height:1;
+    cursor:pointer;
+    padding: 0 4px;
+  }
+  .todo-add button:hover{ opacity:.75; }
+
+  ul.todo-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap: 2px;
+  }
+
+  .todo-item{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    padding: 9px 2px;
+    border-bottom: 1px solid var(--ink-soft);
+  }
+  .todo-item:last-child{ border-bottom:none; }
+
+  .todo-item .check{
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    border: 1.5px solid var(--muted);
+    flex-shrink:0;
+    cursor:pointer;
+    position:relative;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .todo-item.done .check{
+    border-color: var(--gold);
+    background: var(--gold);
+  }
+  .todo-item.done .check::after{
+    content:"";
+    position:absolute;
+    left:4px; top:1px;
+    width:4px; height:8px;
+    border-right: 1.5px solid var(--ink);
+    border-bottom: 1.5px solid var(--ink);
+    transform: rotate(45deg);
+  }
+
+  .todo-item span{
+    flex:1;
+    font-size: 15px;
+    color: var(--paper);
+    word-break: break-word;
+  }
+  .todo-item.done span{
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  .todo-item .remove{
+    opacity:0;
+    background:none;
+    border:none;
+    color: var(--muted);
+    font-size: 15px;
+    cursor:pointer;
+    padding: 2px 6px;
+    transition: opacity .15s ease;
+  }
+  .todo-item:hover .remove{ opacity:1; }
+
+  .todo-empty{
+    color: var(--muted);
+    font-size: 14px;
+    padding: 10px 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <div class="clock" id="clock">00:00</div>
+  <div class="date" id="date">-</div>
+
+  <hr class="divider">
+
+  <form class="search-form" id="searchForm">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8D9E" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Google 검색" autocomplete="off">
+  </form>
+
+  <section class="todo">
+    <h2>오늘 할 일</h2>
+    <form class="todo-add" id="todoForm">
+      <input type="text" id="todoInput" placeholder="할 일을 입력하고 Enter" autocomplete="off">
+      <button type="submit" aria-label="추가">+</button>
+    </form>
+    <ul class="todo-list" id="todoList"></ul>
+  </section>
+</main>
+
+<script>
+  // 시계 & 날짜
+  const clockEl = document.getElementById('clock');
+  const dateEl = document.getElementById('date');
+  const days = ['일','월','화','수','목','금','토'];
+
+  function tick(){
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    clockEl.textContent = `${hh}:${mm}`;
+    dateEl.textContent = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 ${days[now.getDay()]}요일`;
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  // 검색
+  const searchForm = document.getElementById('searchForm');
+  const searchInput = document.getElementById('searchInput');
+
+  searchForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const query = searchInput.value.trim();
+    if(!query) return;
+    const url = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  });
+
+  // 할 일 목록 (이 세션 동안 메모리에 보관)
+  const listEl = document.getElementById('todoList');
+  const formEl = document.getElementById('todoForm');
+  const inputEl = document.getElementById('todoInput');
+
+  function saveTodos(){ /* 브라우저 저장 없이 메모리에만 유지 */ }
+
+  let todos = [];
+
+  function render(){
+    listEl.innerHTML = '';
+    if(todos.length === 0){
+      const empty = document.createElement('li');
+      empty.className = 'todo-empty';
+      empty.textContent = '아직 할 일이 없어요.';
+      listEl.appendChild(empty);
+      return;
+    }
+    todos.forEach((todo, idx) => {
+      const li = document.createElement('li');
+      li.className = 'todo-item' + (todo.done ? ' done' : '');
+
+      const check = document.createElement('div');
+      check.className = 'check';
+      check.addEventListener('click', () => {
+        todos[idx].done = !todos[idx].done;
+        saveTodos(todos);
+        render();
+      });
+
+      const span = document.createElement('span');
+      span.textContent = todo.text;
+
+      const remove = document.createElement('button');
+      remove.className = 'remove';
+      remove.type = 'button';
+      remove.textContent = '삭제';
+      remove.addEventListener('click', () => {
+        todos.splice(idx, 1);
+        saveTodos(todos);
+        render();
+      });
+
+      li.appendChild(check);
+      li.appendChild(span);
+      li.appendChild(remove);
+      listEl.appendChild(li);
+    });
+  }
+
+  formEl.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = inputEl.value.trim();
+    if(!text) return;
+    todos.push({ text, done:false });
+    saveTodos(todos);
+    inputEl.value = '';
+    render();
+  });
+
+  render();
+</script>
+
+</body>
+</html>
