@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>전통 수제 도장 생성기 (Korean Seal Stamp Maker)</title>
+    <!-- Tailwind CSS for modern responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for iconography -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for diverse Korean typography options -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Dokdo&family=Gugi&family=Nanum+Myeongjo:wght@700&family=Nanum+Pen+Script&family=Black+And+White+Picture&family=East+Sea+Dokdo&family=Jua&family=Yeon+Sung&family=Gowun+Batang:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom font utility classes */
+        .font-myeongjo { font-family: 'Nanum Myeongjo', serif; }
+        .font-batang { font-family: 'Gowun Batang', serif; }
+        .font-dohyeon { font-family: 'Do Hyeon', sans-serif; }
+        .font-jua { font-family: 'Jua', sans-serif; }
+        .font-yeonsung { font-family: 'Yeon Sung', cursive; }
+        .font-dokdo { font-family: 'Dokdo', cursive; }
+        .font-gugi { font-family: 'Gugi', cursive; }
+        .font-pen { font-family: 'Nanum Pen Script', cursive; }
+        .font-black { font-family: 'Black Han Sans', sans-serif; }
+        .font-eastsea { font-family: 'East Sea Dokdo', cursive; }
+
+        /* Custom checkered background for transparent PNG preview */
+        .checkerboard {
+            background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+                              linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+                              linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+                              linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+        }
+
+        /* Smooth touch feedback for mobile */
+        button, input[type="range"] {
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans antialiased selection:bg-red-100 selection:text-red-800">
+
+    <!-- Top Header -->
+    <header class="bg-red-700 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 bg-red-800 rounded-xl flex items-center justify-center text-red-100 shadow-inner">
+                    <i class="fa-solid fa-stamp text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight">전통 수제 도장 생성기</h1>
+                    <p class="text-xs text-red-200 hidden sm:block">나만의 맞춤형 투명 배경 도장(인장) 이미지 만들기</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs bg-red-800/80 text-red-100 px-2.5 py-1 rounded-lg border border-red-600 font-medium">
+                    <i class="fa-solid fa-bolt mr-1"></i> 투명 PNG 즉시저장
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+
+        <!-- Left Column: Controls (Mobile First Layout) -->
+        <div class="lg:col-span-7 flex flex-col gap-4">
+            
+            <!-- 1. Name & Suffix Panel -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3">
+                <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                    <i class="fa-solid fa-signature text-red-600"></i> 이름 및 텍스트 설정
+                </h2>
+                <div class="flex gap-2">
+                    <input type="text" id="nameInput" value="홍길동" maxlength="6" 
+                           class="flex-grow px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-lg font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white transition"
+                           placeholder="이름 입력 (예: 홍길동)">
+                    <button id="clearBtn" class="px-3.5 py-3 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-600 rounded-xl text-sm font-medium transition">
+                        지우기
+                    </button>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer select-none text-sm text-slate-700">
+                        <input type="checkbox" id="addInCheckbox" checked class="w-4 h-4 text-red-600 rounded focus:ring-red-500 border-slate-300">
+                        <span>마지막 글자에 <strong>'인(印)'</strong> 자동 추가</span>
+                    </label>
+                    <span id="charCount" class="text-xs font-mono text-slate-400">4글자</span>
+                </div>
+            </div>
+
+            <!-- 2. Font Selection Panel -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                        <i class="fa-solid fa-font text-red-600"></i> 저작권 무료 한글 폰트 선택
+                    </h2>
+                    <span class="text-xs text-slate-400">총 10종</span>
+                </div>
+                <!-- Horizontal scrollable or grid font list -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-56 overflow-y-auto pr-1" id="fontGrid">
+                    <!-- Fonts will be generated or toggled via JS -->
+                    <button type="button" data-font="Nanum Myeongjo" data-css="font-myeongjo" class="font-option p-2.5 border-2 border-red-500 bg-red-50 text-red-900 rounded-xl text-xs sm:text-sm font-bold transition text-center shadow-xs">
+                        나눔명조 (전통서체)
+                    </button>
+                    <button type="button" data-font="Gowun Batang" data-css="font-batang" class="font-option p-2.5 border-2 border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition text-center">
+                        고운바탕 (단아함)
+                    </button>
+                    <button type="button" data-font="Do Hyeon" data-css="font-dohyeon" class="font-option p-2.5 border-2 border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition text-center">
+                        도현체 (굵고선명)
+                    </button>
+                    <button type="button" data-font="Jua" data-css="font-jua" class="font-option p-2.5 border-2 border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition text-center">
+                        주아체 (둥글둥글)
+                    </button>
+                    <button type="button" data-font="Black Han Sans" data-css="font-black" class="font-option p-2.5 border-2 border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition text-center">
+                        검은고딕 (매우굵음)
+                    </button>
+                    <button type="button" data-font="Gugi" data-css="font-gugi" class="font-option p-2.5 border-2 border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition text-center">
+                        구기체 (레트로)
+                    </button>
+                    <button type="button" data-font="Yeon Sung" data-css="font-yeonsung" class="font-option p-2.5 border-2 border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition text-center">
+                        연성체 (손글씨느낌)
+                    </button>
+                    <button type="button" data-font="Nanum Pen Script" data-css="font-pen" class="font-option p-2.5 border-2 border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition text-center">
+                        나눔손글씨 (펜글씨)
+                    </button>
+                    <button type="button" data-font="Dokdo" data-css="font-dokdo" class="font-option p-2.5 border-2 border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition text-center">
+                        독도체 (거친느낌)
+                    </button>
+                    <button type="button" data-font="Black And White Picture" data-css="font-bw" class="font-option p-2.5 border-2 border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition text-center">
+                        흑백사진 (옛날영화)
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. Stamp Frame & Color Panel -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-4">
+                <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                    <i class="fa-solid fa-shapes text-red-600"></i> 외곽선 모양 및 인주 색상
+                </h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Shape Options -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold text-slate-500">외곽선 형태</label>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <button type="button" data-shape="circle" class="shape-option py-2 px-2 border-2 border-red-500 bg-red-50 text-red-900 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition">
+                                <i class="fa-regular fa-circle"></i> 원형
+                            </button>
+                            <button type="button" data-shape="square" class="shape-option py-2 px-2 border-2 border-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition">
+                                <i class="fa-regular fa-square"></i> 사각
+                            </button>
+                            <button type="button" data-shape="rounded" class="shape-option py-2 px-2 border-2 border-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition">
+                                <i class="fa-solid fa-square-full rounded-sm"></i> 둥근사각
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Color Picker -->
+                    <div class="space-y-1.5">
+                        <label for="colorPicker" class="block text-xs font-semibold text-slate-500">인주 색상 선택</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="colorPicker" value="#d62828" class="w-10 h-10 p-1 rounded-xl border border-slate-200 cursor-pointer bg-white">
+                            <div class="flex gap-1.5 flex-wrap">
+                                <button type="button" class="color-preset w-7 h-7 rounded-full bg-[#d62828] border border-slate-300 shadow-xs" data-color="#d62828" title="전통 인주홍"></button>
+                                <button type="button" class="color-preset w-7 h-7 rounded-full bg-[#b7094c] border border-slate-300 shadow-xs" data-color="#b7094c" title="심홍색"></button>
+                                <button type="button" class="color-preset w-7 h-7 rounded-full bg-[#89023e] border border-slate-300 shadow-xs" data-color="#89023e" title="진한 고풍적색"></button>
+                                <button type="button" class="color-preset w-7 h-7 rounded-full bg-[#2b2d42] border border-slate-300 shadow-xs" data-color="#2b2d42" title="묵직한 흑회색"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sliders for Fine-Tuning -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                    <!-- Border Width -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <label for="borderWidthRange" class="font-semibold text-slate-600">외곽선 두께</label>
+                            <span id="borderWidthVal" class="text-slate-400 font-mono">12px</span>
+                        </div>
+                        <input type="range" id="borderWidthRange" min="4" max="22" value="12" class="w-full accent-red-600 cursor-pointer">
+                    </div>
+
+                    <!-- Vintage / Grunge Texture Level -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <label for="textureRange" class="font-semibold text-slate-600">날림/아날로그 질감</label>
+                            <span id="textureVal" class="text-slate-400 font-mono">보통</span>
+                        </div>
+                        <input type="range" id="textureRange" min="0" max="100" value="30" class="w-full accent-red-600 cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Live Preview & PNG Download (Mobile Friendly) -->
+        <div class="lg:col-span-5 flex flex-col gap-4">
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col items-center flex-grow">
+                <div class="flex items-center justify-between w-full mb-3">
+                    <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                        <i class="fa-solid fa-eye text-red-600"></i> 실시간 도장 미리보기
+                    </h2>
+                    <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-mono">투명 배경 (PNG)</span>
+                </div>
+
+                <!-- Checkerboard Preview Box -->
+                <div class="checkerboard p-6 rounded-2xl border border-slate-200 shadow-inner flex items-center justify-center w-full min-h-[280px] my-1 relative overflow-hidden">
+                    <canvas id="stampCanvas" width="400" height="400" class="max-w-full h-auto drop-shadow-md transition-all duration-150"></canvas>
+                </div>
+
+                <p class="text-xs text-slate-500 text-center mt-3">
+                    <i class="fa-solid fa-circle-info text-red-600 mr-1"></i> 스마트폰 사진첩이나 파일에 투명 배경으로 저장됩니다.
+                </p>
+            </div>
+
+            <!-- Download Button -->
+            <button id="downloadBtn" class="w-full py-4 px-6 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold rounded-2xl shadow-lg shadow-red-600/30 transition flex items-center justify-center gap-3 text-lg cursor-pointer">
+                <i class="fa-solid fa-download"></i> 투명 배경 도장 PNG 다운로드
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 px-4 text-center text-xs text-slate-400 mt-auto">
+        <div class="max-w-5xl mx-auto">
+            <p>전통 수제 도장 생성기 &bull; 모바일 터치 및 데스크탑 완벽 지원</p>
+        </div>
+    </footer>
+
+    <!-- Core JavaScript Application -->
+    <script>
+        // DOM Elements
+        const nameInput = document.getElementById('nameInput');
+        const clearBtn = document.getElementById('clearBtn');
+        const addInCheckbox = document.getElementById('addInCheckbox');
+        const charCountSpan = document.getElementById('charCount');
+        const fontGrid = document.getElementById('fontGrid');
+        const colorPicker = document.getElementById('colorPicker');
+        const borderWidthRange = document.getElementById('borderWidthRange');
+        const borderWidthVal = document.getElementById('borderWidthVal');
+        const textureRange = document.getElementById('textureRange');
+        const textureVal = document.getElementById('textureVal');
+        const stampCanvas = document.getElementById('stampCanvas');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // State variables
+        let selectedFont = 'Nanum Myeongjo';
+        let selectedShape = 'circle'; // 'circle', 'square', 'rounded'
+        let stampColor = '#d62828';
+
+        // Font selection handling
+        const fontButtons = fontGrid.querySelectorAll('.font-option');
+        fontButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                fontButtons.forEach(b => {
+                    b.classList.remove('border-red-500', 'bg-red-50', 'text-red-900', 'font-bold');
+                    b.classList.add('border-slate-200', 'text-slate-700', 'font-semibold');
+                });
+                btn.classList.remove('border-slate-200', 'text-slate-700', 'font-semibold');
+                btn.classList.add('border-red-500', 'bg-red-50', 'text-red-900', 'font-bold');
+                selectedFont = btn.getAttribute('data-font');
+                generateStamp();
+            });
+        });
+
+        // Shape selection handling
+        const shapeButtons = document.querySelectorAll('.shape-option');
+        shapeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                shapeButtons.forEach(b => {
+                    b.classList.remove('border-red-500', 'bg-red-50', 'text-red-900', 'font-bold');
+                    b.classList.add('border-slate-200', 'text-slate-700', 'font-semibold');
+                });
+                btn.classList.remove('border-slate-200', 'text-slate-700', 'font-semibold');
+                btn.classList.add('border-red-500', 'bg-red-50', 'text-red-900', 'font-bold');
+                selectedShape = btn.getAttribute('data-shape');
+                generateStamp();
+            });
+        });
+
+        // Color picker and presets
+        document.querySelectorAll('.color-preset').forEach(preset => {
+            preset.addEventListener('click', () => {
+                const color = preset.getAttribute('data-color');
+                colorPicker.value = color;
+                stampColor = color;
+                generateStamp();
+            });
+        });
+
+        colorPicker.addEventListener('input', (e) => {
+            stampColor = e.target.value;
+            generateStamp();
+        });
+
+        // Range Sliders Event Listeners
+        borderWidthRange.addEventListener('input', (e) => {
+            borderWidthVal.textContent = e.target.value + 'px';
+            generateStamp();
+        });
+
+        textureRange.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            if (val === 0) textureVal.textContent = '깔끔함';
+            else if (val < 45) textureVal.textContent = '보통';
+            else if (val < 80) textureVal.textContent = '빈티지';
+            else textureVal.textContent = '거친 날림';
+            generateStamp();
+        });
+
+        nameInput.addEventListener('input', () => {
+            let len = nameInput.value.length;
+            charCountSpan.textContent = len + '글자';
+            generateStamp();
+        });
+
+        clearBtn.addEventListener('click', () => {
+            nameInput.value = '';
+            charCountSpan.textContent = '0글자';
+            generateStamp();
+        });
+
+        addInCheckbox.addEventListener('change', generateStamp);
+
+        // Core Stamp Canvas Rendering Engine
+        function generateStamp() {
+            const ctx = stampCanvas.getContext('2d');
+            const width = stampCanvas.width;
+            const height = stampCanvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // Clear background (Transparent)
+            ctx.clearRect(0, 0, width, height);
+
+            // Text processing
+            let rawText = nameInput.value.trim() || '홍길동';
+            if (addInCheckbox.checked && !rawText.endsWith('인')) {
+                rawText += '인';
+            }
+
+            ctx.fillStyle = stampColor;
+            ctx.strokeStyle = stampColor;
+
+            // 1. Render Border Shape
+            const borderWidth = parseInt(borderWidthRange.value);
+            ctx.lineWidth = borderWidth;
+
+            if (selectedShape === 'circle') {
+                const radius = (width / 2) - (borderWidth / 2) - 16;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Inner decorative ring
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius - 10, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (selectedShape === 'square') {
+                const margin = 20 + (borderWidth / 2);
+                const rectSize = width - (margin * 2);
+                
+                ctx.beginPath();
+                ctx.rect(margin, margin, rectSize, rectSize);
+                ctx.stroke();
+
+                // Inner fine border
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.rect(margin + 10, margin + 10, rectSize - 20, rectSize - 20);
+                ctx.stroke();
+            } else {
+                // Rounded Square
+                const margin = 20 + (borderWidth / 2);
+                const rectSize = width - (margin * 2);
+                const cornerRadius = 24;
+
+                ctx.beginPath();
+                ctx.roundRect(margin, margin, rectSize, rectSize, cornerRadius);
+                ctx.stroke();
+
+                // Inner fine border
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(margin + 10, margin + 10, rectSize - 20, rectSize - 20, cornerRadius - 4);
+                ctx.stroke();
+            }
+
+            // 2. Render Text Characters Inside Stamp
+            ctx.fillStyle = stampColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const chars = rawText.split('');
+            const charCount = chars.length;
+
+            let fontSize = 110;
+            if (charCount === 1) fontSize = 160;
+            else if (charCount === 2) fontSize = 125;
+            else if (charCount === 3) fontSize = 95;
+            else if (charCount >= 4) fontSize = 78;
+
+            ctx.font = `bold ${fontSize}px "${selectedFont}", sans-serif`;
+
+            if (charCount <= 2) {
+                if (charCount === 1) {
+                    ctx.fillText(chars[0], centerX, centerY);
+                } else {
+                    const gap = fontSize * 0.52;
+                    ctx.fillText(chars[0], centerX, centerY - gap / 2);
+                    ctx.fillText(chars[1], centerX, centerY + gap / 2);
+                }
+            } else {
+                // 3 or 4 characters layout (Traditional 2x2 seal grid)
+                const offsetX = fontSize * 0.38;
+                const offsetY = fontSize * 0.38;
+
+                let gridChars = ['', '', '', ''];
+                if (charCount === 3) {
+                    gridChars[0] = chars[0]; // Top-Right
+                    gridChars[1] = chars[1]; // Bottom-Right
+                    gridChars[2] = chars[2]; // Top-Left
+                    gridChars[3] = '';
+                } else {
+                    gridChars[0] = chars[0]; // Top-Right
+                    gridChars[1] = chars[1]; // Bottom-Right
+                    gridChars[2] = chars[2]; // Top-Left
+                    gridChars[3] = chars[3]; // Bottom-Left
+                }
+
+                if (gridChars[0]) ctx.fillText(gridChars[0], centerX + offsetX, centerY - offsetY);
+                if (gridChars[1]) ctx.fillText(gridChars[1], centerX + offsetX, centerY + offsetY);
+                if (gridChars[2]) ctx.fillText(gridChars[2], centerX - offsetX, centerY - offsetY);
+                if (gridChars[3]) ctx.fillText(gridChars[3], centerX - offsetX, centerY + offsetY);
+            }
+
+            // 3. Apply Analog Grunge / Vintage Ink Texture Effect
+            const textureLevel = parseInt(textureRange.value);
+            if (textureLevel > 0) {
+                applyGrungeTexture(ctx, width, height, textureLevel);
+            }
+        }
+
+        // Helper function for realistic ink speckles and imperfections
+        function applyGrungeTexture(ctx, width, height, intensity) {
+            const imgData = ctx.getImageData(0, 0, width, height);
+            const data = imgData.data;
+            const numSpeckles = (intensity / 100) * (width * height * 0.045);
+
+            for (let i = 0; i < numSpeckles; i++) {
+                const x = Math.floor(Math.random() * width);
+                const y = Math.floor(Math.random() * height);
+                const index = (y * width + x) * 4;
+
+                if (data[index + 3] > 40) {
+                    const dropFactor = Math.random() * 0.75;
+                    data[index + 3] = Math.floor(data[index + 3] * (1 - dropFactor));
+                }
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        // Mobile-friendly PNG Download Handler
+        downloadBtn.addEventListener('click', () => {
+            const nameText = nameInput.value.trim() || '도장';
+            const dataUrl = stampCanvas.toDataURL('image/png');
+            
+            const link = document.createElement('a');
+            link.download = `전통도장_${nameText}.png`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            setTimeout(generateStamp, 80);
+        });
+    </script>
+</body>
+</html>
+```
+## eof
