@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오늘의 할 일</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF2F9;--card:#fff;--ink:#1B2540;--sub:#6B7691;--line:#DCE3F0;--study:#2F5BEA;--life:#139A74;--done:#A7B0C5;--danger:#D9453D}
+@media (prefers-color-scheme:dark){:root{--bg:#121828;--card:#1B2338;--ink:#EAEFFC;--sub:#93A0C0;--line:#2B3552;--study:#6F93FF;--life:#3CCB9F;--done:#5A6685;--danger:#FF7A72}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:560px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:26px;margin:0 0 16px;font-weight:700}
+.date{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.date input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:10px 12px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--study);outline-offset:2px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat b{display:block;font-size:28px;line-height:1.1}
+.stat span{font-size:13px;color:var(--sub)}
+.bar{height:8px;background:var(--line);border-radius:8px;overflow:hidden;margin-bottom:20px}
+.bar i{display:block;height:100%;width:0;background:var(--life);transition:width .3s}
+form{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+form input[type=text]{flex:1 1 180px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+select{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+.add{background:var(--study);color:#fff;border-color:var(--study);font-weight:500}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{padding:6px 14px;border-radius:20px;font-size:14px}
+.tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+li{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--study);border-radius:10px;padding:10px 12px}
+li.life{border-left-color:var(--life)}
+li input[type=checkbox]{width:22px;height:22px;accent-color:var(--life);flex:none}
+.txt{flex:1;min-width:0;word-break:break-word}
+.tag{font-size:12px;color:var(--study);font-weight:500}
+li.life .tag{color:var(--life)}
+li.done .txt span{text-decoration:line-through;color:var(--done)}
+li .edit{flex:1;padding:6px 8px;border:1px solid var(--study);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+.mini{padding:6px 10px;font-size:13px}
+.mini.del{color:var(--danger)}
+.empty{text-align:center;color:var(--sub);padding:28px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>오늘의 할 일</h1>
+  <div class="date">
+    <button id="prev" aria-label="전날">‹</button>
+    <input type="date" id="date" aria-label="날짜 선택">
+    <button id="next" aria-label="다음날">›</button>
+    <button id="today">오늘</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="sAll">0</b><span>전체</span></div>
+    <div class="stat"><b id="sDone">0</b><span>완료</span></div>
+    <div class="stat"><b id="sLeft">0</b><span>남은 일</span></div>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+  <form id="form">
+    <input type="text" id="input" placeholder="할 일을 입력하세요" maxlength="100" required aria-label="할 일">
+    <select id="cat" aria-label="카테고리"><option value="study">학업</option><option value="life">일상</option></select>
+    <button class="add" type="submit">추가</button>
+  </form>
+  <div class="tabs" role="group" aria-label="목록 보기">
+    <button data-f="all" aria-pressed="true">전체</button>
+    <button data-f="doing" aria-pressed="false">진행</button>
+    <button data-f="done" aria-pressed="false">완료</button>
+    <button data-c="study" aria-pressed="false">학업</button>
+    <button data-c="life" aria-pressed="false">일상</button>
+  </div>
+  <ul id="list"></ul>
+</div>
+<script>
+var KEY="todayTodos.v1", todos=[], cur="", filter="all", catF="";
+try{todos=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){todos=[]}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(todos))}catch(e){}}
+function ymd(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(x<10?"0":"")+x}
+function shift(n){var d=new Date(cur+"T00:00:00");d.setDate(d.getDate()+n);setDate(ymd(d))}
+function setDate(v){cur=v;document.getElementById("date").value=v;render()}
+var CAT={study:"학업",life:"일상"};
+function render(){
+  var day=todos.filter(function(t){return t.date===cur});
+  var done=day.filter(function(t){return t.done}).length;
+  sAll.textContent=day.length;sDone.textContent=done;sLeft.textContent=day.length-done;
+  bar.style.width=(day.length?done/day.length*100:0)+"%";
+  var shown=day.filter(function(t){
+    if(filter==="doing"&&t.done)return false;
+    if(filter==="done"&&!t.done)return false;
+    if(catF&&t.cat!==catF)return false;
+    return true});
+  list.innerHTML="";
+  if(!shown.length){var e=document.createElement("li");e.className="empty";e.style.display="block";e.style.border="0";e.style.background="none";
+    e.textContent=day.length?"이 조건에 맞는 할 일이 없어요.":"이 날의 할 일이 아직 없어요. 위에서 추가해 보세요.";list.appendChild(e);return}
+  shown.forEach(function(t){
+    var li=document.createElement("li");li.className=t.cat+(t.done?" done":"");
+    var cb=document.createElement("input");cb.type="checkbox";cb.checked=t.done;cb.setAttribute("aria-label","완료 체크");
+    cb.onchange=function(){t.done=cb.checked;save();render()};
+    li.appendChild(cb);
+    if(t.editing){
+      var ed=document.createElement("input");ed.className="edit";ed.value=t.text;ed.maxLength=100;
+      var ok=function(){var v=ed.value.trim();if(v)t.text=v;t.editing=false;save();render()};
+      ed.onkeydown=function(e){if(e.key==="Enter")ok();if(e.key==="Escape"){t.editing=false;render()}};
+      li.appendChild(ed);
+      var b=document.createElement("button");b.className="mini";b.textContent="저장";b.onclick=ok;li.appendChild(b);
+      setTimeout(function(){ed.focus()},0);
+    }else{
+      var d=document.createElement("div");d.className="txt";
+      var tg=document.createElement("div");tg.className="tag";tg.textContent=CAT[t.cat];
+      var sp=document.createElement("span");sp.textContent=t.text;
+      d.appendChild(tg);d.appendChild(sp);li.appendChild(d);
+      var e1=document.createElement("button");e1.className="mini";e1.textContent="수정";e1.onclick=function(){t.editing=true;render()};
+      var e2=document.createElement("button");e2.className="mini del";e2.textContent="삭제";
+      e2.onclick=function(){todos=todos.filter(function(x){return x!==t});save();render()};
+      li.appendChild(e1);li.appendChild(e2);
+    }
+    list.appendChild(li);
+  });
+}
+form.onsubmit=function(e){e.preventDefault();var v=input.value.trim();if(!v)return;
+  todos.push({id:Date.now(),text:v,cat:cat.value,date:cur,done:false});save();input.value="";render();input.focus()};
+document.querySelectorAll(".tabs button").forEach(function(b){b.onclick=function(){
+  if(b.dataset.f){filter=b.dataset.f}else{catF=(catF===b.dataset.c)?"":b.dataset.c}
+  document.querySelectorAll(".tabs button").forEach(function(x){
+    x.setAttribute("aria-pressed",x.dataset.f?String(x.dataset.f===filter):String(x.dataset.c===catF))});
+  render()}});
+prev.onclick=function(){shift(-1)};next.onclick=function(){shift(1)};
+today.onclick=function(){setDate(ymd(new Date()))};
+date.onchange=function(){if(date.value)setDate(date.value)};
+setDate(ymd(new Date()));
+</script>
+</body>
+</html>
