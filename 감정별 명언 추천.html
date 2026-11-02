@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음 처방전 - 감정별 명언 추천</title>
+    <style>
+        :root {
+            --bg-color: #f5f6fa;
+            --card-bg: #ffffff;
+            --text-main: #2f3640;
+            --text-sub: #718093;
+            --primary: #4cd137;
+            --accent: #00a8ff;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 22px;
+            color: #2c3e50;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+        }
+
+        /* 감정 버튼 그리드 */
+        .emotion-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .emotion-btn {
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .emotion-btn:hover {
+            border-color: var(--accent);
+            background: #f0f8ff;
+            transform: translateY(-2px);
+        }
+
+        .emotion-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* 명언 카드 영역 */
+        .quote-card {
+            background: #f8f9fa;
+            padding: 25px 20px;
+            border-radius: 15px;
+            text-align: center;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            border: 1px solid #edf2f7;
+            margin-bottom: 20px;
+        }
+
+        .quote-text {
+            font-size: 16px;
+            line-height: 1.5;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .quote-author {
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 12px;
+            background: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #26af5f;
+        }
+
+        /* 관리자 토글 및 섹션 */
+        .admin-toggle {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .admin-toggle button {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .admin-panel {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f1f2f6;
+            border-radius: 10px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .admin-panel.show {
+            display: block;
+        }
+
+        .admin-panel input, .admin-panel textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #dcdde1;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 12px;
+        }
+
+        .admin-panel button.add-btn {
+            width: 100%;
+            padding: 8px;
+            background: #ffa502;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .quote-list {
+            max-height: 120px;
+            overflow-y: auto;
+            margin-top: 10px;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .quote-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 6px 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .delete-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>✨ 마음 처방전</h2>
+    <div class="subtitle">지금 당신의 감정을 선택해 주세요</div>
+
+    <!-- 감정 선택 버튼 -->
+    <div class="emotion-grid">
+        <button class="emotion-btn" onclick="selectEmotion('happy')">😊 기쁨·행복</button>
+        <button class="emotion-btn" onclick="selectEmotion('sad')">😢 슬픔·우울</button>
+        <button class="emotion-btn" onclick="selectEmotion('burnout')">🔋 지침·번아웃</button>
+        <button class="emotion-btn" onclick="selectEmotion('anxious')">😰 불안·스트레스</button>
+        <button class="emotion-btn" onclick="selectEmotion('angry')">🔥 짜증·분노</button>
+        <button class="emotion-btn" onclick="selectEmotion('excited')">🎉 즐거움·기대</button>
+    </div>
+
+    <!-- 명언 카드 영역 -->
+    <div class="quote-card" id="quoteCard">
+        <div class="quote-text" id="quoteText">위의 감정 버튼을 눌러 마음의 위로를 받아보세요.</div>
+        <div class="quote-author" id="quoteAuthor">- 마음 처방전 -</div>
+    </div>
+
+    <div class="action-btns">
+        <button class="btn-primary" onclick="nextQuote()" id="nextBtn" style="display:none;">🔄 다른 명언 보기</button>
+    </div>
+
+    <!-- 관리자 모드 -->
+    <div class="admin-toggle">
+        <button onclick="toggleAdmin()">⚙️ 명언 목록 관리 (추가·삭제)</button>
+    </div>
+
+    <div class="admin-panel" id="adminPanel">
+        <strong id="adminCurrentEmotion">감정을 먼저 선택해주세요</strong>
+        <div style="margin-top: 8px;">
+            <input type="text" id="newQuoteText" placeholder="명언 내용을 입력하세요">
+            <input type="text" id="newQuoteAuthor" placeholder="발언자 (작가) 입력">
+            <button class="add-btn" onclick="addQuote()">명언 추가하기</button>
+        </div>
+        <ul class="quote-list" id="quoteList"></ul>
+    </div>
+</div>
+
+<script>
+    // 감정별 기본 명언 데이터 (최소 20개씩 확장 가능한 구조)
+    const defaultData = {
+        happy: [
+            { id: 1, quote: "행복은 덧셈이 아니라 곱셈이다. 내가 가진 것에 감사할 때 그 행복은 배가 된다.", author: "법륜스님" },
+            { id: 2, quote: "오늘 하루, 당신의 작은 미소가 누군가에게는 하루를 버티는 힘이 된다.", author: "알 수 없음" },
+            { id: 3, quote: "웃음은 언제나 좋은 것이고, 기쁨은 언제나 옳다.", author: "바이런" }
+        ],
+        sad: [
+            { id: 1, quote: "비가 온 뒤에 땅이 굳어지듯, 슬픔의 시기는 더 단단한 내일을 만드는 과정일 뿐이다.", author: "르네 데카르트" },
+            { id: 2, quote: "울고 싶을 땐 울어도 괜찮아. 감정을 꾹 참는다고 아픔이 사라지는 건 아니니까.", author: "어린 왕자 중" },
+            { id: 3, quote: "가장 어두운 밤에도 별은 빛난다. 당신의 슬픔 끝에도 반드시 빛이 찾아올 것이다.", author: "빅토르 위고" }
+        ],
+        burnout: [
+            { id: 1, quote: "잠시 멈춰 서서 호흡을 가다듬는 건 포기가 아니라, 더 멀리 가기 위한 준비야.", author: "힐링 멘토" },
+            { id: 2, quote: "열심히 달려왔다면 지금은 잠시 쉬어갈 자격이 충분하다.", author: "에세이 '참 소중한 너라서'" },
+            { id: 3, quote: "모든 것을 완벽하게 해내려 애쓰지 마라. 숨을 쉬는 것만으로도 넌 충분히 해내고 있다.", author: "마크 트웨인" }
+        ],
+        anxious: [
+            { id: 1, quote: "걱정의 90%는 일어나지 않을 일에 대한 것이다. 오늘을 살아가자.", author: "마크 트웨인" },
+            { id: 2, quote: "마음이 흔들릴 때는 당장 내 앞에 놓인 한 가지 일에만 집중해 보라.", author: "세네카" },
+            { id: 3, quote: "불안은 상상이 만들어낸 그림자일 뿐, 실체가 아니다.", author: "틱낫한" }
+        ],
+        angry: [
+            { id: 1, quote: "화는 스스로를 태우는 불과 같다. 타인의 잘못 때문에 내 마음을 태우지 말자.", author: "석가모니" },
+            { id: 2, quote: "화가 날 때는 숨을 깊게 세 번 쉬어라. 그 짧은 시간이 많은 실수를 막아준다.", author: "공자" },
+            { id: 3, quote: "누군가에게 화를 낸다는 것은 그 사람에게 내 감정의 주도권을 넘겨주는 것이다.", author: "법정스님" }
+        ],
+        excited: [
+            { id: 1, quote: "가슴 뛰는 일을 해라. 인생은 시험장이 아니라 모험이다.", author: "오프라 윈프리" },
+            { id: 2, quote: "설레는 마음을 품고 나아가는 길에는 언제나 멋진 풍경이 기다리고 있다.", author: "괴테" },
+            { id: 3, quote: "기대되는 내일을 만들기 위해 오늘을 온 마음으로 즐기자.", author: "랄프 왈도 에머슨" }
+        ]
+    };
+
+    // 로컬 스토리지에서 데이터 불러오기 (없으면 기본 데이터 사용)
+    let quotesDb = JSON.parse(localStorage.getItem('quotesDb')) || defaultData;
+    let currentEmotion = null;
+
+    const emotionNames = {
+        happy: "기쁘고 행복함",
+        sad: "슬프고 우울함",
+        burnout: "지치고 번아웃",
+        anxious: "불안하고 스트레스",
+        angry: "짜증나고 분노폭발",
+        excited: "즐겁고 기대됨"
+    };
+
+    function selectEmotion(emotionKey) {
+        currentEmotion = emotionKey;
+        
+        // 버튼 활성화 스타일 변경
+        document.querySelectorAll('.emotion-btn').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        document.getElementById('nextBtn').style.display = 'block';
+        showRandomQuote();
+        updateAdminPanel();
+    }
+
+    function showRandomQuote() {
+        if (!currentEmotion) return;
+        const list = quotesDb[currentEmotion];
+        if (!list || list.length === 0) {
+            document.getElementById('quoteText').innerText = "등록된 명언이 없습니다. 관리자 메뉴에서 추가해 주세요!";
+            document.getElementById('quoteAuthor').innerText = "- 안내 -";
+            return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * list.length);
+        const selected = list[randomIndex];
+
+        document.getElementById('quoteText').innerText = `"${selected.quote}"`;
+        document.getElementById('quoteAuthor').innerText = `- ${selected.author} -`;
+    }
+
+    function nextQuote() {
+        showRandomQuote();
+    }
+
+    function toggleAdmin() {
+        const panel = document.getElementById('adminPanel');
+        panel.classList.toggle('show');
+    }
+
+    function updateAdminPanel() {
+        if (!currentEmotion) return;
+        document.getElementById('adminCurrentEmotion').innerText = `[${emotionNames[currentEmotion]}] 명언 목록 관리`;
+        
+        const listEl = document.getElementById('quoteList');
+        listEl.innerHTML = '';
+
+        quotesDb[currentEmotion].forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>"${item.quote}" (${item.author})</span> <button class="delete-btn" onclick="deleteQuote(${item.id})">삭제</button>`;
+            listEl.appendChild(li);
+        });
+    }
+
+    function addQuote() {
+        if (!currentEmotion) {
+            alert('먼저 감정을 선택해 주세요!');
+            return;
+        }
+        const text = document.getElementById('newQuoteText').value.trim();
+        const author = document.getElementById('newQuoteAuthor').value.trim();
+
+        if (!text || !author) {
+            alert('명언 내용과 발언자를 모두 입력해 주세요.');
+            return;
+        }
+
+        const newItem = {
+            id: Date.now(),
+            quote: text,
+            author: author
+        };
+
+        quotesDb[currentEmotion].push(newItem);
+        saveAndSync();
+
+        document.getElementById('newQuoteText').value = '';
+        document.getElementById('newQuoteAuthor').value = '';
+        alert('성공적으로 추가되었습니다!');
+    }
+
+    function deleteQuote(id) {
+        quotesDb[currentEmotion] = quotesDb[currentEmotion].filter(item => item.id !== id);
+        saveAndSync();
+    }
+
+    function saveAndSync() {
+        localStorage.setItem('quotesDb', JSON.stringify(quotesDb));
+        updateAdminPanel();
+        showRandomQuote();
+    }
+</script>
+
+</body>
+</html>

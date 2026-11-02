@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KDC 주류 카드 짝 맞추기</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+:root{
+  --bg1:#8ecae6; --bg2:#ffb703; --panel:rgba(255,255,255,.92); --text:#333;
+  --accent:#fb8500; --num:#219ebc; --name:#fb8500; --front:#fff; --ok:#2a9d8f;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg1:#12324a; --bg2:#5a3d0a; --panel:rgba(30,30,36,.92); --text:#eee; --front:#2a2a33;}
+}
+:root[data-theme="dark"]{--bg1:#12324a; --bg2:#5a3d0a; --panel:rgba(30,30,36,.92); --text:#eee; --front:#2a2a33;}
+html{height:100%}
+body{
+  font-family:'Jalnan','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2)); color:var(--text);
+  margin:0; padding:16px; min-height:100%;
+  display:flex; flex-direction:column; align-items:center; user-select:none;
+}
+h1{color:#fff; text-shadow:2px 2px 4px rgba(0,0,0,.35); font-size:clamp(1.4rem,5vw,2.2rem); text-align:center; margin:8px 0}
+.sub{color:#fff; margin:0 0 12px; text-align:center; font-size:.95rem; text-shadow:1px 1px 3px rgba(0,0,0,.35)}
+.info{display:flex; gap:20px; background:var(--panel); padding:10px 24px; border-radius:30px; margin-bottom:16px; box-shadow:0 4px 6px rgba(0,0,0,.1)}
+.info span{font-weight:bold; color:var(--accent)}
+.board{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; width:100%; max-width:640px; perspective:1000px; margin-bottom:20px}
+@media (max-width:520px){.board{grid-template-columns:repeat(4,1fr); gap:8px}}
+.card{aspect-ratio:1; position:relative; cursor:pointer; transform-style:preserve-3d; transition:transform .5s ease}
+.card.flipped{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; backface-visibility:hidden; display:flex; align-items:center; justify-content:center; text-align:center; border-radius:14px; box-shadow:0 4px 8px rgba(0,0,0,.18)}
+.back{background:linear-gradient(135deg,#023047,#219ebc); border:3px solid #fff; color:#fff; font-size:1.5rem}
+.back::after{content:"📚"}
+.front{transform:rotateY(180deg); background:var(--front); font-weight:bold; border:3px solid}
+.front.num{border-color:var(--num); color:var(--num); font-size:clamp(1.3rem,5vw,2rem)}
+.front.name{border-color:var(--name); color:var(--name); font-size:clamp(.95rem,3.4vw,1.25rem); word-break:keep-all; padding:2px}
+.card.matched .front{border-color:var(--ok); box-shadow:0 0 12px var(--ok)}
+.btn{background:var(--accent); color:#fff; border:none; padding:12px 30px; font:inherit; font-size:1.1rem; font-weight:bold; border-radius:50px; cursor:pointer; box-shadow:0 4px 6px rgba(0,0,0,.2)}
+.btn:hover{filter:brightness(1.1)}
+details{background:var(--panel); border-radius:14px; padding:10px 18px; margin-top:18px; max-width:640px; width:100%; box-sizing:border-box}
+summary{cursor:pointer; font-weight:bold}
+.table{display:grid; grid-template-columns:repeat(2,1fr); gap:4px 20px; margin-top:8px}
+#win{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); align-items:center; justify-content:center; z-index:10}
+.modal{background:var(--panel); padding:28px 44px; border-radius:20px; text-align:center; animation:pop .5s ease}
+.modal h2{color:var(--accent); margin-top:0}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+<h1>📚 KDC 주류 짝 맞추기 📚</h1>
+<p class="sub">번호 카드와 주제 카드를 짝지어 보세요! (예: 300 ↔ 사회과학)</p>
+<div class="info"><div>점수: <span id="score">0</span>점</div><div>시도: <span id="tries">0</span>회</div></div>
+<div class="board" id="board"></div>
+<button class="btn" onclick="startGame()">다시 시작</button>
+
+<details>
+  <summary>KDC 주류 정답표 보기</summary>
+  <div class="table" id="table"></div>
+</details>
+
+<div id="win"><div class="modal">
+  <h2>🎉 축하합니다! 🎉</h2>
+  <p>KDC 10개 주류를 모두 맞췄어요!</p>
+  <p>최종 점수: <b id="final" style="color:var(--accent)">0</b>점 (시도 <b id="finalTries">0</b>회)</p>
+  <button class="btn" onclick="startGame()">한 번 더 하기</button>
+</div></div>
+
+<script>
+const KDC=[
+  ['000','총류'],['100','철학'],['200','종교'],['300','사회과학'],['400','자연과학'],
+  ['500','기술과학'],['600','예술'],['700','언어'],['800','문학'],['900','역사']
+];
+let flipped=[], matched=0, score=0, tries=0, busy=false;
+
+document.getElementById('table').innerHTML=KDC.map(k=>`<div><b>${k[0]}</b> ${k[1]}</div>`).join('');
+
+function sound(type){
+  try{
+    const c=new (window.AudioContext||window.webkitAudioContext)();
+    const o=c.createOscillator(), g=c.createGain(); o.connect(g); g.connect(c.destination);
+    const t=c.currentTime;
+    if(type==='flip'){o.frequency.setValueAtTime(400,t);o.frequency.exponentialRampToValueAtTime(600,t+.08);g.gain.setValueAtTime(.1,t);g.gain.exponentialRampToValueAtTime(.01,t+.08);o.start();o.stop(t+.08);}
+    else if(type==='match'){o.type='triangle';o.frequency.setValueAtTime(523.25,t);o.frequency.setValueAtTime(659.25,t+.1);o.frequency.setValueAtTime(783.99,t+.2);g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.01,t+.35);o.start();o.stop(t+.35);}
+    else if(type==='miss'){o.type='sawtooth';o.frequency.setValueAtTime(200,t);o.frequency.exponentialRampToValueAtTime(120,t+.15);g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.01,t+.15);o.start();o.stop(t+.15);}
+    else if(type==='win'){[523.25,659.25,783.99,1046.5].forEach((f,i)=>{const oo=c.createOscillator(),gg=c.createGain();oo.connect(gg);gg.connect(c.destination);oo.frequency.setValueAtTime(f,t+i*.12);gg.gain.setValueAtTime(.15,t+i*.12);gg.gain.exponentialRampToValueAtTime(.01,t+i*.12+.2);oo.start(t+i*.12);oo.stop(t+i*.12+.2);});}
+  }catch(e){}
+}
+
+function startGame(){
+  document.getElementById('win').style.display='none';
+  const board=document.getElementById('board'); board.innerHTML='';
+  score=tries=matched=0; flipped=[]; busy=false; update();
+  const deck=[];
+  KDC.forEach(([code,name])=>{
+    deck.push({code,text:code,kind:'num'});
+    deck.push({code,text:name,kind:'name'});
+  });
+  deck.sort(()=>Math.random()-.5).forEach(d=>{
+    const el=document.createElement('div'); el.className='card';
+    el.innerHTML=`<div class="face back"></div><div class="face front ${d.kind}">${d.text}</div>`;
+    el.addEventListener('click',()=>flip(d,el));
+    board.appendChild(el);
+  });
+}
+
+function flip(d,el){
+  if(busy||el.classList.contains('flipped')) return;
+  sound('flip'); el.classList.add('flipped'); flipped.push({d,el});
+  if(flipped.length<2) return;
+  tries++; busy=true;
+  const [a,b]=flipped;
+  if(a.d.code===b.d.code && a.d.kind!==b.d.kind){
+    sound('match'); score+=10; matched++;
+    a.el.classList.add('matched'); b.el.classList.add('matched');
+    flipped=[]; busy=false; update();
+    if(matched===KDC.length) setTimeout(win,400);
+  }else{
+    sound('miss'); update();
+    setTimeout(()=>{a.el.classList.remove('flipped');b.el.classList.remove('flipped');flipped=[];busy=false;},1000);
+  }
+}
+
+function update(){
+  document.getElementById('score').textContent=score;
+  document.getElementById('tries').textContent=tries;
+}
+
+function win(){
+  sound('win');
+  document.getElementById('final').textContent=score;
+  document.getElementById('finalTries').textContent=tries;
+  document.getElementById('win').style.display='flex';
+  if(window.confetti) confetti({particleCount:150,spread:80,origin:{y:.6}});
+}
+
+window.onload=startGame;
+</script>
+</body>
+</html>
