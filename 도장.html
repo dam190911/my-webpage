@@ -11,7 +11,7 @@
     <!-- Google Fonts for diverse Korean typography options -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Dokdo&family=Gugi&family=Nanum+Myeongjo:wght@700&family=Nanum+Pen+Script&family=Black+And+White+Picture&family=East+Sea+Dokdo&family=Jua&family=Yeon+Sung&family=Gowun+Batang:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Dokdo&family=Gugi&family=Nanum+Myeongjo:wght@700&family=Nanum+Pen+Script&family=Black+And+White+Picture&family=East+Sea+Dokdo&family=Jua&family=Yeon+Sung&family=Gowun+Batang:wght@700&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Great+Vibes&family=Dancing+Script&display=swap" rel="stylesheet">
     <style>
         /* Custom font utility classes */
         .font-myeongjo { font-family: 'Nanum Myeongjo', serif; }
@@ -62,9 +62,15 @@
             </div>
         </div>
     </header>
+    <nav class="bg-white border-b border-slate-200">
+        <div class="max-w-5xl mx-auto px-3 flex gap-1">
+            <button type="button" data-tab="stamp" class="tab-btn px-4 py-3 text-sm border-b-2 border-red-600 text-red-700 font-bold"><i class="fa-solid fa-stamp mr-1.5"></i>도장 만들기</button>
+            <button type="button" data-tab="sign" class="tab-btn px-4 py-3 text-sm border-b-2 border-transparent text-slate-500 font-semibold"><i class="fa-solid fa-pen-nib mr-1.5"></i>서명하기</button>
+        </div>
+    </nav>
 
     <!-- Main Container -->
-    <main class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+    <main id="stampView" class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
 
         <!-- Left Column: Controls (Mobile First Layout) -->
         <div class="lg:col-span-7 flex flex-col gap-4">
@@ -155,6 +161,8 @@
                             <button type="button" data-shape="rounded" class="shape-option py-2 px-2 border-2 border-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition">
                                 <i class="fa-solid fa-square-full rounded-sm"></i> 둥근사각
                             </button>
+                            <button type="button" data-shape="oval" class="shape-option py-2 px-2 border-2 border-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition"><i class="fa-regular fa-circle"></i> 타원</button>
+                            <button type="button" data-shape="none" class="shape-option py-2 px-2 border-2 border-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition"><i class="fa-solid fa-ban"></i> 테두리 없음</button>
                         </div>
                     </div>
 
@@ -195,6 +203,18 @@
                 </div>
             </div>
 
+            <!-- 4. Detail Customization Panel -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-red-600"></i> 도장 상세 커스텀
+                    </h2>
+                    <button type="button" id="customReset" class="text-xs text-slate-500 hover:text-red-600 transition">기본값으로</button>
+                </div>
+                <div id="customGroups" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+                <div id="customSliders" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100"></div>
+            </div>
+
         </div>
 
         <!-- Right Column: Live Preview & PNG Download (Mobile Friendly) -->
@@ -223,6 +243,117 @@
             </button>
         </div>
 
+    </main>
+
+    <!-- Signature View -->
+    <main id="signView" class="hidden flex-grow max-w-5xl w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+        <div class="lg:col-span-7 flex flex-col gap-4">
+            <div id="methodTabs" class="grid grid-cols-2 gap-2">
+                <button type="button" data-method="draw"><i class="fa-solid fa-pen mr-1.5"></i>마우스·손으로 쓰기</button>
+                <button type="button" data-method="type"><i class="fa-solid fa-keyboard mr-1.5"></i>타자로 입력</button>
+            </div>
+            <div id="typePanel" class="hidden bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3">
+                <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                    <i class="fa-solid fa-keyboard text-red-600"></i> 타자로 서명 만들기
+                </h2>
+                <input type="text" id="typeInput" value="홍길동" maxlength="20" placeholder="서명할 이름 입력"
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white transition">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="typeFonts"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs"><label for="typeSize" class="font-semibold text-slate-600">글자 크기</label><span id="typeSizeVal" class="text-slate-400 font-mono">110</span></div>
+                        <input type="range" id="typeSize" min="50" max="220" value="110" class="w-full accent-red-600 cursor-pointer">
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs"><label for="typeSlant" class="font-semibold text-slate-600">기울기</label><span id="typeSlantVal" class="text-slate-400 font-mono">0°</span></div>
+                        <input type="range" id="typeSlant" min="-20" max="30" value="0" class="w-full accent-red-600 cursor-pointer">
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400">글자 색은 아래 '펜 설정'의 색상을 따라가요.</p>
+            </div>
+
+            <div id="drawPanel" class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                        <i class="fa-solid fa-pen-nib text-red-600"></i> 서명 그리기
+                    </h2>
+                    <span class="text-xs text-slate-400">손가락·마우스·펜으로 직접 서명하세요</span>
+                </div>
+                <canvas id="signCanvas" width="900" height="400" class="w-full h-auto rounded-xl bg-white border-2 border-dashed border-slate-300 cursor-crosshair" style="touch-action:none"></canvas>
+                <div class="flex gap-2">
+                    <button type="button" id="signUndo" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-sm font-medium transition"><i class="fa-solid fa-rotate-left mr-1"></i> 한 획 되돌리기</button>
+                    <button type="button" id="signClear" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-sm font-medium transition"><i class="fa-solid fa-eraser mr-1"></i> 모두 지우기</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3">
+                <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                    <i class="fa-solid fa-palette text-red-600"></i> 펜 설정
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold text-slate-500">펜 색상</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="penColor" value="#111827" class="w-10 h-10 p-1 rounded-xl border border-slate-200 cursor-pointer bg-white">
+                            <button type="button" class="pen-preset w-7 h-7 rounded-full bg-[#111827] border border-slate-300" data-color="#111827" title="검정"></button>
+                            <button type="button" class="pen-preset w-7 h-7 rounded-full bg-[#1e3a8a] border border-slate-300" data-color="#1e3a8a" title="남색"></button>
+                            <button type="button" class="pen-preset w-7 h-7 rounded-full bg-[#2563eb] border border-slate-300" data-color="#2563eb" title="파랑"></button>
+                            <button type="button" class="pen-preset w-7 h-7 rounded-full bg-[#d62828] border border-slate-300" data-color="#d62828" title="빨강"></button>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <label for="penWidth" class="font-semibold text-slate-600">펜 굵기</label>
+                            <span id="penWidthVal" class="text-slate-400 font-mono">5px</span>
+                        </div>
+                        <input type="range" id="penWidth" min="2" max="16" value="5" class="w-full accent-red-600 cursor-pointer">
+                    </div>
+                </div>
+                <label class="flex items-center gap-2 cursor-pointer select-none text-sm text-slate-700">
+                    <input type="checkbox" id="guideCheck" checked class="w-4 h-4 text-red-600 rounded focus:ring-red-500 border-slate-300">
+                    <span>안내선 보기 <span class="text-xs text-slate-400">(저장 이미지에는 들어가지 않아요)</span></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="lg:col-span-5 flex flex-col gap-4">
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                        <i class="fa-solid fa-eye text-red-600"></i> 결과 미리보기
+                    </h2>
+                    <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-mono">투명 배경 (PNG)</span>
+                </div>
+                <div class="checkerboard p-4 rounded-2xl border border-slate-200 shadow-inner flex items-center justify-center w-full min-h-[200px]">
+                    <canvas id="outCanvas" class="max-w-full h-auto max-h-60 hidden"></canvas>
+                    <p id="outEmpty" class="text-sm text-slate-500 bg-white/80 px-3 py-1.5 rounded-lg">왼쪽 칸에 서명을 그려보세요</p>
+                </div>
+
+                <div class="space-y-2.5 pt-1 border-t border-slate-100">
+                    <div id="outModes" class="grid grid-cols-3 gap-1.5 pt-2"></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label for="stampPos" class="block text-xs font-semibold text-slate-500">도장 위치</label>
+                            <select id="stampPos" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="right">서명 오른쪽</option>
+                                <option value="overlap">서명 끝에 겹치기</option>
+                                <option value="left">서명 왼쪽</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs">
+                                <label for="stampSize" class="font-semibold text-slate-500">도장 크기</label>
+                                <span id="stampSizeVal" class="text-slate-400 font-mono">45%</span>
+                            </div>
+                            <input type="range" id="stampSize" min="20" max="90" value="45" class="w-full accent-red-600 cursor-pointer mt-2.5">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button id="comboDownloadBtn" class="w-full py-4 px-6 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold rounded-2xl shadow-lg shadow-red-600/30 transition flex items-center justify-center gap-3 text-lg cursor-pointer">
+                <i class="fa-solid fa-download"></i> <span id="comboLabel">도장 + 서명 PNG 다운로드</span>
+            </button>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -327,124 +458,137 @@
 
         addInCheckbox.addEventListener('change', generateStamp);
 
+        // ===== 상세 커스텀 (양각/음각, 글자 방향, 테두리 줄, 크기·간격·기울기) =====
+        const CUSTOM_DEFAULT = { style: 'normal', layout: 'vertical', border: 'double', scale: 100, spacing: 100, rotate: 0 };
+        const custom = { ...CUSTOM_DEFAULT };
+        const groupDefs = [
+            { key: 'style', label: '도장 방식', opts: [['normal', '양각 (글자가 색)'], ['inverse', '음각 (바탕이 색)']] },
+            { key: 'layout', label: '글자 읽는 방향', opts: [['vertical', '세로 (우→좌)'], ['horizontal', '가로 (좌→우)']] },
+            { key: 'border', label: '테두리 줄', opts: [['double', '이중선'], ['single', '단선']] }
+        ];
+        const sliderDefs = [
+            { key: 'scale', label: '글자 크기', min: 60, max: 140, fmt: v => v + '%' },
+            { key: 'spacing', label: '글자 간격', min: 70, max: 140, fmt: v => v + '%' },
+            { key: 'rotate', label: '도장 기울기', min: -20, max: 20, fmt: v => v + '°' }
+        ];
+        const ON = 'border-red-500 bg-red-50 text-red-900 font-bold';
+        const OFF = 'border-slate-200 text-slate-700 font-semibold';
+        const customGroups = document.getElementById('customGroups');
+        const customSliders = document.getElementById('customSliders');
+        const paintFns = [];
+
+        groupDefs.forEach(g => {
+            const wrap = document.createElement('div');
+            wrap.className = 'space-y-1.5';
+            wrap.innerHTML = `<label class="block text-xs font-semibold text-slate-500">${g.label}</label><div class="grid grid-cols-2 gap-1.5"></div>`;
+            const row = wrap.lastElementChild;
+            g.opts.forEach(([val, text]) => {
+                const b = document.createElement('button');
+                b.type = 'button'; b.dataset.val = val; b.textContent = text;
+                row.appendChild(b);
+            });
+            const paint = () => row.querySelectorAll('button').forEach(b => {
+                b.className = 'py-2 px-1.5 border-2 rounded-xl text-xs transition ' + (custom[g.key] === b.dataset.val ? ON : OFF);
+            });
+            row.addEventListener('click', e => {
+                const b = e.target.closest('button');
+                if (!b) return;
+                custom[g.key] = b.dataset.val; paint(); generateStamp();
+            });
+            paintFns.push(paint); paint();
+            customGroups.appendChild(wrap);
+        });
+
+        sliderDefs.forEach(s => {
+            const d = document.createElement('div');
+            d.className = 'space-y-1';
+            d.innerHTML = `<div class="flex justify-between text-xs"><label class="font-semibold text-slate-600">${s.label}</label><span class="text-slate-400 font-mono">${s.fmt(custom[s.key])}</span></div><input type="range" min="${s.min}" max="${s.max}" value="${custom[s.key]}" class="w-full accent-red-600 cursor-pointer">`;
+            const out = d.querySelector('span'), inp = d.querySelector('input');
+            inp.addEventListener('input', () => { custom[s.key] = +inp.value; out.textContent = s.fmt(inp.value); generateStamp(); });
+            paintFns.push(() => { inp.value = custom[s.key]; out.textContent = s.fmt(custom[s.key]); });
+            customSliders.appendChild(d);
+        });
+
+        document.getElementById('customReset').addEventListener('click', () => {
+            Object.assign(custom, CUSTOM_DEFAULT);
+            paintFns.forEach(f => f());
+            generateStamp();
+        });
+
         // Core Stamp Canvas Rendering Engine
         function generateStamp() {
             const ctx = stampCanvas.getContext('2d');
-            const width = stampCanvas.width;
-            const height = stampCanvas.height;
-            const centerX = width / 2;
-            const centerY = height / 2;
+            const W = stampCanvas.width;
+            const c = W / 2;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.clearRect(0, 0, W, W);
 
-            // Clear background (Transparent)
-            ctx.clearRect(0, 0, width, height);
-
-            // Text processing
             let rawText = nameInput.value.trim() || '홍길동';
-            if (addInCheckbox.checked && !rawText.endsWith('인')) {
-                rawText += '인';
-            }
+            if (addInCheckbox.checked && !rawText.endsWith('인')) rawText += '인';
 
+            const bw = parseInt(borderWidthRange.value);
+            const hasBorder = selectedShape !== 'none';
+            const inverse = custom.style === 'inverse' && hasBorder;
+
+            // 외곽선 경로 (inset: 안쪽으로 들어가는 거리)
+            const tracePath = inset => {
+                ctx.beginPath();
+                if (selectedShape === 'circle') {
+                    ctx.arc(c, c, c - bw / 2 - 16 - inset, 0, Math.PI * 2);
+                } else if (selectedShape === 'oval') {
+                    const r = c - bw / 2 - 16 - inset;
+                    ctx.ellipse(c, c, r * 0.82, r, 0, 0, Math.PI * 2);
+                } else {
+                    const m = 20 + bw / 2 + inset;
+                    ctx.roundRect(m, m, W - m * 2, W - m * 2, selectedShape === 'rounded' ? Math.max(24 - inset * 0.4, 2) : 0);
+                }
+            };
+
+            ctx.save();
+            ctx.translate(c, c);
+            ctx.rotate(custom.rotate * Math.PI / 180);
+            ctx.translate(-c, -c);
             ctx.fillStyle = stampColor;
             ctx.strokeStyle = stampColor;
 
-            // 1. Render Border Shape
-            const borderWidth = parseInt(borderWidthRange.value);
-            ctx.lineWidth = borderWidth;
-
-            if (selectedShape === 'circle') {
-                const radius = (width / 2) - (borderWidth / 2) - 16;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                ctx.stroke();
-
-                // Inner decorative ring
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, radius - 10, 0, Math.PI * 2);
-                ctx.stroke();
-            } else if (selectedShape === 'square') {
-                const margin = 20 + (borderWidth / 2);
-                const rectSize = width - (margin * 2);
-                
-                ctx.beginPath();
-                ctx.rect(margin, margin, rectSize, rectSize);
-                ctx.stroke();
-
-                // Inner fine border
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.rect(margin + 10, margin + 10, rectSize - 20, rectSize - 20);
-                ctx.stroke();
-            } else {
-                // Rounded Square
-                const margin = 20 + (borderWidth / 2);
-                const rectSize = width - (margin * 2);
-                const cornerRadius = 24;
-
-                ctx.beginPath();
-                ctx.roundRect(margin, margin, rectSize, rectSize, cornerRadius);
-                ctx.stroke();
-
-                // Inner fine border
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.roundRect(margin + 10, margin + 10, rectSize - 20, rectSize - 20, cornerRadius - 4);
-                ctx.stroke();
+            // 1. 테두리 (음각이면 바탕을 가득 채움)
+            if (hasBorder) {
+                if (inverse) { tracePath(0); ctx.fill(); }
+                else { ctx.lineWidth = bw; tracePath(0); ctx.stroke(); }
             }
 
-            // 2. Render Text Characters Inside Stamp
-            ctx.fillStyle = stampColor;
+            // 2. 글자 배치
+            const chars = [...rawText].slice(0, 4);
+            const n = chars.length;
+            const base = n === 1 ? 160 : n === 2 ? 125 : n === 3 ? 95 : 78;
+            const fs = base * custom.scale / 100;
+            const sp = custom.spacing / 100;
+            const o = fs * 0.38 * sp;
+            const g = fs * 0.95 * sp;
+            const horizontal = custom.layout === 'horizontal';
+            let pos;
+            if (n === 1) pos = [[0, 0]];
+            else if (n === 2) pos = horizontal ? [[-g / 2, 0], [g / 2, 0]] : [[0, -g / 2], [0, g / 2]];
+            else pos = horizontal ? [[-o, -o], [o, -o], [-o, o], [o, o]] : [[o, -o], [o, o], [-o, -o], [-o, o]];
+
+            if (inverse) ctx.globalCompositeOperation = 'destination-out';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+            ctx.font = `bold ${fs}px "${selectedFont}", sans-serif`;
+            chars.forEach((ch, i) => ctx.fillText(ch, c + pos[i][0], c + pos[i][1]));
 
-            const chars = rawText.split('');
-            const charCount = chars.length;
-
-            let fontSize = 110;
-            if (charCount === 1) fontSize = 160;
-            else if (charCount === 2) fontSize = 125;
-            else if (charCount === 3) fontSize = 95;
-            else if (charCount >= 4) fontSize = 78;
-
-            ctx.font = `bold ${fontSize}px "${selectedFont}", sans-serif`;
-
-            if (charCount <= 2) {
-                if (charCount === 1) {
-                    ctx.fillText(chars[0], centerX, centerY);
-                } else {
-                    const gap = fontSize * 0.52;
-                    ctx.fillText(chars[0], centerX, centerY - gap / 2);
-                    ctx.fillText(chars[1], centerX, centerY + gap / 2);
-                }
-            } else {
-                // 3 or 4 characters layout (Traditional 2x2 seal grid)
-                const offsetX = fontSize * 0.38;
-                const offsetY = fontSize * 0.38;
-
-                let gridChars = ['', '', '', ''];
-                if (charCount === 3) {
-                    gridChars[0] = chars[0]; // Top-Right
-                    gridChars[1] = chars[1]; // Bottom-Right
-                    gridChars[2] = chars[2]; // Top-Left
-                    gridChars[3] = '';
-                } else {
-                    gridChars[0] = chars[0]; // Top-Right
-                    gridChars[1] = chars[1]; // Bottom-Right
-                    gridChars[2] = chars[2]; // Top-Left
-                    gridChars[3] = chars[3]; // Bottom-Left
-                }
-
-                if (gridChars[0]) ctx.fillText(gridChars[0], centerX + offsetX, centerY - offsetY);
-                if (gridChars[1]) ctx.fillText(gridChars[1], centerX + offsetX, centerY + offsetY);
-                if (gridChars[2]) ctx.fillText(gridChars[2], centerX - offsetX, centerY - offsetY);
-                if (gridChars[3]) ctx.fillText(gridChars[3], centerX - offsetX, centerY + offsetY);
+            // 3. 안쪽 가는 테두리 (이중선)
+            if (hasBorder && custom.border === 'double') {
+                ctx.lineWidth = 2;
+                tracePath(inverse ? 10 : bw / 2 + 5);
+                ctx.stroke();
             }
+            ctx.restore();
 
-            // 3. Apply Analog Grunge / Vintage Ink Texture Effect
+            // 4. 아날로그 질감
             const textureLevel = parseInt(textureRange.value);
-            if (textureLevel > 0) {
-                applyGrungeTexture(ctx, width, height, textureLevel);
-            }
+            if (textureLevel > 0) applyGrungeTexture(ctx, W, W, textureLevel);
         }
 
         // Helper function for realistic ink speckles and imperfections
@@ -480,12 +624,290 @@
             document.body.removeChild(link);
         });
 
+        // ===== 탭 전환 =====
+        const stampView = document.getElementById('stampView');
+        const signView = document.getElementById('signView');
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const t = btn.dataset.tab;
+                stampView.classList.toggle('hidden', t !== 'stamp');
+                signView.classList.toggle('hidden', t !== 'sign');
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    const on = b === btn;
+                    b.className = 'tab-btn px-4 py-3 text-sm border-b-2 ' + (on ? 'border-red-600 text-red-700 font-bold' : 'border-transparent text-slate-500 font-semibold');
+                });
+                if (t === 'sign') { drawSign(); refreshOutput(); }
+            });
+        });
+
+        // ===== 서명 패드 =====
+        const signCanvas = document.getElementById('signCanvas');
+        const outCanvas = document.getElementById('outCanvas');
+        const outEmpty = document.getElementById('outEmpty');
+        const penColor = document.getElementById('penColor');
+        const penWidth = document.getElementById('penWidth');
+        const guideCheck = document.getElementById('guideCheck');
+                const stampPos = document.getElementById('stampPos');
+        const stampSize = document.getElementById('stampSize');
+        let strokes = [];
+        let current = null;
+
+        function paintStrokes(ctx) {
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            strokes.forEach(s => {
+                ctx.strokeStyle = s.color; ctx.fillStyle = s.color; ctx.lineWidth = s.w;
+                const p = s.pts;
+                if (p.length < 2) {
+                    ctx.beginPath(); ctx.arc(p[0].x, p[0].y, s.w / 2, 0, Math.PI * 2); ctx.fill();
+                    return;
+                }
+                ctx.beginPath();
+                ctx.moveTo(p[0].x, p[0].y);
+                for (let i = 1; i < p.length - 1; i++) {
+                    const mx = (p[i].x + p[i + 1].x) / 2, my = (p[i].y + p[i + 1].y) / 2;
+                    ctx.quadraticCurveTo(p[i].x, p[i].y, mx, my);
+                }
+                ctx.lineTo(p[p.length - 1].x, p[p.length - 1].y);
+                ctx.stroke();
+            });
+        }
+
+        function drawSign() {
+            const ctx = signCanvas.getContext('2d');
+            const W = signCanvas.width, H = signCanvas.height;
+            ctx.clearRect(0, 0, W, H);
+            if (guideCheck.checked) {
+                ctx.save();
+                ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.setLineDash([10, 8]);
+                ctx.beginPath(); ctx.moveTo(40, H * 0.72); ctx.lineTo(W - 40, H * 0.72); ctx.stroke();
+                ctx.setLineDash([]); ctx.fillStyle = '#cbd5e1'; ctx.font = 'bold 28px sans-serif';
+                ctx.fillText('✕', 44, H * 0.72 - 12);
+                ctx.restore();
+            }
+            paintStrokes(ctx);
+        }
+
+        function signPoint(e) {
+            const r = signCanvas.getBoundingClientRect();
+            return { x: (e.clientX - r.left) * signCanvas.width / r.width, y: (e.clientY - r.top) * signCanvas.height / r.height };
+        }
+
+        signCanvas.addEventListener('pointerdown', e => {
+            e.preventDefault();
+            signCanvas.setPointerCapture(e.pointerId);
+            current = { color: penColor.value, w: +penWidth.value, pts: [signPoint(e)] };
+            strokes.push(current);
+            drawSign();
+        });
+        signCanvas.addEventListener('pointermove', e => {
+            if (!current) return;
+            current.pts.push(signPoint(e));
+            drawSign();
+        });
+        ['pointerup', 'pointercancel'].forEach(ev => signCanvas.addEventListener(ev, () => {
+            if (!current) return;
+            current = null; refreshOutput();
+        }));
+
+        document.getElementById('signUndo').addEventListener('click', () => { strokes.pop(); drawSign(); refreshOutput(); });
+        document.getElementById('signClear').addEventListener('click', () => { strokes = []; drawSign(); refreshOutput(); });
+        guideCheck.addEventListener('change', drawSign);
+        penColor.addEventListener('input', () => refreshOutput());
+        document.querySelectorAll('.pen-preset').forEach(b => b.addEventListener('click', () => { penColor.value = b.dataset.color; refreshOutput(); }));
+        penWidth.addEventListener('input', () => { document.getElementById('penWidthVal').textContent = penWidth.value + 'px'; });
+        stampSize.addEventListener('input', () => { document.getElementById('stampSizeVal').textContent = stampSize.value + '%'; refreshOutput(); });
+        stampPos.addEventListener('change', refreshOutput);
+
+        // 서명만 잘라서 투명 PNG용 캔버스로 만들기
+        function buildDrawn() {
+            if (!strokes.length) return null;
+            let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+            strokes.forEach(s => s.pts.forEach(p => {
+                x0 = Math.min(x0, p.x - s.w); y0 = Math.min(y0, p.y - s.w);
+                x1 = Math.max(x1, p.x + s.w); y1 = Math.max(y1, p.y + s.w);
+            }));
+            const pad = 12;
+            x0 -= pad; y0 -= pad; x1 += pad; y1 += pad;
+            const cv = document.createElement('canvas');
+            cv.width = Math.ceil(x1 - x0); cv.height = Math.ceil(y1 - y0);
+            const ctx = cv.getContext('2d');
+            ctx.translate(-x0, -y0);
+            paintStrokes(ctx);
+            return cv;
+        }
+
+        // ===== 타자 서명 =====
+        const typeInput = document.getElementById('typeInput');
+        const typeSize = document.getElementById('typeSize');
+        const typeSlant = document.getElementById('typeSlant');
+        const typeFontsEl = document.getElementById('typeFonts');
+        const typeFontList = [
+            ['Nanum Pen Script', '나눔손글씨'], ['East Sea Dokdo', '동해독도'], ['Dokdo', '독도체'],
+            ['Nanum Brush Script', '나눔붓글씨'], ['Gaegu', '개구'], ['Hi Melody', '하이멜로디'],
+            ['Yeon Sung', '연성체'], ['Great Vibes', 'Signature'], ['Dancing Script', 'Signature']
+        ];
+        let typeFont = typeFontList[0][0];
+        let method = 'draw';
+        let outMode = 'both';
+
+        function paintTypeFonts() {
+            typeFontsEl.querySelectorAll('button').forEach(btn => {
+                btn.className = 'py-2 px-2 border-2 rounded-xl text-lg transition ' + (btn.dataset.font === typeFont ? ON : OFF);
+            });
+        }
+        typeFontList.forEach(([f, label]) => {
+            const btn = document.createElement('button');
+            btn.type = 'button'; btn.dataset.font = f; btn.style.fontFamily = `"${f}", cursive`;
+            btn.textContent = label;
+            typeFontsEl.appendChild(btn);
+        });
+        typeFontsEl.addEventListener('click', e => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            typeFont = btn.dataset.font; paintTypeFonts(); refreshOutput();
+        });
+        paintTypeFonts();
+        typeInput.addEventListener('input', refreshOutput);
+        typeSize.addEventListener('input', () => { document.getElementById('typeSizeVal').textContent = typeSize.value; refreshOutput(); });
+        typeSlant.addEventListener('input', () => { document.getElementById('typeSlantVal').textContent = typeSlant.value + '°'; refreshOutput(); });
+
+        function trimCanvas(cv, pad = 12) {
+            const w = cv.width, h = cv.height;
+            const d = cv.getContext('2d').getImageData(0, 0, w, h).data;
+            let x0 = w, y0 = h, x1 = -1, y1 = -1;
+            for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+                if (d[(y * w + x) * 4 + 3] > 8) {
+                    if (x < x0) x0 = x; if (x > x1) x1 = x;
+                    if (y < y0) y0 = y; if (y > y1) y1 = y;
+                }
+            }
+            if (x1 < 0) return null;
+            const o = document.createElement('canvas');
+            o.width = x1 - x0 + 1 + pad * 2; o.height = y1 - y0 + 1 + pad * 2;
+            o.getContext('2d').drawImage(cv, x0, y0, x1 - x0 + 1, y1 - y0 + 1, pad, pad, x1 - x0 + 1, y1 - y0 + 1);
+            return o;
+        }
+
+        function buildTyped() {
+            const text = typeInput.value.trim();
+            if (!text) return null;
+            const size = +typeSize.value;
+            const font = `${size}px "${typeFont}", cursive`;
+            // 폰트가 아직 로드 전이면 로드 후 다시 그리기
+            if (!document.fonts.check(font, text)) document.fonts.load(font, text).then(refreshOutput);
+            const tmp = document.createElement('canvas').getContext('2d');
+            tmp.font = font;
+            const textW = Math.ceil(tmp.measureText(text).width);
+            const h = Math.ceil(size * 1.6);
+            const pad = h;
+            const cv = document.createElement('canvas');
+            cv.width = textW + pad * 2; cv.height = h;
+            const ctx = cv.getContext('2d');
+            const tan = Math.tan(+typeSlant.value * Math.PI / 180);
+            const base = size * 1.15;
+            ctx.setTransform(1, 0, -tan, 1, pad + tan * base, 0);
+            ctx.font = font; ctx.fillStyle = penColor.value; ctx.textBaseline = 'alphabetic';
+            ctx.fillText(text, 0, base);
+            return trimCanvas(cv);
+        }
+
+        function buildSignature() { return method === 'type' ? buildTyped() : buildDrawn(); }
+
+        // 도장 + 서명 합치기 (출력 방식에 따라)
+        function buildOutput() {
+            if (outMode === 'stamp') {
+                const cv = document.createElement('canvas');
+                cv.width = stampCanvas.width; cv.height = stampCanvas.height;
+                cv.getContext('2d').drawImage(stampCanvas, 0, 0);
+                return cv;
+            }
+            const sig = buildSignature();
+            if (outMode === 'sign') return sig;
+            const sz = Math.round(signCanvas.height * stampSize.value / 100);
+            if (!sig) {
+                const cv = document.createElement('canvas');
+                cv.width = cv.height = sz;
+                cv.getContext('2d').drawImage(stampCanvas, 0, 0, sz, sz);
+                return cv;
+            }
+            const pos = stampPos.value;
+            const tx = pos === 'right' ? sig.width - sz * 0.15 : pos === 'left' ? -sz * 0.85 : sig.width * 0.7 - sz / 2;
+            const ty = sig.height / 2 - sz / 2;
+            const minX = Math.min(0, tx), maxX = Math.max(sig.width, tx + sz);
+            const minY = Math.min(0, ty), maxY = Math.max(sig.height, ty + sz);
+            const cv = document.createElement('canvas');
+            cv.width = Math.ceil(maxX - minX); cv.height = Math.ceil(maxY - minY);
+            const ctx = cv.getContext('2d');
+            ctx.drawImage(stampCanvas, tx - minX, ty - minY, sz, sz);   // 도장 먼저
+            ctx.drawImage(sig, -minX, -minY);                            // 서명을 위에
+            return cv;
+        }
+
+        // 입력 방식 전환 (그리기 / 타자)
+        const methodTabs = document.getElementById('methodTabs');
+        function setMethod(m) {
+            method = m;
+            document.getElementById('drawPanel').classList.toggle('hidden', m !== 'draw');
+            document.getElementById('typePanel').classList.toggle('hidden', m !== 'type');
+            penWidth.parentElement.classList.toggle('hidden', m !== 'draw');
+            guideCheck.parentElement.classList.toggle('hidden', m !== 'draw');
+            methodTabs.querySelectorAll('button').forEach(b => {
+                b.className = 'py-2.5 px-2 border-2 rounded-xl text-sm transition ' + (b.dataset.method === m ? ON : OFF);
+            });
+            refreshOutput();
+        }
+        methodTabs.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMethod(b.dataset.method); });
+
+        // 출력 방식 전환 (도장만 / 서명만 / 도장+서명)
+        const outModesEl = document.getElementById('outModes');
+        const modeDefs = [['stamp', '도장만', '도장 PNG 다운로드'], ['sign', '서명만', '서명 PNG 다운로드'], ['both', '도장 + 서명', '도장 + 서명 PNG 다운로드']];
+        modeDefs.forEach(([k, label]) => {
+            const b = document.createElement('button');
+            b.type = 'button'; b.dataset.mode = k; b.textContent = label;
+            outModesEl.appendChild(b);
+        });
+        function setMode(k) {
+            outMode = k;
+            outModesEl.querySelectorAll('button').forEach(b => {
+                b.className = 'py-2 px-1.5 border-2 rounded-xl text-xs transition ' + (b.dataset.mode === k ? ON : OFF);
+            });
+            stampPos.closest('.grid').classList.toggle('hidden', k !== 'both');
+            document.getElementById('comboLabel').textContent = modeDefs.find(d => d[0] === k)[2];
+            refreshOutput();
+        }
+        outModesEl.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
+
+        function refreshOutput() {
+            const cv = buildOutput();
+            outCanvas.classList.toggle('hidden', !cv);
+            outEmpty.classList.toggle('hidden', !!cv);
+            if (!cv) return;
+            outCanvas.width = cv.width; outCanvas.height = cv.height;
+            const ctx = outCanvas.getContext('2d');
+            ctx.clearRect(0, 0, cv.width, cv.height);
+            ctx.drawImage(cv, 0, 0);
+        }
+
+        function saveCanvas(cv, filename) {
+            if (!cv) { alert('먼저 서명을 그려주세요.'); return; }
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = cv.toDataURL('image/png');
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+        document.getElementById('comboDownloadBtn').addEventListener('click', () => {
+            const names = { stamp: '도장.png', sign: '서명.png', both: '도장_서명.png' };
+            saveCanvas(buildOutput(), names[outMode]);
+        });
+
+        setMethod('draw');
+        setMode('both');
+
         // Initialize on load
         window.addEventListener('load', () => {
-            setTimeout(generateStamp, 80);
+            setTimeout(() => { generateStamp(); drawSign(); }, 80);
         });
     </script>
 </body>
 </html>
-```
-## eof
