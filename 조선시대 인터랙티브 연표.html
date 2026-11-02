@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>조선시대 인터랙티브 연표</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#faf6ee;--surf:#fff;--tx:#2b2620;--mut:#7a7064;--ac:#b5452f;--ln:#d9cdb8;--ov:rgba(30,24,16,.5);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1a16;--surf:#2a2620;--tx:#f1eadc;--mut:#a79d8c;--ac:#e07a5f;--ln:#4a4338;--ov:rgba(0,0,0,.65);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1d1a16;--surf:#2a2620;--tx:#f1eadc;--mut:#a79d8c;--ac:#e07a5f;--ln:#4a4338;--ov:rgba(0,0,0,.65);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Noto Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;line-height:1.6;min-height:100vh}
+header{padding:28px 20px 8px;text-align:center}
+h1{margin:0;font-size:clamp(22px,4vw,32px)}
+header p{margin:6px 0 0;color:var(--mut);font-size:14px}
+.wrap{position:relative;margin-top:24px}
+.track{overflow-x:auto;padding:10px 50vw;scrollbar-width:thin}
+.in{position:relative;height:280px}
+.in::before{content:"";position:absolute;left:-40px;right:-40px;top:140px;height:3px;background:var(--ln)}
+.node{position:absolute;top:0;width:140px;margin-left:-70px;height:280px;text-align:center;background:none;border:0;color:inherit;font:inherit;padding:0;pointer-events:none}
+.node .dot,.node .lb{pointer-events:auto;cursor:pointer}
+.node .dot{position:absolute;left:50%;top:131px;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:var(--surf);border:3px solid var(--mut);z-index:1;transition:.3s}
+.node .lb{position:absolute;left:0;right:0}
+.node.up .lb{bottom:158px}
+.node.dn .lb{top:172px}
+.node .yr{display:block;font-weight:700;font-size:15px;color:var(--mut);transition:.3s}
+.node .nm{display:block;font-size:14px;padding:0 6px;margin-top:2px;transition:.3s}
+.tk{position:absolute;top:140px;font-size:11px;color:var(--mut);transform:translateX(-50%);padding-top:12px;pointer-events:none}
+.tk::before{content:"";position:absolute;left:50%;top:0;height:9px;width:1px;background:var(--mut)}
+.node:hover .dot{border-color:var(--ac)}
+.node.on .dot{transform:scale(1.7);background:var(--ac);border-color:var(--ac);box-shadow:0 0 0 6px color-mix(in srgb,var(--ac) 25%,transparent)}
+.node.on .yr{color:var(--ac);font-size:18px}
+.node.on .nm{font-weight:700}
+.node.pend .nm::after{content:" 🔎";}
+.bar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 16px 12px}
+button.b{background:var(--surf);color:var(--tx);border:1px solid var(--ln);border-radius:10px;padding:10px 16px;font:inherit;font-size:14px;cursor:pointer}
+button.b.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+button.b:hover{filter:brightness(.95)}
+.ov{position:fixed;inset:0;background:var(--ov);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.ov.show{display:flex}
+.card{background:var(--surf);width:min(520px,100%);max-height:88vh;overflow:auto;border-radius:18px;padding:24px;box-shadow:0 10px 40px rgba(0,0,0,.3);animation:pop .25s}
+@keyframes pop{from{transform:translateY(14px) scale(.97);opacity:0}}
+.card h2{margin:0 0 2px;font-size:22px}
+.card .y{color:var(--ac);font-weight:700}
+.card p{white-space:pre-wrap;margin:14px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
+input,textarea{width:100%;font:inherit;font-size:15px;padding:10px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);color:var(--tx)}
+textarea{min-height:110px;resize:vertical}
+.hint{font-size:13px;color:var(--mut);margin:8px 0 0}
+.nav{display:flex;justify-content:space-between;margin-top:4px}
+</style>
+</head>
+<body>
+<header>
+<h1>🏯 조선시대 인터랙티브 연표</h1>
+<p>사건을 눌러 이야기를 읽어 보세요. 옆으로 밀거나 ◀ ▶ 버튼으로 이동할 수 있어요.</p>
+</header>
+<div class="wrap"><div class="track" id="track" aria-label="조선시대 연표"></div></div>
+<div class="bar">
+<button class="b" id="prev">◀ 이전 사건</button>
+<button class="b" id="next">다음 사건 ▶</button>
+<button class="b p" id="add">＋ 사건 추가</button>
+<button class="b" id="rst">↺ 기본 사건 되살리기</button>
+</div>
+
+<div class="ov" id="ov1"><div class="card" role="dialog" aria-modal="true">
+<div class="y" id="dy"></div><h2 id="dt"></h2><p id="dd"></p>
+<div id="ext"></div>
+<div class="row"><button class="b" id="edit">✏️ 내용 쓰기·수정</button><button class="b" id="del">🗑 삭제</button><button class="b p" id="cls">닫기</button></div>
+</div></div>
+
+<div class="ov" id="ov2"><div class="card" role="dialog" aria-modal="true">
+<h2 id="ft">사건 추가</h2>
+<label for="fy">연도 (예: 1488)</label><input id="fy" type="number">
+<label for="fn">사건 이름</label><input id="fn" type="text">
+<label for="fc">설명 (비워 두면 Claude 조사 요청으로 저장돼요)</label><textarea id="fc"></textarea>
+<p class="hint" id="fe" style="color:var(--ac)"></p>
+<div class="row"><button class="b p" id="save">저장</button><button class="b" id="cancel">취소</button></div>
+</div></div>
+
+<script>
+const BASE=[
+[1392,"조선 건국","이성계 장군이 고려를 이어 새 나라 조선을 세웠어요. 나라 이름은 '조선', 수도는 한양(지금의 서울)이 되었어요. 백성을 귀하게 여기는 유교 나라를 만들겠다고 약속했답니다."],
+[1418,"세종대왕 즉위","조선의 4번째 왕 세종이 왕이 되었어요. 세종대왕은 공부를 아주 좋아했고, 백성이 잘 살 수 있도록 농사, 과학, 음악 등 여러 분야를 발전시켰어요."],
+[1443,"한글 창제","세종대왕이 집현전 학자들과 함께 우리 글자 '훈민정음'(한글)을 만들었어요. 어려운 한자를 모르는 백성도 쉽게 읽고 쓸 수 있게 하려는 마음에서였어요. 1446년에 세상에 널리 알렸어요."],
+[1592,"임진왜란","일본이 바다를 건너 조선을 쳐들어온 전쟁이에요. 이순신 장군은 거북선과 지혜로운 작전으로 바다를 지켰고, 곳곳에서 의병들이 나라를 지키려고 일어났어요. 7년 동안 이어졌어요."],
+[1636,"병자호란","청나라가 조선에 쳐들어온 전쟁이에요. 인조 임금은 남한산성으로 피했지만 추위와 식량 부족으로 끝내 항복했어요. 많은 백성이 힘든 시간을 보냈어요."],
+[1724,"영조의 탕평책","영조 임금은 신하들이 편을 갈라 싸우는 것을 막으려고 '탕평책'을 펼쳤어요. 어느 한쪽 편만 들지 않고 능력 있는 사람을 골고루 뽑아 쓰는 정책이에요."],
+[1794,"수원 화성 축조","정조 임금이 수원에 튼튼하고 아름다운 성 '화성'을 쌓기 시작했어요. 정약용이 만든 거중기 덕분에 무거운 돌을 쉽게 들어 올렸고, 약 2년 반 만에 완성했어요."],
+[1866,"병인양요","프랑스 군함이 강화도에 쳐들어온 사건이에요. 조선 군사들이 용감하게 맞서 싸워 프랑스 군을 물리쳤어요. 이때 프랑스가 강화도의 소중한 책들을 가져가기도 했어요."],
+[1894,"동학농민운동","살기 힘들었던 농민들이 '사람이 곧 하늘'이라는 동학의 가르침을 따라 나쁜 관리를 몰아내고 세상을 바꾸자며 일어났어요. 전봉준이 이끌었어요."],
+[1897,"대한제국 선포","고종 임금이 나라 이름을 '대한제국'으로 바꾸고 스스로 황제가 되었어요. 우리나라가 다른 나라에 기대지 않는 힘센 독립 국가임을 세계에 알리려는 뜻이었어요."]
+].map((e,i)=>({id:"b"+i,y:e[0],t:e[1],d:e[2],c:false}));
+let custom=[],over={},gone=[],sel=null,editing=false,armed=false,armT;
+try{custom=JSON.parse(localStorage.getItem("jt_c")||"[]");over=JSON.parse(localStorage.getItem("jt_o")||"{}");gone=JSON.parse(localStorage.getItem("jt_g")||"[]")}catch(e){}
+function persist(){try{localStorage.setItem("jt_c",JSON.stringify(custom));localStorage.setItem("jt_o",JSON.stringify(over));localStorage.setItem("jt_g",JSON.stringify(gone))}catch(e){}}
+function all(){return BASE.filter(e=>!gone.includes(e.id)).map(e=>over[e.id]!==undefined?{...e,d:over[e.id]}:e).concat(custom).sort((a,b)=>a.y-b.y)}
+const $=id=>document.getElementById(id),track=$("track");
+const PX=8;
+function render(){
+const a=all();track.innerHTML="";
+if(!a.length){track.innerHTML='<p class="hint" style="text-align:center;min-width:100vw">사건이 없어요. ＋ 사건 추가 또는 ↺ 기본 사건 되살리기를 눌러 주세요.</p>';return}
+const o=Math.floor(a[0].y/10)*10,last=a[a.length-1].y;
+const inn=document.createElement("div");inn.className="in";inn.style.width=((last-o)*PX)+"px";
+for(let y=Math.ceil(o/50)*50;y<=last;y+=50){const t=document.createElement("span");t.className="tk";t.style.left=((y-o)*PX)+"px";t.textContent=y;inn.appendChild(t)}
+a.forEach((e,i)=>{
+const b=document.createElement("div");
+b.className="node "+(i%2?"dn":"up")+(e.id===sel?" on":"")+(e.d?"":" pend");b.dataset.id=e.id;b.style.left=((e.y-o)*PX)+"px";
+b.innerHTML='<span class="dot"></span><span class="lb"><span class="yr"></span><span class="nm"></span></span>';
+b.querySelector(".yr").textContent=e.y+"년";b.querySelector(".nm").textContent=e.t;
+b.onclick=()=>pick(e.id,true);inn.appendChild(b)});
+track.appendChild(inn);
+}
+function center(id){const n=track.querySelector('[data-id="'+id+'"]');if(n)track.scrollTo({left:track.scrollLeft+n.getBoundingClientRect().left-track.getBoundingClientRect().left-track.clientWidth/2+n.offsetWidth/2,behavior:"smooth"})}
+function pick(id,open){sel=id;render();center(id);if(open)show(id)}
+function cur(){return all().find(e=>e.id===sel)}
+function show(id){
+const e=all().find(x=>x.id===id);if(!e)return;editing=false;paint(e);$("ov1").classList.add("show")}
+function paint(e){
+$("dy").textContent=e.y+"년";$("dt").textContent=e.t;
+const ext=$("ext");ext.innerHTML="";
+if(editing){
+$("dd").style.display="none";
+ext.innerHTML='<textarea id="ed"></textarea><div class="row"><button class="b p" id="sv">저장</button></div>';
+$("ed").value=e.d;$("sv").onclick=()=>{setDesc(e,$("ed").value.trim());editing=false;paint(cur())};
+}else if(e.d){$("dd").style.display="";$("dd").textContent=e.d}
+else{
+$("dd").style.display="";$("dd").textContent="아직 설명이 없어요. 직접 써 넣거나, 아래 버튼으로 Claude에게 조사를 부탁해 보세요.";
+const q="연표에 추가한 '"+e.y+"년 "+e.t+"' 사건을 조사해서, 초등학생도 이해할 수 있게 4~5문장으로 쉽게 설명해 줘.";
+ext.innerHTML='<div class="row"><button class="b" id="cp">📋 Claude에게 보낼 요청 복사</button></div><p class="hint">복사한 요청을 Claude 채팅에 붙여 넣으세요. 받은 설명은 ‘내용 쓰기·수정’에 붙여 넣으면 돼요.</p>';
+$("cp").onclick=async()=>{try{await navigator.clipboard.writeText(q);$("cp").textContent="✅ 복사됨!"}catch(x){$("cp").textContent="복사 실패 — 아래 문장을 직접 복사하세요";$("ext").insertAdjacentHTML("beforeend",'<textarea readonly id="qq"></textarea>');$("qq").value=q;$("qq").select()}};
+}
+armed=false;clearTimeout(armT);$("del").textContent="🗑 삭제";$("edit").style.display=editing?"none":"";
+}
+function setDesc(e,v){if(e.c){const c=custom.find(x=>x.id===e.id);if(c)c.d=v}else over[e.id]=v;persist();render();center(e.id)}
+$("edit").onclick=()=>{editing=true;paint(cur())};
+$("del").onclick=()=>{const e=cur();if(!e)return;
+if(!armed){armed=true;$("del").textContent="정말 삭제? 한 번 더 누르세요";armT=setTimeout(()=>{armed=false;$("del").textContent="🗑 삭제"},4000);return}
+if(e.c)custom=custom.filter(x=>x.id!==e.id);else if(!gone.includes(e.id))gone.push(e.id);
+sel=null;armed=false;persist();render();$("ov1").classList.remove("show")};
+$("cls").onclick=()=>$("ov1").classList.remove("show");
+function step(n){const a=all();if(!a.length)return;let i=a.findIndex(e=>e.id===sel);i=i<0?(n>0?0:a.length-1):Math.max(0,Math.min(a.length-1,i+n));pick(a[i].id,false)}
+$("prev").onclick=()=>step(-1);$("rst").onclick=()=>{gone=[];persist();render();const a=all();if(a.length)center(a[0].id)};$("next").onclick=()=>step(1);
+$("add").onclick=()=>{$("fe").textContent="";$("fy").value="";$("fn").value="";$("fc").value="";$("ov2").classList.add("show");$("fy").focus()};
+$("cancel").onclick=()=>$("ov2").classList.remove("show");
+$("save").onclick=()=>{
+const y=parseInt($("fy").value,10),t=$("fn").value.trim();
+if(isNaN(y)||!t){$("fe").textContent="연도와 사건 이름을 입력해 주세요.";return}
+const e={id:"c"+Date.now(),y,t,d:$("fc").value.trim(),c:true};
+custom.push(e);persist();$("ov2").classList.remove("show");pick(e.id,true)};
+document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",ev=>{if(ev.target===o)o.classList.remove("show")}));
+document.addEventListener("keydown",ev=>{
+if(ev.key==="Escape")document.querySelectorAll(".ov").forEach(o=>o.classList.remove("show"));
+if(!document.querySelector(".ov.show")){if(ev.key==="ArrowRight")step(1);if(ev.key==="ArrowLeft")step(-1)}});
+render();setTimeout(()=>{const a=all();if(a.length)center(a[0].id)},50);
+</script>
+</body>
+</html>

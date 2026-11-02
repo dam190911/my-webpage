@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>도형 돌리고 뒤집기</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#1d2433;--muted:#7a8397;--line:#d5d9e4;--accent:#3b6df0;--fillA:#cfe0ff;--fillT:#eceef4;--ok:#1c9a5b;--bad:#d6453d;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141822;--card:#1e2432;--text:#eef1f8;--muted:#9099ae;--line:#3a4256;--accent:#7ea2ff;--fillA:#2b4175;--fillT:#272d3d;--ok:#4cd08a;--bad:#ff7a72;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141822;--card:#1e2432;--text:#eef1f8;--muted:#9099ae;--line:#3a4256;--accent:#7ea2ff;--fillA:#2b4175;--fillT:#272d3d;--ok:#4cd08a;--bad:#ff7a72;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans KR","Malgun Gothic",sans-serif;min-height:100%}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:4px 0 12px;text-align:center}
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0;align-items:center}
+button,select{font:inherit;color:var(--text);background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer;min-height:44px}
+button:hover{border-color:var(--accent)}
+button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+button.big{font-size:1rem;font-weight:600}
+.stage{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+figure{margin:0;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:8px;flex:1 1 260px;max-width:340px;text-align:center}
+figcaption{font-weight:600;color:var(--muted);padding:2px 0 4px}
+svg{width:100%;height:auto;display:block}
+.ax{stroke:var(--line);stroke-width:1;stroke-dasharray:4 4}
+.bd{fill:none;stroke:var(--line);stroke-width:1.5}
+.me{fill:var(--fillA);stroke:var(--accent);stroke-width:3;stroke-linejoin:round}
+.tg{fill:var(--fillT);stroke:var(--muted);stroke-width:3;stroke-dasharray:7 5;stroke-linejoin:round}
+text.f{font-size:44px;font-weight:800;fill:var(--text);text-anchor:middle;dominant-baseline:central;font-family:Georgia,serif}
+#status{text-align:center;font-size:1.05rem;min-height:1.6em;margin:6px 0;font-weight:600}
+#msg{text-align:center;min-height:1.6em;font-weight:700}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.hint{color:var(--muted);font-size:.9rem;text-align:center}
+.vx{fill:#ff8a1f;stroke:#fff;stroke-width:2}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+#pad{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:10px;max-width:340px;margin:10px auto;text-align:center}
+#pad svg{cursor:crosshair;touch-action:none}
+.gd{stroke:var(--line);stroke-width:.5}
+.pl{fill:var(--fillA);fill-opacity:.6;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round}
+.pt{fill:var(--accent)}
+.sw{width:32px;height:32px;min-height:32px;padding:0;border-radius:50%}
+#cl{width:44px;height:36px;padding:2px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);cursor:pointer}
+.shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>도형 돌리고 뒤집기</h1>
+<div class="row"><button id="tP" class="on big">연습 모드</button><button id="tQ" class="big">퀴즈 모드</button></div>
+<div class="row" id="shapes"></div>
+<div class="row" id="mg"><button id="bEd">✏️ 이 도형 수정</button><button id="bDl">🗑 이 도형 삭제</button><span class="hint">색</span><span class="row" id="sws" style="margin:0"></span><input type="color" id="cl" aria-label="도형 색 고르기"><button id="bCl">기본색</button></div>
+<div id="pad" hidden><div class="hint">칸의 교점을 눌러 꼭짓점을 순서대로 찍어요 (3개 이상). 주황색 점이 표시되는 첫 번째 꼭짓점이에요. 점을 끌면 위치를 바꿀 수 있어요.</div><svg id="pd" viewBox="-110 -110 220 220"></svg><div id="pdMsg" class="hint"></div><div class="row"><button id="pdUn">되돌리기</button><button id="pdOk" class="on">도형 추가</button><button id="pdX">닫기</button></div></div>
+<div class="stage">
+  <figure id="fT" hidden><svg id="sT" viewBox="-110 -110 220 220"></svg><figcaption>목표 모양</figcaption></figure>
+  <figure><svg id="sM" viewBox="-110 -110 220 220"></svg><figcaption id="capM">내 도형</figcaption></figure>
+</div>
+<div id="status"></div>
+<div class="row">
+  <button class="big" id="bCCW">↺ 반시계 회전</button>
+  <button class="big" id="bCW">↻ 시계 회전</button>
+  <button class="big" id="bFX">⇋ 좌우 뒤집기</button>
+  <button class="big" id="bFY">⇅ 상하 뒤집기</button>
+  <button id="bRS">처음으로</button>
+</div>
+<div class="row" id="pr"><span class="hint">회전 단위</span><button data-s="45">45°</button><button data-s="90" class="on">90°</button></div>
+<div id="qz" hidden>
+  <div class="row"><span class="hint">난이도</span><button data-l="0" class="on">하 (회전)</button><button data-l="1">중 (뒤집기)</button><button data-l="2">상 (회전+뒤집기)</button></div>
+  <div class="row"><button class="big on" id="bCK">정답 확인</button><button id="bNX" hidden>다음 문제 ▶</button></div>
+  <div id="msg"></div>
+  <p class="hint" id="score"></p>
+</div>
+<p class="hint">도형 안의 글자 F가 방향을 알려줘요. 점선은 뒤집기의 기준선이에요.</p>
+</main>
+<canvas id="fx"></canvas>
+<script>
+const $=id=>document.getElementById(id);
+const reg=(n,r,s)=>Array.from({length:n},(_,i)=>{const a=(s+360*i/n)*Math.PI/180;return[r*Math.cos(a),r*Math.sin(a)]});
+const SH={'직각삼각형':[[-60,-50],[-60,50],[60,50]],'정삼각형':reg(3,78,-90),'정사각형':reg(4,72,-135),'직사각형':[[-75,-45],[75,-45],[75,45],[-75,45]],'오각형':reg(5,78,-90),'육각형':reg(6,76,0)};
+const I=[1,0,0,1],FX=[-1,0,0,1],FY=[1,0,0,-1];
+const rot=t=>{const r=t*Math.PI/180,c=Math.cos(r),s=Math.sin(r);return[c,s,-s,c]};
+const mul=(P,M)=>[P[0]*M[0]+P[2]*M[1],P[1]*M[0]+P[3]*M[1],P[0]*M[2]+P[2]*M[3],P[1]*M[2]+P[3]*M[3]];
+const css=M=>`matrix(${M.join(' ')} 0 0)`;
+const same=(A,B)=>A.every((v,i)=>Math.abs(v-B[i])<.01);
+let shape='직角삼각형',M=I,T=I,mode='P',step=90,lvl=0,q=0,score=0,tries=0,busy=false,done=false;
+shape='직각삼각형';
+function build(svg,cls){svg.innerHTML='<rect class="bd" x="-105" y="-105" width="210" height="210" rx="8"/><line class="ax" x1="-105" y1="0" x2="105" y2="0"/><line class="ax" x1="0" y1="-105" x2="0" y2="105"/><g><polygon class="'+cls+'"/><text class="f">F</text><circle class="vx" r="7"/></g>'}
+build($('sM'),'me');build($('sT'),'tg');
+function setShape(n){shape=n;const p=SH[n],cx=p.reduce((s,a)=>s+a[0],0)/p.length,cy=p.reduce((s,a)=>s+a[1],0)/p.length;
+ for(const id of['sM','sT']){const s=$(id);s.querySelector('polygon').setAttribute('points',p.map(a=>a.join(',')).join(' '));const t=s.querySelector('text');t.setAttribute('x',cx);t.setAttribute('y',cy);const v=s.querySelector('circle');v.setAttribute('cx',p[0][0]);v.setAttribute('cy',p[0][1])}
+ applyCol();
+ document.querySelectorAll('#shapes button').forEach(b=>b.classList.toggle('on',b.dataset.n===n))}
+for(const n in SH){const b=document.createElement('button');b.textContent=n;b.dataset.n=n;b.onclick=()=>{setShape(n);reset()};$('shapes').appendChild(b)}
+// 도형 중심(centroid)을 회전 중심으로 쓰기 위해 도형 좌표를 중심 기준으로 이동
+for(const n in SH){const p=SH[n],cx=p.reduce((s,a)=>s+a[0],0)/p.length,cy=p.reduce((s,a)=>s+a[1],0)/p.length;SH[n]=p.map(a=>[+(a[0]-cx).toFixed(2),+(a[1]-cy).toFixed(2)])}
+function draw(svg,m){svg.querySelector('g').setAttribute('transform',css(m))}
+function describe(m){const det=m[0]*m[3]-m[1]*m[2];const n=a=>Math.round(((a*180/Math.PI)%360+360)%360)%360;
+ if(det>0){const t=n(Math.atan2(m[1],m[0]));return t?`시계 방향 ${t}° 회전한 상태`:'처음 모양 그대로'}
+ const t=n(Math.atan2(-m[1],-m[0]));if(t===0)return'좌우로 뒤집힌 상태';if(t===180)return'상하로 뒤집힌 상태';return`좌우로 뒤집은 뒤 시계 방향 ${t}° 회전한 상태`}
+function render(){draw($('sM'),M);if(mode==='P')$('status').textContent='현재: '+describe(M)}
+function op(P,kind,deg){if(busy||(mode==='Q'&&done))return;busy=true;if(mode==='Q')tries++;const old=M,t0=performance.now(),D=320;
+ (function f(now){const k=Math.min(1,(now-t0)/D);const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+  const pre=kind==='r'?rot(deg*e):kind==='x'?[1-2*e,0,0,1]:[1,0,0,1-2*e];
+  draw($('sM'),mul(pre,old));
+  if(k<1)requestAnimationFrame(f);else{M=mul(P,old);busy=false;render()}})(t0)}
+$('bCW').onclick=()=>op(rot(step),'r',step);
+$('bCCW').onclick=()=>op(rot(-step),'r',-step);
+$('bFX').onclick=()=>op(FX,'x');
+$('bFY').onclick=()=>op(FY,'y');
+function reset(){if(mode==='P'){M=I;render()}else{newQ(false)}}
+$('bRS').onclick=()=>{if(mode==='Q'&&done)return;M=I;render()};
+document.querySelectorAll('#pr button').forEach(b=>b.onclick=()=>{step=+b.dataset.s;document.querySelectorAll('#pr button').forEach(x=>x.classList.toggle('on',x===b))});
+document.querySelectorAll('#qz [data-l]').forEach(b=>b.onclick=()=>{lvl=+b.dataset.l;document.querySelectorAll('#qz [data-l]').forEach(x=>x.classList.toggle('on',x===b));q=0;score=0;newQ(true)});
+function setMode(m){mode=m;$('tP').classList.toggle('on',m==='P');$('tQ').classList.toggle('on',m==='Q');
+ $('fT').hidden=$('qz').hidden=m==='P';$('shapes').hidden=$('mg').hidden=m==='Q';$('pad').hidden=true;$('pr').hidden=m==='Q';$('capM').textContent=m==='P'?'내 도형':'내 도형 (목표와 똑같이 맞춰요)';
+ if(m==='Q'){step=90;q=0;score=0;newQ(true)}else{M=I;$('msg').textContent='';render()}}
+$('tP').onclick=()=>setMode('P');$('tQ').onclick=()=>setMode('Q');
+function newQ(next){if(next&&q>=5){finish();return}
+ const fl=Math.random()<.5?FX:FY,r=Math.floor(Math.random()*3)+1;const t=lvl===0?rot(90*r):lvl===1?fl:mul(rot(r%2?90*r:270),fl);
+ T=t;M=I;tries=0;done=false;q=next?q+1:q;if(!q)q=1;
+ const names=Object.keys(SH);setShape(names[Math.floor(Math.random()*names.length)]);
+ draw($('sT'),T);draw($('sM'),M);$('msg').textContent='';$('msg').className='';$('bCK').hidden=false;$('bNX').hidden=true;
+ $('status').textContent=`문제 ${q} / 5 — 버튼을 눌러 목표 모양과 똑같이 만들어 보세요`;$('score').textContent=`점수 ${score}점`}
+$('bCK').onclick=()=>{if(busy||done)return;
+ if(same(M,T)){done=true;score++;sfx(1);boom(60);$('msg').textContent=tries<=2?'정답이에요! 아주 잘했어요 🎉':'정답이에요! 🎉';$('msg').className='ok';$('bCK').hidden=true;$('bNX').hidden=false;$('bNX').textContent=q>=5?'결과 보기 ▶':'다음 문제 ▶';$('score').textContent=`점수 ${score}점`}
+ else{sfx(0);shake();$('msg').textContent='아직 달라요. 목표 모양의 F 방향을 다시 살펴보세요.';$('msg').className='bad'}};
+$('bNX').onclick=()=>newQ(true);
+function finish(){done=true;if(score===5){sfx(2);boom(200)}$('bCK').hidden=true;$('bNX').hidden=false;$('bNX').textContent='다시 도전 ↻';$('bNX').onclick=()=>{$('bNX').onclick=()=>newQ(true);q=0;score=0;newQ(true)};
+ $('status').textContent=`퀴즈 끝! 5문제 중 ${score}문제를 맞혔어요`;$('msg').textContent=score===5?'만점이에요! 🏆':'한 번 더 도전해 볼까요?';$('msg').className='ok'}
+let ac;
+function tone(f,t,d,type,v){const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime+t;o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(ac.destination);o.start(n);o.stop(n+d)}
+function sfx(k){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();
+ if(k===0){tone(220,0,.18,'sawtooth',.15);tone(150,.16,.3,'sawtooth',.15)}
+ else(k===2?[523,659,784,1047,1319]:[523,659,784,1047]).forEach((f,i)=>tone(f,i*.1,.25,'triangle',.2))}catch(e){}}
+let P=[],raf=0;
+function boom(n){const c=$('fx'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;const cols=['#ff5c5c','#ffb02e','#ffe14d','#4cd08a','#4da3ff','#b07cff'];
+ for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=4+Math.random()*9;P.push({x:c.width/2,y:c.height*.45,vx:Math.cos(a)*s,vy:Math.sin(a)*s-4,r:3+Math.random()*4,c:cols[i%6],l:80+Math.random()*50,rt:Math.random()*6})}
+ if(raf)return;(function f(){x.clearRect(0,0,c.width,c.height);P=P.filter(p=>p.l>0);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.25;p.vx*=.99;p.l--;p.rt+=.2;x.save();x.translate(p.x,p.y);x.rotate(p.rt);x.globalAlpha=Math.min(1,p.l/30);x.fillStyle=p.c;x.fillRect(-p.r,-p.r/2,p.r*2,p.r);x.restore()});
+ if(P.length)raf=requestAnimationFrame(f);else{raf=0;x.clearRect(0,0,c.width,c.height)}})()}
+function shake(){const e=$('sM').parentElement;e.classList.remove('shake');void e.offsetWidth;e.classList.add('shake')}
+// 내 도형 만들기
+let pts=[],cnt=0,editN=null,drag=-1;const pd=$('pd');
+function padDraw(){let s='';for(let i=-100;i<=100;i+=20)s+=`<line class="gd" x1="${i}" y1="-100" x2="${i}" y2="100"/><line class="gd" x1="-100" y1="${i}" x2="100" y2="${i}"/>`;
+ const L=pts.map(p=>p.join(',')).join(' ');
+ if(pts.length>2)s+=`<polygon class="pl" points="${L}"/>`;else if(pts.length>1)s+=`<polyline class="pl" fill="none" points="${L}"/>`;
+ pts.forEach((p,i)=>s+=`<circle class="pt" cx="${p[0]}" cy="${p[1]}" r="${i?4:6}"${i?'':' style="fill:#ff8a1f"'}/>`);pd.innerHTML=s;$('pdMsg').textContent=`꼭짓점 ${pts.length}개`}
+const pp=e=>{const r=pd.getBoundingClientRect(),c=v=>Math.max(-100,Math.min(100,Math.round(v/20)*20));return[c((e.clientX-r.left)/r.width*220-110),c((e.clientY-r.top)/r.height*220-110)]};
+pd.addEventListener('pointerdown',e=>{const r=pd.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*220-110,y=(e.clientY-r.top)/r.height*220-110;
+ drag=pts.findIndex(a=>Math.hypot(a[0]-x,a[1]-y)<10);
+ if(drag>=0){pd.setPointerCapture(e.pointerId);return}
+ const p=pp(e),l=pts[pts.length-1];if(!l||l[0]!==p[0]||l[1]!==p[1]){pts.push(p);padDraw()}});
+pd.addEventListener('pointermove',e=>{if(drag<0)return;const p=pp(e);if(pts[drag][0]!==p[0]||pts[drag][1]!==p[1]){pts[drag]=p;padDraw()}});
+pd.addEventListener('pointerup',()=>{drag=-1});
+$('pdUn').onclick=()=>{pts.pop();padDraw()};
+$('pdX').onclick=()=>{editN=null;$('pdOk').textContent='도형 추가';$('pad').hidden=true};
+function addBtn(n){const b=document.createElement('button');b.textContent=n;b.dataset.n=n;b.onclick=()=>{setShape(n);reset()};$('shapes').insertBefore(b,$('bAdd'))}
+$('pdOk').onclick=()=>{if(pts.length<3){$('pdMsg').textContent='꼭짓점을 3개 이상 찍어 주세요';return}
+ const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),mx=(Math.min(...xs)+Math.max(...xs))/2,my=(Math.min(...ys)+Math.max(...ys))/2;
+ let q2=pts.map(p=>[p[0]-mx,p[1]-my]);const R=Math.max(...q2.map(p=>Math.hypot(p[0],p[1])));if(R>90)q2=q2.map(p=>[+(p[0]*90/R).toFixed(2),+(p[1]*90/R).toFixed(2)]);
+ if(editN){SH[editN]=q2;setShape(editN);reset()}else{const n='내 도형 '+(++cnt);SH[n]=q2;addBtn(n);setShape(n);reset()}editN=null;$('pdOk').textContent='도형 추가';$('pad').hidden=true};
+const ba=document.createElement('button');ba.id='bAdd';ba.textContent='＋ 내 도형 만들기';ba.onclick=()=>{editN=null;$('pdOk').textContent='도형 추가';pts=[];padDraw();$('pad').hidden=!$('pad').hidden};$('shapes').appendChild(ba);
+// 도형 색 / 수정 / 삭제
+const COL={};
+function applyCol(){const c=COL[shape],g=$('sM').querySelector('polygon');g.style.fill=c||'';g.style.fillOpacity=c?'.45':'';g.style.stroke=c||'';$('cl').value=c||'#3b6df0'}
+['#ef4444','#f59e0b','#22c55e','#3b82f6','#a855f7','#ec4899'].forEach(c=>{const b=document.createElement('button');b.className='sw';b.style.background=c;b.setAttribute('aria-label','색 '+c);b.onclick=()=>{COL[shape]=c;applyCol()};$('sws').appendChild(b)});
+$('cl').oninput=e=>{COL[shape]=e.target.value;applyCol()};
+$('bCl').onclick=()=>{delete COL[shape];applyCol()};
+$('bEd').onclick=()=>{editN=shape;pts=SH[shape].map(a=>a.slice());$('pdOk').textContent='수정 완료';$('pad').hidden=false;padDraw()};
+let dt=0;
+$('bDl').onclick=()=>{const b=$('bDl');if(!dt){b.textContent='한 번 더 누르면 삭제';dt=setTimeout(()=>{dt=0;b.textContent='🗑 이 도형 삭제'},2500);return}
+ clearTimeout(dt);dt=0;b.textContent='🗑 이 도형 삭제';
+ if(Object.keys(SH).length<=1){$('status').textContent='도형이 하나는 남아 있어야 해요';return}
+ const n=shape;delete SH[n];delete COL[n];document.querySelector('#shapes button[data-n="'+n+'"]').remove();M=I;setShape(Object.keys(SH)[0]);render()};
+setShape(shape);render();
+</script>
+</body>
+</html>

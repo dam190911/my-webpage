@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학생 역량 지표 시각화</title>
+<style>
+:root{--blue:#3478d4;--red:#e45b63;--ink:#243247;--muted:#718096;--line:#e5eaf1;--bg:#f5f7fb;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif}
+header{background:linear-gradient(120deg,#244d83,#397bc1);color:#fff;padding:28px 20px}
+.header-inner,main{max-width:1180px;margin:auto}
+header h1{margin:0 0 8px;font-size:clamp(23px,4vw,32px)}
+header p{margin:0;color:#e4efff;font-size:14px}
+main{padding:24px 18px 48px}
+.layout{display:grid;grid-template-columns:minmax(340px,.98fr) minmax(360px,1.15fr);gap:20px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 5px 20px #24324708;min-width:0}
+.card h2{font-size:18px;margin:0 0 5px}
+.sub{font-size:13px;color:var(--muted);margin:0 0 16px}
+.student-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-bottom:12px}
+select,input{font:inherit}
+select{min-width:0;width:100%;border:1px solid #dce3ed;border-radius:9px;padding:10px;background:#fff;color:var(--ink)}
+button{border:0;border-radius:9px;padding:10px 13px;font-weight:650;cursor:pointer;font-size:13px;transition:.15s}
+button:hover{filter:brightness(.96);transform:translateY(-1px)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #9dc3f5;outline-offset:1px}
+.primary{background:#e9f1ff;color:#245da8}.dark{background:#294f7d;color:white}.ghost{background:#f0f3f7;color:#526176}.danger{background:#fff0f0;color:#bd444b}
+.student-actions,.toolbar,.actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.student-add{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-bottom:18px}
+.student-add input,.add-row input{min-width:0;border:1px solid #dce3ed;border-radius:9px;padding:10px 12px}
+.section-line{border:0;border-top:1px solid var(--line);margin:17px 0}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:#65748a;font-weight:650;background:#f7f9fc}
+th,td{padding:9px 7px;border-bottom:1px solid var(--line)}
+th:not(:first-child),td:not(:first-child){text-align:center}
+td input{width:100%;min-width:0;border:1px solid #dce3ed;border-radius:7px;padding:8px 6px;font:inherit;color:var(--ink);background:#fff}
+td .score{max-width:76px;text-align:center}td .name{min-width:80px}
+.delete{padding:7px 9px}
+.add-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:14px}
+.hint,.notice{font-size:12px;color:var(--muted);margin:10px 0 0;line-height:1.55}
+.legend{display:flex;gap:18px;align-items:center;justify-content:center;font-size:13px;margin:10px 0 4px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.chart-wrap{width:100%;max-width:660px;margin:0 auto}
+canvas{display:block;width:100%;height:auto;touch-action:manipulation;cursor:crosshair}
+.detail{background:#f3f7fd;border:1px solid #dce8f8;border-radius:11px;padding:12px 14px;margin-top:8px;font-size:13px;line-height:1.65;min-height:54px}
+.detail strong{color:#243247}
+.summary{background:#f7f9fc;border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px;font-size:14px;line-height:1.7;white-space:pre-line}
+.actions{margin:14px 0 0}
+.empty{color:var(--muted);font-size:13px;padding:15px 4px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.card{padding:16px}}
+@media(max-width:440px){main{padding:15px 10px 32px}.card{padding:13px}.student-tools{grid-template-columns:1fr}.student-actions button{flex:1}.student-add{grid-template-columns:1fr auto}th,td{padding:7px 4px}td input{padding:7px 3px;font-size:12px}.delete{padding:6px}}
+</style>
+</head>
+<body>
+<header><div class="header-inner">
+<h1>학생 역량 지표 시각화</h1>
+<p>학생별 사전·사후 평가를 레이더 차트로 비교하고, 평가 지표를 목적에 맞게 구성해 보세요.</p>
+</div></header>
+<main>
+<div class="layout">
+<section class="card">
+<h2>학생 목록</h2>
+<p class="sub">학생을 추가하고 선택하면 해당 학생의 평가 데이터가 표시됩니다.</p>
+<div class="student-tools">
+<select id="studentSelect" aria-label="평가할 학생 선택"></select>
+<button class="ghost" id="renameStudent" type="button">이름 수정</button>
+</div>
+<div class="student-actions">
+<button class="danger" id="deleteStudent" type="button">선택 학생 삭제</button>
+</div>
+<div class="student-add">
+<input id="newStudent" type="text" maxlength="30" placeholder="새 학생 이름 (예: 학생 2)">
+<button class="dark" id="addStudent" type="button">+ 학생 추가</button>
+</div>
+<hr class="section-line">
+<h2>평가 지표 및 점수 입력</h2>
+<p class="sub">현재 선택한 학생의 점수입니다. 점수 범위는 0~100점입니다.</p>
+<div class="toolbar">
+<button class="primary" id="sampleBtn" type="button">현재 학생 예시 점수 불러오기</button>
+<button class="ghost" id="clearScoresBtn" type="button">점수 초기화</button>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th style="width:39%">평가 영역</th><th>사전</th><th>사후</th><th style="width:48px">삭제</th></tr></thead>
+<tbody id="rows"></tbody>
+</table>
+<div id="emptyMetrics" class="empty" hidden>등록된 평가 지표가 없습니다. 아래에서 지표를 추가해 주세요.</div>
+</div>
+<div class="add-row">
+<input id="newMetric" type="text" maxlength="18" placeholder="새 평가 지표 이름 (예: 문제해결력)">
+<button class="dark" id="addMetric" type="button">+ 지표 추가</button>
+</div>
+<p class="hint">평가 지표 이름을 수정하거나 추가·삭제할 수 있습니다. 변경 사항은 현재 선택한 학생에게만 적용됩니다.</p>
+</section>
+<section class="card">
+<h2>사전·사후 역량 비교</h2>
+<p class="sub" id="chartStudentName">선택한 학생의 평가 결과입니다.</p>
+<div class="legend">
+<span><i class="dot" style="background:var(--blue)"></i>사전 평가</span>
+<span><i class="dot" style="background:var(--red)"></i>사후 평가</span>
+</div>
+<div class="chart-wrap"><canvas id="radar" width="680" height="590" aria-label="사전 사후 평가 레이더 차트"></canvas></div>
+<div class="detail" id="pointDetail" aria-live="polite">차트의 꼭짓점에 해당하는 점을 누르면 해당 영역의 정확한 사전·사후 점수를 확인할 수 있습니다.</div>
+<div class="summary" id="summary" aria-live="polite"></div>
+<div class="actions">
+<button class="dark" id="downloadBtn" type="button">차트 이미지 저장 (PNG)</button>
+<button class="primary" id="copyBtn" type="button">분석 요약 복사</button>
+</div>
+<p class="notice">학생별 데이터는 이 브라우저에 자동 저장됩니다. 같은 브라우저에서 다시 열면 이전 작업을 이어갈 수 있습니다.</p>
+</section>
+</div>
+</main>
+<script>
+const starterMetrics=[
+  {name:"의사소통",before:55,after:78},{name:"협업",before:62,after:82},
+  {name:"문제해결",before:48,after:72},{name:"창의성",before:70,after:80},
+  {name:"자기주도",before:58,after:85},{name:"정보활용",before:64,after:76}
+];
+const demoScores=[55,62,48,70,58,64];
+let students=[
+  {id:makeId(),name:"학생 1",metrics:starterMetrics.map(m=>({...m}))}
+];
+let currentId=students[0].id;
+let hitPoints=[];
+const rows=document.getElementById('rows'),canvas=document.getElementById('radar'),ctx=canvas.getContext('2d');
+const blue='#3478d4',red='#e45b63',grid='#dce3ed';
+function makeId(){return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function currentStudent(){return students.find(s=>s.id===currentId)||students[0]}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function score(v){return Math.max(0,Math.min(100,Number(v)||0))}
+function save(){try{localStorage.setItem('studentCompetencyRadar_v2',JSON.stringify({students,currentId}))}catch(e){}}
+function load(){
+ try{const saved=JSON.parse(localStorage.getItem('studentCompetencyRadar_v2'));
+  if(saved&&Array.isArray(saved.students)&&saved.students.length){students=saved.students;currentId=saved.currentId||students[0].id;
+   students.forEach(s=>{if(!Array.isArray(s.metrics))s.metrics=[];s.metrics.forEach(m=>{m.before=score(m.before);m.after=score(m.after)})});
+   if(!currentStudent())currentId=students[0].id;
+  }
+ }catch(e){}
+}
+function renderStudentSelect(){
+ const select=document.getElementById('studentSelect');select.innerHTML='';
+ students.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;select.appendChild(o)});
+ select.value=currentId;
+ document.getElementById('chartStudentName').textContent=currentStudent().name+'의 평가 결과입니다.';
+}
+function renderRows(){
+ const metrics=currentStudent().metrics;rows.innerHTML='';
+ document.getElementById('emptyMetrics').hidden=metrics.length!==0;
+ metrics.forEach((m,i)=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input class="name" aria-label="평가 영역 ${i+1}" maxlength="18" value="${escapeHtml(m.name)}"></td>
+  <td><input class="score" aria-label="${escapeHtml(m.name)} 사전 점수" type="number" min="0" max="100" step="1" value="${m.before}"></td>
+  <td><input class="score" aria-label="${escapeHtml(m.name)} 사후 점수" type="number" min="0" max="100" step="1" value="${m.after}"></td>
+  <td><button class="danger delete" type="button" aria-label="${escapeHtml(m.name)} 삭제">×</button></td>`;
+  const inputs=tr.querySelectorAll('input');
+  inputs[0].addEventListener('input',e=>{metrics[i].name=e.target.value;update()});
+  inputs[1].addEventListener('input',e=>{metrics[i].before=score(e.target.value);update()});
+  inputs[2].addEventListener('input',e=>{metrics[i].after=score(e.target.value);update()});
+  inputs[1].addEventListener('change',e=>e.target.value=metrics[i].before);
+  inputs[2].addEventListener('change',e=>e.target.value=metrics[i].after);
+  tr.querySelector('button').addEventListener('click',()=>{metrics.splice(i,1);renderRows();update()});
+  rows.appendChild(tr);
+ });
+}
+function drawChart(){
+ const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);hitPoints=[];
+ const metrics=currentStudent().metrics;
+ if(metrics.length<3){ctx.fillStyle='#526176';ctx.font='18px sans-serif';ctx.textAlign='center';ctx.fillText('레이더 차트를 표시하려면 지표를 3개 이상 추가하세요.',w/2,h/2);return}
+ const cx=w/2,cy=h/2+8,r=Math.min(w*.34,h*.34),n=metrics.length;
+ const angle=i=>-Math.PI/2+i*2*Math.PI/n;
+ ctx.lineWidth=1;ctx.strokeStyle=grid;
+ for(let level=20;level<=100;level+=20){
+  ctx.beginPath();for(let i=0;i<n;i++){const a=angle(i),rr=r*level/100,x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}
+  ctx.closePath();ctx.stroke();ctx.fillStyle='#8794a6';ctx.font='12px sans-serif';ctx.textAlign='left';ctx.fillText(String(level),cx+5,cy-r*level/100-4);
+ }
+ for(let i=0;i<n;i++){const a=angle(i);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);ctx.stroke()}
+ function polygon(key,color,fill){
+  ctx.beginPath();metrics.forEach((m,i)=>{const a=angle(i),rr=r*score(m[key])/100,x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.closePath();
+  ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=color;ctx.lineWidth=3;ctx.stroke();
+  metrics.forEach((m,i)=>{const a=angle(i),rr=r*score(m[key])/100,x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;
+   ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+   hitPoints.push({x,y,index:i,series:key,radius:13});
+  });
+ }
+ polygon('before',blue,'rgba(52,120,212,.12)');polygon('after',red,'rgba(228,91,99,.12)');
+ ctx.font='bold 14px sans-serif';ctx.fillStyle='#34445b';
+ metrics.forEach((m,i)=>{const a=angle(i),x=cx+Math.cos(a)*(r+37),y=cy+Math.sin(a)*(r+37);
+  ctx.textAlign=Math.cos(a)>.25?'left':Math.cos(a)<-.25?'right':'center';ctx.textBaseline=Math.sin(a)>.45?'top':Math.sin(a)<-.45?'bottom':'middle';
+  const label=(m.name||`지표 ${i+1}`).trim();ctx.fillText(label.length>11?label.slice(0,10)+'…':label,x,y);
+  ctx.font='12px sans-serif';ctx.fillStyle='#718096';ctx.fillText(`${m.before} / ${m.after}`,x,y+(Math.sin(a)>=-.2?17:-17));ctx.font='bold 14px sans-serif';ctx.fillStyle='#34445b';
+ });
+}
+function makeSummary(){
+ const metrics=currentStudent().metrics;
+ if(!metrics.length)return {html:'평가 지표가 없습니다. 왼쪽에서 새로운 지표를 추가해 주세요.',text:'평가 지표가 없습니다. 왼쪽에서 새로운 지표를 추가해 주세요.'};
+ const avgB=metrics.reduce((s,m)=>s+score(m.before),0)/metrics.length,avgA=metrics.reduce((s,m)=>s+score(m.after),0)/metrics.length,diff=avgA-avgB;
+ const list=metrics.map(m=>({...m,diff:score(m.after)-score(m.before)})),up=list.filter(m=>m.diff>0),same=list.filter(m=>m.diff===0),down=list.filter(m=>m.diff<0);
+ const signed=n=>`${n>0?'+':''}${n.toFixed(1)}`;
+ const studentName=escapeHtml(currentStudent().name);
+ const plainLines=list.map(m=>`${m.name||'이름 없는 지표'}: ${m.before}점 → ${m.after}점 (${m.diff>0?'+':''}${m.diff}점)`);
+ const htmlLines=list.map(m=>`<div>${escapeHtml(m.name||'이름 없는 지표')}: ${m.before}점 → ${m.after}점 (<span style="color:#d9434b;font-weight:750">${m.diff>0?'+':''}${m.diff}점</span>)</div>`);
+ let text=`[${currentStudent().name} 평가 결과]\n사전 평균: ${avgB.toFixed(1)}점 → 사후 평균: ${avgA.toFixed(1)}점\n평균 변화: ${signed(diff)}점\n\n[영역별 변화]\n${plainLines.join('\n')}`;
+ let html=`<strong>[${studentName} 평가 결과]</strong><br>사전 평균: ${avgB.toFixed(1)}점 → 사후 평균: ${avgA.toFixed(1)}점<br>평균 변화: ${signed(diff)}점<br><br><strong>[영역별 변화]</strong><br>${htmlLines.join('')}`;
+ let summaryText=`[요약]\n상승 ${up.length}개 · 동일 ${same.length}개 · 하락 ${down.length}개`;
+ let summaryHtml=`<br><br><strong>[요약]</strong><br>상승 ${up.length}개 · 동일 ${same.length}개 · 하락 ${down.length}개`;
+ if(up.length){const best=[...up].sort((a,b)=>b.diff-a.diff)[0];summaryText+=`\n가장 크게 향상된 영역: ${best.name} (${signed(best.diff)}점)`;summaryHtml+=`<br>가장 크게 향상된 영역: ${escapeHtml(best.name)} (${signed(best.diff)}점)`}
+ if(down.length){const downText=down.sort((a,b)=>a.diff-b.diff).map(m=>`${m.name} (${m.diff}점)`).join(', ');summaryText+=`\n점검이 필요한 영역: ${downText}`;summaryHtml+=`<br>점검이 필요한 영역: ${escapeHtml(downText)}`}
+ else{summaryText+='\n점수가 하락한 영역은 없습니다.';summaryHtml+='<br>점수가 하락한 영역은 없습니다.'}
+ return {html:html+summaryHtml,text:text+'\n\n'+summaryText};
+}
+function update(){drawChart();const summary=makeSummary();document.getElementById('summary').innerHTML=summary.html;save()}
+function switchStudent(){renderStudentSelect();renderRows();update();document.getElementById('pointDetail').textContent='차트의 꼭짓점에 해당하는 점을 누르면 해당 영역의 정확한 사전·사후 점수를 확인할 수 있습니다.'}
+document.getElementById('studentSelect').addEventListener('change',e=>{currentId=e.target.value;switchStudent()});
+document.getElementById('addStudent').addEventListener('click',()=>{
+ const input=document.getElementById('newStudent'),name=input.value.trim();if(!name){input.focus();return}
+ if(students.some(s=>s.name.toLowerCase()===name.toLowerCase())){alert('이미 존재하는 학생 이름입니다.');return}
+ const template=currentStudent().metrics.map(m=>({name:m.name,before:0,after:0}));
+ const s={id:makeId(),name,metrics:template};students.push(s);currentId=s.id;input.value='';switchStudent();
+});
+document.getElementById('newStudent').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('addStudent').click()});
+document.getElementById('renameStudent').addEventListener('click',()=>{
+ const s=currentStudent(),name=prompt('변경할 학생 이름을 입력하세요.',s.name);if(name===null)return;
+ const clean=name.trim();if(!clean){alert('학생 이름을 입력해 주세요.');return}
+ if(students.some(x=>x.id!==s.id&&x.name.toLowerCase()===clean.toLowerCase())){alert('이미 존재하는 학생 이름입니다.');return}
+ s.name=clean;switchStudent();
+});
+document.getElementById('deleteStudent').addEventListener('click',()=>{
+ if(students.length===1){alert('학생 목록에는 최소 한 명이 필요합니다.');return}
+ if(!confirm(`${currentStudent().name}의 평가 데이터를 삭제할까요?`))return;
+ students=students.filter(s=>s.id!==currentId);currentId=students[0].id;switchStudent();
+});
+document.getElementById('addMetric').addEventListener('click',()=>{
+ const input=document.getElementById('newMetric'),name=input.value.trim(),metrics=currentStudent().metrics;
+ if(!name){input.focus();return}if(metrics.some(m=>m.name.trim().toLowerCase()===name.toLowerCase())){alert('이미 존재하는 지표 이름입니다.');return}
+ metrics.push({name,before:0,after:0});input.value='';renderRows();update();
+});
+document.getElementById('newMetric').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('addMetric').click()});
+document.getElementById('sampleBtn').addEventListener('click',()=>{
+ const s=currentStudent();s.metrics=starterMetrics.map(m=>({...m}));renderRows();update();
+});
+document.getElementById('clearScoresBtn').addEventListener('click',()=>{
+ if(!confirm('현재 학생의 모든 사전·사후 점수를 0점으로 초기화할까요?'))return;
+ currentStudent().metrics.forEach(m=>{m.before=0;m.after=0});renderRows();update();
+});
+canvas.addEventListener('click',e=>{
+ const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*canvas.width/rect.width,y=(e.clientY-rect.top)*canvas.height/rect.height;
+ let nearest=null,min=Infinity;hitPoints.forEach(p=>{const d=Math.hypot(x-p.x,y-p.y);if(d<min){min=d;nearest=p}});
+ if(nearest&&min<=22){
+  const m=currentStudent().metrics[nearest.index],delta=m.after-m.before;
+  document.getElementById('pointDetail').innerHTML=`<strong>${escapeHtml(m.name||'이름 없는 지표')}</strong><br><span style="color:${blue}">● 사전 평가: ${m.before}점</span>　<span style="color:${red}">● 사후 평가: ${m.after}점</span><br>점수 변화: <strong>${delta>0?'+':''}${delta}점</strong> <span style="color:#718096">(${nearest.series==='before'?'사전':'사후'} 평가 꼭짓점 선택)</span>`;
+ }else{
+  document.getElementById('pointDetail').textContent='점에 가까운 꼭짓점을 눌러 주세요. 꼭짓점이 겹치면 해당 위치에서 더 가까운 점의 수치가 표시됩니다.';
+ }
+});
+document.getElementById('downloadBtn').addEventListener('click',()=>{
+ if(currentStudent().metrics.length<3){alert('차트 이미지를 저장하려면 지표를 3개 이상 입력해 주세요.');return}
+ const link=document.createElement('a');link.download=`${currentStudent().name}_역량_사전사후_비교.png`;link.href=canvas.toDataURL('image/png');link.click();
+});
+document.getElementById('copyBtn').addEventListener('click',async()=>{
+ const text=makeSummary().text;try{await navigator.clipboard.writeText(text);alert('분석 요약을 복사했습니다.')}
+ catch(e){const a=document.createElement('textarea');a.value=text;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();alert('분석 요약을 복사했습니다.')}
+});
+load();renderStudentSelect();renderRows();update();
+</script>
+</body></html>
