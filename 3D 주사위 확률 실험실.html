@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>3D 주사위 확률 실험실</title>
+<style>
+:root{--bg:#f3f5fa;--card:#fff;--tx:#1d2233;--mu:#6a7085;--ac:#4f6df5;--ac2:#f08a24;--bd:#dfe3ee;--sc:#e9edf8;--lo:#e5484d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13151e;--card:#1e212d;--tx:#e8eaf3;--mu:#9aa0b8;--ac:#7b93ff;--ac2:#ffa94d;--bd:#2f3345;--sc:#2a2f44;--lo:#ff7a85}}
+:root[data-theme="dark"]{--bg:#13151e;--card:#1e212d;--tx:#e8eaf3;--mu:#9aa0b8;--ac:#7b93ff;--ac2:#ffa94d;--bd:#2f3345;--sc:#2a2f44;--lo:#ff7a85}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif}
+header{padding:18px 20px 6px}
+h1{margin:0;font-size:22px}
+header p{margin:4px 0 0;color:var(--mu);font-size:14px}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;padding:12px 20px 24px;max-width:1200px;margin:0 auto}
+@media(max-width:820px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+#stage{height:340px;padding:0;overflow:hidden;position:relative;background:linear-gradient(var(--sc),var(--card))}
+#stage canvas{display:block;width:100%;height:100%}
+#badge{position:absolute;left:12px;top:12px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:6px 12px;font-size:14px}
+#badge b{font-size:22px;color:var(--ac)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+button{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:9px 14px;border-radius:10px;cursor:pointer}
+button.p{background:var(--ac);border-color:var(--ac);color:#fff}
+button:disabled{opacity:.5;cursor:not-allowed}
+input[type=number]{font:inherit;width:100px;padding:9px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+h2{font-size:15px;margin:0 0 8px}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--bd)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mu);font-weight:600}
+tfoot td{font-weight:700;border-bottom:0}
+#chart{width:100%;height:260px;display:block}
+#tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.tile{border:1px solid var(--bd);border-radius:12px;padding:8px;text-align:center;background:var(--card)}.tile canvas{width:40px;height:40px;border-radius:9px;border:1px solid var(--bd)}.tile .n{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}.tile .p{font-size:12px;color:var(--mu)}.tile .bar{height:5px;background:var(--sc);border-radius:3px;margin-top:6px;overflow:hidden}.tile .bar i{display:block;height:100%;width:0;background:var(--ac)}.tile.hit{animation:hit .8s;border-color:var(--ac2)}@keyframes hit{0%{transform:scale(1.14);background:var(--sc)}100%{transform:scale(1)}}
+.pg{margin-top:12px}.pgt{display:flex;justify-content:space-between;font-size:12px;color:var(--mu);margin-bottom:4px}.pgb{height:12px;background:var(--sc);border-radius:6px;overflow:hidden}.pgb div{height:100%;width:0;background:var(--ac);border-radius:6px}.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 10px}
+.right{display:flex;flex-direction:column;gap:16px}
+.note{color:var(--mu);font-size:12px;margin:6px 0 0}
+</style>
+</head>
+<body>
+<header>
+<h1>🎲 3D 주사위 확률 실험실</h1>
+<p>주사위를 굴려 보고, 많이 굴릴수록 각 눈의 비율이 1/6(≈16.67%)에 가까워지는지 확인해 보세요.</p>
+</header>
+<main>
+<section>
+<div class="card" id="stage"><div id="badge">마지막 결과 <b id="last">–</b></div></div>
+<div class="card" style="margin-top:16px">
+<h2>굴리기</h2>
+<div class="ctrl">
+<button class="p" id="b1">1회</button>
+<button id="b10">10회</button>
+<button id="b100">100회</button>
+<input type="number" id="cn" min="1" max="100000" value="1000" aria-label="사용자 지정 횟수">
+<button id="bc">지정 횟수 굴리기</button>
+<button id="br">초기화</button>
+</div>
+<div class="pg"><div class="pgt"><span id="pgl">대기 중</span><span id="pgp">0%</span></div><div class="pgb"><div id="pgf"></div></div></div>
+<p class="note">사용자 지정은 1~100,000회까지 가능합니다.</p>
+</div>
+</section>
+<section class="right">
+<div class="card"><h2>눈별 출현 횟수</h2><div id="tiles"></div><p class="note">굴릴 때마다 나온 눈의 칸이 반짝이며 횟수가 늘어납니다.</p></div>
+<div class="card">
+<h2>출현 빈도 표</h2>
+<table>
+<thead><tr><th>눈</th><th>횟수</th><th>비율(%)</th><th>이론값과 차이(%p)</th></tr></thead>
+<tbody id="tb"></tbody>
+<tfoot><tr><td>전체</td><td id="tot">0</td><td id="totp">0.00</td><td></td></tr></tfoot>
+</table>
+</div>
+<div class="card">
+<h2>비율 막대그래프</h2>
+<canvas id="chart"></canvas>
+<p class="note lg">점선은 이론 확률 16.67%입니다.<i style="background:var(--ac)"></i>기준선 이상<i style="background:var(--lo)"></i>기준선 미만</p>
+</div>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+var counts=[0,0,0,0,0,0],total=0,busy=false,spinning=false;
+var $=function(i){return document.getElementById(i)};
+
+/* ---------- Three.js scene ---------- */
+var stage=$('stage');
+var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+renderer.shadowMap.enabled=true;
+stage.appendChild(renderer.domElement);
+var scene=new THREE.Scene();
+var camera=new THREE.PerspectiveCamera(38,1,0.1,50);
+camera.position.set(0,3.6,6);camera.lookAt(0,0.9,0);
+scene.add(new THREE.AmbientLight(0xffffff,0.65));
+var dl=new THREE.DirectionalLight(0xffffff,0.8);
+dl.position.set(3,6,4);dl.castShadow=true;scene.add(dl);
+var ground=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.ShadowMaterial({opacity:0.25}));
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+
+var P={1:[[1,1]],2:[[0,0],[2,2]],3:[[0,0],[1,1],[2,2]],4:[[0,0],[2,0],[0,2],[2,2]],5:[[0,0],[2,0],[1,1],[0,2],[2,2]],6:[[0,0],[2,0],[0,1],[2,1],[0,2],[2,2]]};
+function tex(n){
+var c=document.createElement('canvas');c.width=c.height=128;var g=c.getContext('2d');
+g.fillStyle='#fbf8ee';g.fillRect(0,0,128,128);
+g.fillStyle=n===1?'#d9322f':'#1d2233';
+P[n].forEach(function(p){g.beginPath();g.arc(28+p[0]*36,28+p[1]*36,n===1?15:10,0,7);g.fill()});
+return new THREE.CanvasTexture(c);
+}
+/* BoxGeometry face order: +x,-x,+y,-y,+z,-z (opposite faces sum to 7) */
+var order=[3,4,1,6,2,5];
+var NORM={1:[0,1,0],6:[0,-1,0],3:[1,0,0],4:[-1,0,0],2:[0,0,1],5:[0,0,-1]};
+var mats=order.map(function(n){return new THREE.MeshStandardMaterial({map:tex(n),roughness:0.3,metalness:0.05})});
+var geo=new THREE.BoxGeometry(1.6,1.6,1.6,32,32,32);
+(function(){var pos=geo.attributes.position,nor=geo.attributes.normal,h=0.8,r=0.2,inn=h-r,v=new THREE.Vector3(),c=new THREE.Vector3(),d=new THREE.Vector3();
+for(var i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i);c.set(Math.max(-inn,Math.min(inn,v.x)),Math.max(-inn,Math.min(inn,v.y)),Math.max(-inn,Math.min(inn,v.z)));d.subVectors(v,c);if(d.lengthSq()>1e-9){d.normalize();pos.setXYZ(i,c.x+d.x*r,c.y+d.y*r,c.z+d.z*r);nor.setXYZ(i,d.x,d.y,d.z)}}
+pos.needsUpdate=true;nor.needsUpdate=true})();
+var dice=new THREE.Mesh(geo,mats);
+dice.castShadow=true;dice.position.y=0.8;scene.add(dice);
+
+function fit(){var w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+new ResizeObserver(fit).observe(stage);fit();
+
+/* ---------- roll animation ---------- */
+var anim=null;
+function targetQuat(r){
+var n=NORM[r];
+var q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(n[0],n[1],n[2]),new THREE.Vector3(0,1,0));
+var yaw=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),Math.random()*Math.PI*2);
+return yaw.multiply(q);
+}
+function rollTo(r,dur,done){
+var axis=new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).normalize();
+anim={t0:performance.now(),dur:dur,axis:axis,ang:(3+Math.random()*3)*Math.PI*2,qT:targetQuat(r),done:done};
+}
+var qs=new THREE.Quaternion(),clock=performance.now();
+function loop(now){
+requestAnimationFrame(loop);
+var dt=Math.min((now-clock)/1000,0.05);clock=now;
+if(anim){
+var t=(now-anim.t0)/anim.dur;
+if(t>=1){dice.quaternion.copy(anim.qT);dice.position.y=0.8;var d=anim.done;anim=null;if(d)d()}
+else{
+var e=1-Math.pow(1-t,3);
+qs.setFromAxisAngle(anim.axis,anim.ang*(1-e));
+dice.quaternion.copy(qs.multiply(anim.qT));
+dice.position.y=0.8+(1-t)*1.3*Math.abs(Math.sin(t*Math.PI*3));
+}
+}else if(spinning){
+dice.rotation.x+=dt*9;dice.rotation.y+=dt*11;
+dice.position.y=1.3+Math.sin(now/90)*0.25;
+}
+renderer.render(scene,camera);
+}
+requestAnimationFrame(loop);
+
+/* ---------- stats ---------- */
+function rnd(){return 1+Math.floor(Math.random()*6)}
+var tl=[];(function(){var box=$('tiles');for(var k=1;k<=6;k++){var el=document.createElement('div');el.className='tile';var cv=document.createElement('canvas');cv.width=cv.height=80;cv.getContext('2d').drawImage(mats[order.indexOf(k)].map.image,0,0,80,80);el.appendChild(cv);el.insertAdjacentHTML('beforeend','<div class="n">0</div><div class="p">0.0%</div><div class="bar"><i></i></div>');box.appendChild(el);tl.push({el:el,n:el.querySelector('.n'),p:el.querySelector('.p'),b:el.querySelector('.bar i')})}})();
+function flash(r){var e=tl[r-1].el;e.classList.remove('hit');void e.offsetWidth;e.classList.add('hit')}
+function setPg(p,l){p=Math.max(0,Math.min(100,p));$('pgf').style.width=p+'%';$('pgp').textContent=Math.round(p)+'%';$('pgl').textContent=l}
+function render(last){
+var h='';
+for(var i=0;i<6;i++){
+var p=total?counts[i]/total*100:0;
+var df=total?p-100/6:0;
+h+='<tr><td>'+(i+1)+'</td><td>'+counts[i].toLocaleString()+'</td><td>'+p.toFixed(2)+'</td><td>'+(df>0?'+':'')+df.toFixed(2)+'</td></tr>';
+}
+$('tb').innerHTML=h;
+var mx=Math.max.apply(null,counts)||1;
+for(var j=0;j<6;j++){var t=tl[j];t.n.textContent=counts[j].toLocaleString();t.p.textContent=(total?counts[j]/total*100:0).toFixed(1)+'%';t.b.style.width=counts[j]/mx*100+'%'}
+$('tot').textContent=total.toLocaleString();
+$('totp').textContent=total?'100.00':'0.00';
+if(last!==undefined)$('last').textContent=last||'–';
+draw();
+}
+function draw(){
+var c=$('chart'),dpr=Math.min(devicePixelRatio||1,2),W=c.clientWidth,H=c.clientHeight;
+if(!W)return;
+c.width=W*dpr;c.height=H*dpr;
+var g=c.getContext('2d');g.scale(dpr,dpr);
+var cs=getComputedStyle(document.documentElement);
+var lo=cs.getPropertyValue('--lo'),ac=cs.getPropertyValue('--ac'),ac2=cs.getPropertyValue('--ac2'),mu=cs.getPropertyValue('--mu'),bd=cs.getPropertyValue('--bd'),tx=cs.getPropertyValue('--tx');
+var pc=counts.map(function(v){return total?v/total*100:0});
+var ymax=Math.max(25,Math.ceil((Math.max.apply(null,pc)+6)/5)*5);
+var L=36,R=8,T=20,B=26,pw=W-L-R,ph=H-T-B;
+g.font='11px sans-serif';g.textAlign='right';g.textBaseline='middle';
+for(var v=0;v<=ymax;v+=5){var y=T+ph-v/ymax*ph;g.strokeStyle=bd;g.lineWidth=1;g.beginPath();g.moveTo(L,y);g.lineTo(W-R,y);g.stroke();g.fillStyle=mu;g.fillText(v+'%',L-5,y)}
+var bw=pw/6;
+g.textAlign='center';
+for(var i=0;i<6;i++){
+var bh=pc[i]/ymax*ph,x=L+i*bw+bw*0.18,w=bw*0.64;
+g.fillStyle=pc[i]>=100/6?ac:lo;g.fillRect(x,T+ph-bh,w,bh);
+g.fillStyle=tx;g.textBaseline='bottom';g.fillText(total?pc[i].toFixed(1)+'%':'',x+w/2,T+ph-bh-2);
+g.textBaseline='top';g.fillStyle=mu;g.font='12px sans-serif';g.fillText(String(i+1),x+w/2,T+ph+6);g.font='11px sans-serif';
+}
+var ty=T+ph-(100/6)/ymax*ph;
+g.strokeStyle=ac2;g.lineWidth=2;g.setLineDash([6,4]);g.beginPath();g.moveTo(L,ty);g.lineTo(W-R,ty);g.stroke();g.setLineDash([]);
+}
+addEventListener('resize',draw);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+
+/* ---------- actions ---------- */
+var btns=['b1','b10','b100','bc','br'].map($);
+function lock(b){busy=b;btns.forEach(function(x){x.disabled=b})}
+function single(){
+if(busy)return;lock(true);
+var r=rnd();setPg(0,'굴리는 중…');
+rollTo(r,1500,function(){counts[r-1]++;total++;render(r);flash(r);setPg(100,'완료 · 1회');lock(false)});
+}
+function bulk(n){
+if(busy)return;
+n=Math.max(1,Math.min(100000,Math.floor(n)||0));
+$('cn').value=n>0?$('cn').value:1000;
+lock(true);spinning=true;setPg(0,'0 / '+n.toLocaleString()+'회');
+var done=0,per=Math.ceil(n/90),last=1;
+(function step(){
+var k=Math.min(per,n-done);
+for(var i=0;i<k;i++){last=rnd();counts[last-1]++;total++}
+done+=k;render();setPg(done/n*100,done.toLocaleString()+' / '+n.toLocaleString()+'회');
+if(done<n){requestAnimationFrame(step)}
+else{
+spinning=false;
+$('last').textContent='…';
+rollTo(last,1100,function(){render(last);flash(last);setPg(100,'완료 · '+n.toLocaleString()+'회');lock(false)});
+}
+})();
+}
+function reset(){
+if(busy)return;
+counts=[0,0,0,0,0,0];total=0;render(0);setPg(0,'대기 중');
+}
+$('b1').onclick=single;
+$('b10').onclick=function(){bulk(10)};
+$('b100').onclick=function(){bulk(100)};
+$('bc').onclick=function(){bulk(parseInt($('cn').value,10))};
+$('br').onclick=reset;
+dice.quaternion.copy(targetQuat(1));
+render(0);
+})();
+</script>
+</body>
+</html>

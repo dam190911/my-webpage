@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>시계 읽기 연습</title>
+<style>
+:root{--bg:#fff8e7;--card:#ffffff;--ink:#2b2b3a;--sub:#6b6b80;--brand:#ff8a3d;--brand2:#3d8bff;--ok:#2fb344;--bad:#e5484d;--line:#e8dfc8;--face:#fffdf5;--hour:#2b2b3a;--min:#3d8bff;--hint:#fff1c9;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1b26;--card:#292636;--ink:#f3f0ff;--sub:#a9a5c0;--line:#3b3750;--face:#322f42;--hour:#f3f0ff;--hint:#4a4128}}
+:root[data-theme="dark"]{--bg:#1d1b26;--card:#292636;--ink:#f3f0ff;--sub:#a9a5c0;--line:#3b3750;--face:#322f42;--hour:#f3f0ff;--hint:#4a4128}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Jua","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;min-height:100vh;overflow-x:hidden}
+h1{font-size:clamp(22px,4vw,32px);margin:0;text-align:center;padding:16px 12px 4px}
+.sub{text-align:center;color:var(--sub);margin:0 0 12px;font-size:15px}
+.levels{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 12px 12px}
+.lv{border:3px solid var(--line);background:var(--card);color:var(--ink);border-radius:16px;padding:10px 14px;font:inherit;font-size:16px;cursor:pointer;min-width:120px}
+.lv small{display:block;color:var(--sub);font-size:13px}
+.lv.on{border-color:var(--brand);background:var(--brand);color:#fff}
+.lv.on small{color:#fff}
+.main{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;padding:0 12px 24px;max-width:960px;margin:0 auto}
+.card{background:var(--card);border:2px solid var(--line);border-radius:24px;padding:16px;flex:1 1 320px}
+.clockwrap{max-width:420px;margin:0 auto}
+svg{width:100%;height:auto;display:block}
+.panel{display:flex;flex-direction:column;gap:14px;max-width:440px}
+.q{font-size:20px;text-align:center}
+.inputs{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.spin{display:flex;flex-direction:column;align-items:center;gap:6px}
+.spin label{color:var(--sub);font-size:15px}
+.row{display:flex;align-items:center;gap:6px}
+.row input{width:84px;height:60px;font:inherit;font-size:30px;text-align:center;border:3px solid var(--line);border-radius:14px;background:var(--face);color:var(--ink)}
+.row input:focus{outline:3px solid var(--brand2);border-color:var(--brand2)}
+.pm{width:48px;height:60px;border:none;border-radius:14px;background:var(--brand2);color:#fff;font:inherit;font-size:28px;cursor:pointer}
+.pm:active{transform:scale(.94)}
+.colon{font-size:36px;margin-top:22px}
+.check{border:none;border-radius:18px;background:var(--ok);color:#fff;font:inherit;font-size:22px;padding:14px;cursor:pointer}
+.check:disabled{opacity:.5;cursor:default}
+.msg{min-height:30px;text-align:center;font-size:20px}
+.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.hint{background:var(--hint);border-radius:14px;padding:10px 12px;font-size:16px;line-height:1.5;display:none}
+.stats{display:flex;gap:8px}
+.stat{flex:1;text-align:center;background:var(--face);border:2px solid var(--line);border-radius:14px;padding:8px 4px}
+.stat b{display:block;font-size:26px}
+.stat span{font-size:14px;color:var(--sub)}
+.stat.g b{color:var(--ok)}.stat.r b{color:var(--bad)}
+.reset{background:none;border:none;color:var(--sub);font:inherit;text-decoration:underline;cursor:pointer;align-self:center}
+.fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+.balloon{position:absolute;bottom:-90px;width:46px;height:58px;border-radius:50% 50% 48% 48%;animation:up 2.2s ease-in forwards}
+.balloon:after{content:"";position:absolute;left:50%;top:100%;width:2px;height:28px;background:#999}
+.conf{position:absolute;top:-20px;width:10px;height:14px;animation:fall 1.8s linear forwards}
+@keyframes up{to{transform:translateY(-120vh) rotate(8deg)}}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+</style>
+</head>
+<body>
+<h1>🕒 시계 읽기 연습</h1>
+<p class="sub">긴바늘(분침)이 움직이면 짧은바늘(시침)도 함께 움직여요!</p>
+<div class="levels" id="levels"></div>
+<div class="main">
+  <div class="card"><div class="clockwrap"><svg viewBox="0 0 300 300" id="clock" role="img" aria-label="아날로그 시계"></svg></div></div>
+  <div class="card panel">
+    <div class="q" id="q">지금 몇 시 몇 분일까요?</div>
+    <div class="inputs">
+      <div class="spin"><label for="hIn">시</label><div class="row"><button class="pm" id="hm" aria-label="시 줄이기">−</button><input id="hIn" type="number" inputmode="numeric" min="1" max="12"><button class="pm" id="hp" aria-label="시 늘리기">+</button></div></div>
+      <div class="colon">:</div>
+      <div class="spin"><label for="mIn">분</label><div class="row"><button class="pm" id="mm" aria-label="분 줄이기">−</button><input id="mIn" type="number" inputmode="numeric" min="0" max="59"><button class="pm" id="mp" aria-label="분 늘리기">+</button></div></div>
+    </div>
+    <button class="check" id="chk">정답 확인</button>
+    <div class="msg" id="msg"></div>
+    <div class="hint" id="hint"></div>
+    <div class="stats">
+      <div class="stat"><b id="sT">0</b><span>총 문제</span></div>
+      <div class="stat g"><b id="sC">0</b><span>맞은 문제</span></div>
+      <div class="stat r"><b id="sW">0</b><span>틀린 문제</span></div>
+    </div>
+    <button class="reset" id="rs">기록 지우기</button>
+  </div>
+</div>
+<div class="fx" id="fx"></div>
+<script>
+(function(){
+var NS="http://www.w3.org/2000/svg";
+var LV=[{n:"1단계",d:"정시 읽기",step:15},{n:"2단계",d:"30분 단위",step:15},{n:"3단계",d:"5분 단위",step:5},{n:"4단계",d:"1분 단위",step:1}];
+var level=0,cur=null,locked=false,stats={t:0,c:0,w:0},answered=false,timer=null;
+var $=function(i){return document.getElementById(i)};
+
+function el(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+
+/* 시계 그리기 */
+var svg=$("clock");
+el("circle",{cx:150,cy:150,r:144,fill:"var(--face)",stroke:"var(--brand)","stroke-width":8},svg);
+for(var i=0;i<60;i++){
+  var a=i*6*Math.PI/180,big=i%5===0,r1=big?124:132,r2=140;
+  el("line",{x1:150+r1*Math.sin(a),y1:150-r1*Math.cos(a),x2:150+r2*Math.sin(a),y2:150-r2*Math.cos(a),stroke:"var(--ink)","stroke-width":big?3.5:1.3,"stroke-linecap":"round"},svg);
+}
+for(var n=1;n<=12;n++){
+  var b=n*30*Math.PI/180;
+  var t=el("text",{x:150+104*Math.sin(b),y:150-104*Math.cos(b),"text-anchor":"middle","dominant-baseline":"central","font-size":26,"font-weight":700,fill:"var(--ink)","font-family":"inherit"},svg);
+  t.textContent=n;
+}
+var hand=el("line",{x1:150,y1:150,x2:150,y2:84,stroke:"var(--hour)","stroke-width":10,"stroke-linecap":"round"},svg);
+var mhand=el("line",{x1:150,y1:150,x2:150,y2:36,stroke:"var(--min)","stroke-width":6,"stroke-linecap":"round"},svg);
+el("circle",{cx:150,cy:150,r:9,fill:"var(--brand)"},svg);
+
+/* 핵심 각도 로직: 분침 = 분×6°, 시침 = (시%12)×30° + 분×0.5° */
+function setClock(h,m){
+  var ma=m*6, ha=(h%12)*30+m*0.5;
+  hand.setAttribute("transform","rotate("+ha+" 150 150)");
+  mhand.setAttribute("transform","rotate("+ma+" 150 150)");
+}
+
+/* 난이도 버튼 */
+var lvBox=$("levels");
+LV.forEach(function(l,i){
+  var bt=document.createElement("button");bt.className="lv";bt.innerHTML=l.n+"<small>"+l.d+"</small>";
+  bt.onclick=function(){level=i;renderLevels();newQ()};
+  lvBox.appendChild(bt);
+});
+function renderLevels(){[].forEach.call(lvBox.children,function(b,i){b.classList.toggle("on",i===level)})}
+
+/* 문제 생성 */
+function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function newQ(){
+  clearTimeout(timer);
+  var h,m,tries=0;
+  do{
+    h=rnd(1,12);
+    if(level===0)m=0;
+    else if(level===1)m=[0,30][rnd(0,1)];
+    else if(level===2)m=rnd(0,11)*5;
+    else m=rnd(0,59);
+    tries++;
+  }while(cur&&cur.h===h&&cur.m===m&&tries<20);
+  cur={h:h,m:m};answered=false;locked=false;
+  setClock(h,m);
+  $("hIn").value="";$("mIn").value="";
+  $("msg").textContent="";$("msg").className="msg";
+  $("hint").style.display="none";
+  $("chk").disabled=false;$("chk").textContent="정답 확인";
+  $("q").textContent="지금 몇 시 몇 분일까요?";
+}
+
+/* 입력: 직접 입력 + 증감 버튼 */
+var hIn=$("hIn"),mIn=$("mIn");
+function num(inp){var v=parseInt(inp.value,10);return isNaN(v)?null:v}
+$("hp").onclick=function(){if(locked)return;var v=num(hIn);hIn.value=v===null?1:(v%12)+1};
+$("hm").onclick=function(){if(locked)return;var v=num(hIn);hIn.value=v===null?12:(v<=1?12:v-1)};
+$("mp").onclick=function(){if(locked)return;var s=LV[level].step,v=num(mIn);mIn.value=v===null?0:(v+s>=60?0:v+s)};
+$("mm").onclick=function(){if(locked)return;var s=LV[level].step,v=num(mIn);mIn.value=v===null?60-s:(v-s<0?60-s:v-s)};
+[hIn,mIn].forEach(function(i){i.addEventListener("keydown",function(e){if(e.key==="Enter")check()})});
+
+/* 정답 확인 */
+function pad(n){return n<10?"0"+n:""+n}
+function hintText(h,m){
+  var s="";
+  var k=Math.floor(m/5),rest=m%5;
+  if(m===0){s="긴바늘이 12를 가리키면 정각이에요. 짧은바늘이 가리키는 "+h+"이 시예요.";}
+  else{
+    s="① 짧은바늘은 "+h+"을 지나 "+(h%12+1)+" 쪽으로 가는 중이에요. 지나간 숫자 "+h+"이 시예요.<br>";
+    if(rest===0)s+="② 긴바늘이 "+k+"을 가리켜요. "+k+" × 5 = "+m+"분이에요.";
+    else s+="② 긴바늘은 "+k+"에서 작은 눈금 "+rest+"칸 더 갔어요. "+k+" × 5 = "+(k*5)+", 거기에 "+rest+"을 더하면 "+m+"분이에요.";
+  }
+  return s;
+}
+function check(){
+  if(locked||answered)return;
+  var h=num(hIn),m=num(mIn);
+  if(h===null||m===null){$("msg").textContent="시와 분을 모두 입력해 주세요";$("msg").className="msg bad";return}
+  answered=true;locked=true;stats.t++;
+  var hh=(h===0?12:h);
+  if(hh===cur.h&&m===cur.m){
+    stats.c++;
+    $("msg").textContent="🎉 정답이에요! "+cur.h+"시 "+cur.m+"분";$("msg").className="msg ok";
+    $("chk").disabled=true;
+    celebrate();
+    timer=setTimeout(newQ,1800);
+  }else{
+    stats.w++;
+    $("msg").innerHTML="앗, 아쉬워요! 정답은 <b>"+cur.h+"시 "+cur.m+"분</b> ("+cur.h+":"+pad(cur.m)+")";$("msg").className="msg bad";
+    var hn=$("hint");hn.innerHTML="💡 힌트<br>"+hintText(cur.h,cur.m);hn.style.display="block";
+    $("chk").disabled=false;$("chk").textContent="다음 문제 ▶";
+    $("chk").onclick=function(){$("chk").onclick=check;newQ()};
+  }
+  renderStats();
+}
+$("chk").onclick=check;
+
+function renderStats(){$("sT").textContent=stats.t;$("sC").textContent=stats.c;$("sW").textContent=stats.w}
+$("rs").onclick=function(){stats={t:0,c:0,w:0};renderStats()};
+
+/* 풍선/폭죽 효과 */
+function celebrate(){
+  var fx=$("fx"),cols=["#ff5d5d","#ffb13d","#3dcf6b","#3d8bff","#b46bff","#ff6bb5"];
+  for(var i=0;i<9;i++){
+    var b=document.createElement("div");b.className="balloon";
+    b.style.left=(5+i*11)+"%";b.style.background=cols[i%6];b.style.animationDelay=(Math.random()*.5)+"s";
+    fx.appendChild(b);
+  }
+  for(var j=0;j<50;j++){
+    var c=document.createElement("div");c.className="conf";
+    c.style.left=Math.random()*100+"%";c.style.background=cols[j%6];c.style.animationDelay=(Math.random()*.6)+"s";
+    fx.appendChild(c);
+  }
+  setTimeout(function(){fx.innerHTML=""},3000);
+}
+
+renderLevels();newQ();
+})();
+</script>
+</body>
+</html>

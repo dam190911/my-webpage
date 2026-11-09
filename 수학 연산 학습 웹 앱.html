@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#171d3b">
+<title>Math Adventure | 연산 모험</title>
+<style>
+:root{--bg:#10152e;--panel:#1b2346;--panel2:#242e59;--line:#394574;--gold:#ffd166;--mint:#65e6bd;--pink:#ff7b9c;--text:#f7f7ff;--muted:#b7c0e4;--blue:#8db8ff}
+*{box-sizing:border-box}body{margin:0;color:var(--text);font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;background:radial-gradient(circle at 15% 0%,#303c76 0,transparent 34%),radial-gradient(circle at 90% 20%,#452c69 0,transparent 30%),var(--bg);min-height:100vh}
+button,input,select{font:inherit}button{cursor:pointer;border:0;color:inherit}.app{max-width:1120px;margin:auto;padding:22px 18px 50px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,#ffd166,#ff9f5a);display:grid;place-items:center;font-size:27px;box-shadow:0 8px 25px #ffb84d44}.brand h1{font-size:20px;margin:0;letter-spacing:.4px}.brand small{color:var(--muted)}.top-actions{display:flex;gap:8px}.icon-btn,.ghost{background:#ffffff12;border:1px solid var(--line);padding:9px 12px;border-radius:12px}.hero{position:relative;overflow:hidden;background:linear-gradient(120deg,#29376c,#4b3974 60%,#65416f);border:1px solid #7181c455;border-radius:25px;padding:25px;margin-bottom:18px;display:grid;grid-template-columns:1.4fr .6fr;gap:10px;min-height:190px}.hero:after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;background:#ffffff0b;right:10%;top:-110px}.eyebrow{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:1.5px}.hero h2{font-size:clamp(25px,4vw,38px);line-height:1.2;margin:8px 0}.hero p{color:#e0e4ff;margin:0}.hero-art{display:grid;place-items:center;font-size:94px;filter:drop-shadow(0 12px 10px #1118);z-index:1}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat,.panel,.mode-card{background:linear-gradient(145deg,#20294f,#192141);border:1px solid var(--line);border-radius:18px;padding:16px}.stat-label{color:var(--muted);font-size:12px}.stat-value{font-size:24px;font-weight:850;margin-top:4px}.xp-track{height:8px;background:#ffffff18;border-radius:20px;overflow:hidden;margin-top:9px}.xp-fill{height:100%;background:linear-gradient(90deg,var(--mint),#9bffd9);width:0%;transition:width .3s}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin:22px 2px 12px}.section-head h3{margin:0;font-size:19px}.section-head small{color:var(--muted)}.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.mode-card{cursor:pointer;text-align:left;transition:.18s;min-height:145px}.mode-card:hover{transform:translateY(-3px);border-color:var(--gold);background:linear-gradient(145deg,#303b70,#222b52)}.mode-icon{font-size:31px}.mode-card h4{margin:9px 0 4px;font-size:16px}.mode-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+.content-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:18px}.panel h3{margin:0 0 13px}.quick-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #ffffff12}.quick-row:last-child{border:0}.quick-row span{color:var(--muted);font-size:13px}.badge-list{display:flex;flex-wrap:wrap;gap:8px}.badge{background:#ffffff10;border:1px solid #ffffff1b;border-radius:12px;padding:9px 11px;font-size:12px}.badge.locked{opacity:.35;filter:grayscale(1)}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.tab{background:#ffffff10;border:1px solid var(--line);padding:9px 14px;border-radius:12px;color:var(--muted)}.tab.active{background:#354477;color:white;border-color:#8296e4}
+.screen{display:none}.screen.active{display:block}.setup{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:7px}.choice-row{display:flex;gap:7px;flex-wrap:wrap}.choice{background:#ffffff0c;border:1px solid var(--line);border-radius:11px;padding:9px 12px;font-size:13px}.choice.selected{background:#354477;border-color:var(--blue);color:white}.primary{background:linear-gradient(110deg,#ffd166,#ff9f5a);color:#352344;font-weight:900;padding:12px 19px;border-radius:13px;box-shadow:0 7px 20px #ffb84d22}.primary:hover{filter:brightness(1.06)}.wide{width:100%;margin-top:16px}
+.gamebox{max-width:720px;margin:15px auto;background:linear-gradient(145deg,#252f5e,#1a2142);border:1px solid #56669c;border-radius:24px;padding:22px}.game-top{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:13px}.progress{height:8px;background:#ffffff18;border-radius:20px;margin:14px 0 25px;overflow:hidden}.progress>div{height:100%;background:var(--gold);width:0%;transition:width .2s}.question{font-size:clamp(36px,8vw,58px);font-weight:900;text-align:center;margin:25px 0 20px;letter-spacing:2px}.answer-row{display:flex;gap:9px;max-width:430px;margin:auto}.answer-row input{min-width:0;flex:1;background:#111832;border:1px solid #56669c;border-radius:13px;padding:13px;color:white;text-align:center;font-size:23px;outline:none}.answer-row input:focus{border-color:var(--gold)}.feedback{text-align:center;min-height:28px;margin:12px 0;font-weight:800}.feedback.good{color:var(--mint)}.feedback.bad{color:var(--pink)}.choice-answers{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;max-width:430px;margin:12px auto}.choice-answers button{padding:13px;border-radius:12px;background:#ffffff12;border:1px solid var(--line);font-size:18px}.choice-answers button:hover{border-color:var(--gold)}.game-actions{display:flex;justify-content:center;gap:9px;margin-top:15px}.hidden{display:none!important}.result{text-align:center;padding:25px 10px}.result .big{font-size:65px}.result h2{font-size:28px;margin:5px}.result p{color:var(--muted)}.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.mini-stat{background:#ffffff0c;border-radius:13px;padding:12px}.mini-stat b{display:block;font-size:22px}.mini-stat small{color:var(--muted)}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{text-align:left;padding:11px 8px;border-bottom:1px solid #ffffff16}.table th{color:var(--muted);font-weight:600}.barrow{display:grid;grid-template-columns:65px 1fr 45px;gap:10px;align-items:center;margin:13px 0;font-size:13px}.bar{height:10px;background:#ffffff18;border-radius:20px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#7e9cff,#65e6bd)}.avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.avatar{font-size:34px;padding:13px 5px;border-radius:15px;background:#ffffff0c;border:1px solid var(--line)}.avatar.selected{border:2px solid var(--gold);background:#ffd16618}.notice{color:var(--muted);font-size:12px;line-height:1.6}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#f7f7ff;color:#20264a;padding:12px 18px;border-radius:14px;font-weight:800;box-shadow:0 8px 30px #0005;z-index:10;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1}.modal-back{position:fixed;inset:0;background:#080b1dcc;display:grid;place-items:center;padding:18px;z-index:5}.modal{max-width:480px;width:100%;background:#20294f;border:1px solid var(--line);border-radius:20px;padding:22px}.modal h3{margin-top:0}.modal-actions{display:flex;gap:9px;justify-content:end;margin-top:16px}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}.modes{grid-template-columns:repeat(2,1fr)}.content-grid{grid-template-columns:1fr}.hero{grid-template-columns:1fr .35fr;padding:20px}.hero-art{font-size:65px}.setup{grid-template-columns:1fr}.avatar-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:430px){.app{padding:14px 12px 35px}.brand h1{font-size:17px}.hero-art{font-size:48px}.stat{padding:12px}.stat-value{font-size:20px}.mode-card{padding:13px;min-height:135px}.gamebox{padding:15px}.answer-row{flex-direction:column}.answer-row button{width:100%}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div class="brand"><div class="logo">🧭</div><div><h1>MATH ADVENTURE</h1><small>연산으로 떠나는 수학 모험</small></div></div>
+ <div class="top-actions"><button class="icon-btn" id="soundToggle" title="효과음 켜기/끄기">🔊</button><button class="icon-btn" id="backupBtn" title="백업 다운로드">💾 백업</button><button class="icon-btn" id="restoreBtn" title="백업 복원">📂 복원</button></div>
+</header>
+
+<section id="home" class="screen active">
+ <div class="hero"><div><div class="eyebrow">YOUR MATH JOURNEY STARTS HERE</div><h2>오늘의 모험을<br>시작해 볼까요?</h2><p>문제를 풀고 경험치를 모아 나만의 탐험가를 성장시켜 보세요!</p></div><div class="hero-art" id="heroAvatar">🧙</div></div>
+ <div class="stats">
+  <div class="stat"><div class="stat-label">나의 레벨</div><div class="stat-value" id="levelValue">Lv. 1</div><div class="xp-track"><div class="xp-fill" id="xpFill"></div></div><div class="stat-label" id="xpText">0 / 100 XP</div></div>
+  <div class="stat"><div class="stat-label">총 경험치</div><div class="stat-value" id="totalXp">0 XP</div><div class="stat-label">한 문제씩 성장 중!</div></div>
+  <div class="stat"><div class="stat-label">연속 학습</div><div class="stat-value" id="streakValue">🔥 0일</div><div class="stat-label">꾸준함이 실력이 돼요</div></div>
+  <div class="stat"><div class="stat-label">전체 정답률</div><div class="stat-value" id="accuracyValue">0%</div><div class="stat-label" id="totalSolved">0문제 풀이</div></div>
+ </div>
+ <div class="section-head"><h3>⚔️ 모험 모드 선택</h3><small>원하는 도전을 골라보세요</small></div>
+ <div class="modes">
+  <button class="mode-card" data-mode="time"><div class="mode-icon">⏱️</div><h4>타임어택</h4><p>60초 안에 최대한 많은 문제에 도전!</p></button>
+  <button class="mode-card" data-mode="infinite"><div class="mode-icon">🌿</div><h4>무한모드</h4><p>시간 제한 없이 차근차근 연습하기</p></button>
+  <button class="mode-card" data-mode="challenge"><div class="mode-icon">🏆</div><h4>챌린지</h4><p>10문제 연속 정답에 도전하고 레벨업!</p></button>
+  <button class="mode-card" data-mode="master"><div class="mode-icon">🐉</div><h4>마스터전</h4><p>혼합 연산 5문제를 모두 클리어!</p></button>
+ </div>
+ <div class="content-grid">
+  <div class="panel"><h3>📜 나의 모험 기록</h3><div class="quick-row"><b>오늘 푼 문제</b><strong id="todaySolved">0개</strong></div><div class="quick-row"><b>이번 주 문제</b><strong id="weekSolved">0개</strong></div><div class="quick-row"><b>최고 타임어택</b><strong id="bestTime">0개</strong></div><div class="quick-row"><b>최고 콤보</b><strong id="bestCombo">0회</strong></div></div>
+  <div class="panel"><h3>🎖️ 획득한 배지</h3><div class="badge-list" id="homeBadges"></div></div>
+ </div>
+</section>
+
+<section id="setup" class="screen">
+ <div class="section-head"><h3 id="setupTitle">게임 준비</h3><small>나에게 맞는 연산을 선택해요</small></div>
+ <div class="panel">
+  <div class="setup">
+   <div class="field"><label>연산 종류</label><div class="choice-row" id="opChoices"><button class="choice selected" data-op="all">혼합</button><button class="choice" data-op="+">덧셈 +</button><button class="choice" data-op="-">뺄셈 −</button><button class="choice" data-op="×">곱셈 ×</button><button class="choice" data-op="÷">나눗셈 ÷</button></div></div>
+   <div class="field"><label>난이도 설정</label><div class="choice-row" id="diffChoices"><button class="choice selected" data-diff="easy">초급</button><button class="choice" data-diff="medium">중급</button><button class="choice" data-diff="hard">고급</button><button class="choice" data-diff="auto">자동</button></div></div>
+   <div class="field"><label>정답 입력 방식</label><div class="choice-row" id="inputChoices"><button class="choice selected" data-input="both">직접 입력 + 객관식</button><button class="choice" data-input="typed">직접 입력</button><button class="choice" data-input="choice">객관식</button></div></div>
+   <div class="field"><label>자동 난이도 조절</label><div class="notice">자동을 선택하면 최근 정답률에 따라 난이도가 조절돼요. 직접 선택한 난이도는 고정됩니다.</div></div>
+  </div>
+  <button class="primary wide" id="startGame">🚀 모험 시작하기</button>
+  <button class="ghost wide" id="backHome">← 홈으로</button>
+ </div>
+</section>
+
+<section id="play" class="screen">
+ <div class="gamebox">
+  <div class="adventure-scene" id="adventureScene">
+   <div class="scene-sun"></div><div class="scene-cloud">☁️</div><div class="scene-ground"></div><div class="scene-path"></div>
+   <div class="scene-caption" id="sceneCaption">몬스터 숲을 탐험 중!</div><div class="scene-hearts" id="sceneHearts">❤️❤️❤️</div>
+   <div class="scene-avatar" id="sceneAvatar">🧙</div><div class="scene-monster" id="sceneMonster">👾</div><div class="scene-flash" id="sceneFlash">BONUS!</div>
+  </div>
+  <div class="game-top"><span id="gameModeLabel">타임어택</span><span id="gameCounter">문제 1</span><span id="timerLabel">⏱ 60초</span></div>
+  <div class="progress"><div id="gameProgress"></div></div>
+  <div class="question" id="question">8 + 7 = ?</div>
+  <div id="typedArea" class="answer-row"><input id="answerInput" type="number" inputmode="numeric" placeholder="정답 입력" autocomplete="off"><button class="primary" id="submitAnswer">확인</button></div>
+  <div id="choiceArea" class="choice-answers hidden"></div>
+  <div class="feedback" id="feedback" aria-live="polite"></div>
+  <div class="game-actions"><button class="ghost" id="skipQuestion">건너뛰기</button><button class="ghost" id="quitGame">그만하기</button></div>
+ </div>
+</section>
+
+<section id="result" class="screen">
+ <div class="gamebox result"><div class="big" id="resultIcon">🏆</div><h2 id="resultTitle">모험 완료!</h2><p id="resultMessage">멋진 도전이었어요.</p><div class="stats-grid"><div class="mini-stat"><b id="resultSolved">0</b><small>푼 문제</small></div><div class="mini-stat"><b id="resultCorrect">0</b><small>정답</small></div><div class="mini-stat"><b id="resultXp">0</b><small>획득 XP</small></div></div><button class="primary wide" id="playAgain">다시 도전하기</button><button class="ghost wide" id="resultHome">홈으로 돌아가기</button></div>
+</section>
+
+<section id="dashboard" class="screen">
+ <div class="section-head"><h3>📊 학습 통계</h3><small>나의 성장을 확인해요</small></div>
+ <div class="stats"><div class="stat"><div class="stat-label">오늘</div><div class="stat-value" id="dashToday">0</div><div class="stat-label">문제 풀이</div></div><div class="stat"><div class="stat-label">이번 주</div><div class="stat-value" id="dashWeek">0</div><div class="stat-label">문제 풀이</div></div><div class="stat"><div class="stat-label">전체</div><div class="stat-value" id="dashAll">0</div><div class="stat-label">문제 풀이</div></div><div class="stat"><div class="stat-label">정답률</div><div class="stat-value" id="dashAccuracy">0%</div><div class="stat-label">전체 기록</div></div></div>
+ <div class="panel"><h3>연산 종류별 정답률</h3><div id="operationBars"></div></div>
+ <div class="content-grid"><div class="panel"><h3>🏅 개인 최고 기록</h3><div class="quick-row"><span>타임어택 정답 수</span><b id="dashBestTime">0개</b></div><div class="quick-row"><span>최고 연속 정답</span><b id="dashCombo">0회</b></div><div class="quick-row"><span>최고 레벨</span><b id="dashLevel">Lv. 1</b></div></div><div class="panel"><h3>최근 학습 기록</h3><div id="recentHistory" class="notice">아직 기록이 없어요. 첫 모험을 시작해 보세요!</div></div></div>
+ <button class="ghost wide" data-nav="home">홈으로</button>
+</section>
+
+<section id="collection" class="screen">
+ <div class="section-head"><h3>🎒 탐험가 꾸미기</h3><small>배지를 모아 나만의 캐릭터를 완성해요</small></div>
+ <div class="panel"><h3>나의 캐릭터 미리보기</h3><div style="display:flex;align-items:center;gap:16px;padding:12px;background:#ffffff0b;border-radius:16px"><div id="avatarPreview" style="font-size:62px">🧙</div><div><b id="avatarTitle">초보 탐험가</b><p class="notice" id="avatarDescription">첫 모험을 시작해 보세요!</p></div></div></div>
+ <div class="panel" style="margin-top:14px"><h3>캐릭터 선택</h3><div class="avatar-grid" id="avatarGrid"></div><p class="notice">일부 캐릭터는 특정 배지를 획득해야 사용할 수 있어요.</p></div>
+ <div class="panel" style="margin-top:14px"><h3>✨ 장착할 장식 아이템</h3><div class="avatar-grid" id="accessoryGrid"></div><p class="notice">배지를 획득하면 새로운 모자와 오라가 해금돼요.</p></div>
+ <div class="panel" style="margin-top:14px"><h3>획득한 배지</h3><div class="badge-list" id="allBadges"></div></div>
+ <button class="ghost wide" data-nav="home">홈으로</button>
+</section>
+
+<section id="review" class="screen">
+ <div class="section-head"><h3>📝 오답 노트</h3><small>틀린 문제와 정답을 다시 확인해요</small></div>
+ <div class="panel"><div class="quick-row"><b>누적 오답</b><strong id="wrongCount">0문제</strong></div><div id="reviewList" class="review-list"></div><p class="notice">오답은 게임이 끝난 뒤에도 이 브라우저에 저장돼요. 정답을 확인하고 다시 풀어보세요.</p></div>
+ <button class="ghost wide" data-nav="home">홈으로</button>
+</section>
+
+<div class="tabs">
+ <button class="tab active" data-nav="home">🏠 홈</button><button class="tab" data-nav="dashboard">📊 통계</button><button class="tab" data-nav="collection">🎒 꾸미기</button><button class="tab" data-nav="review">📝 오답 노트</button>
+</div>
+<p class="notice">학습 기록은 현재 브라우저의 LocalStorage에 저장됩니다. 브라우저 데이터 삭제 또는 다른 기기 사용 시 기록이 사라질 수 있으니 백업 파일을 보관해 주세요. 랭킹은 이 기기에서의 개인 최고 기록입니다.</p>
+</div>
+<div class="toast" id="toast"></div>
+<div class="modal-back hidden" id="modal"><div class="modal"><h3 id="modalTitle">알림</h3><p id="modalText"></p><div class="modal-actions"><button class="ghost" id="modalCancel">취소</button><button class="primary" id="modalOk">확인</button></div></div></div>
+<input type="file" id="restoreFile" accept="application/json" class="hidden">
+<script>
+(()=>{
+const KEY='mathAdventureSave_v1';
+const defaults=()=>({xp:0,level:1,solved:0,correct:0,streak:0,lastDate:'',bestCombo:0,bestTime:0,avatar:'🧙',accessory:'none',sound:true,badges:[],history:[],ops:{'+':{n:0,c:0},'-':{n:0,c:0},'×':{n:0,c:0},'÷':{n:0,c:0}}});
+let data=load(),mode='time',op='all',diff='easy',inputMode='both',game=null,lastMode='time',audioCtx=null;
+const $=id=>document.getElementById(id);
+function load(){try{return {...defaults(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return defaults()}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function today(){return new Date().toLocaleDateString('en-CA')}
+function weekStart(){let d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d}
+function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2100)}
+function sound(kind){if(!data.sound)return;try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.type='sine';o.frequency.value=kind==='good'?660:kind==='level'?880:kind==='bad'?180:440;g.gain.setValueAtTime(.08,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.18);o.start();o.stop(audioCtx.currentTime+.19)}catch(e){}}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.nav===id))}
+function levelFor(xp){return Math.floor(xp/100)+1}
+function dayCounts(){let t=today(),w=weekStart().getTime(),todayN=0,weekN=0;data.history.forEach(h=>{let d=new Date(h.date+'T12:00:00');if(h.date===t)todayN+=h.solved;if(d>=new Date(w))weekN+=h.solved});return {todayN,weekN}}
+function badgeDefs(){return [
+{id:'first',icon:'🌟',name:'첫 발걸음',desc:'첫 문제 풀이',ok:()=>data.solved>=1},
+{id:'ten',icon:'🔟',name:'10문제 돌파',desc:'누적 10문제 풀이',ok:()=>data.solved>=10},
+{id:'fifty',icon:'📚',name:'연산 수집가',desc:'누적 50문제 풀이',ok:()=>data.solved>=50},
+{id:'hundred',icon:'💯',name:'백전노장',desc:'누적 100문제 풀이',ok:()=>data.solved>=100},
+{id:'combo',icon:'🔥',name:'콤보 마스터',desc:'10연속 정답',ok:()=>data.bestCombo>=10},
+{id:'combo20',icon:'🌋',name:'불꽃 질주',desc:'20연속 정답',ok:()=>data.bestCombo>=20},
+{id:'perfect',icon:'💎',name:'완벽주의자',desc:'5문제 이상 모두 정답인 게임 완료',ok:()=>data.history.some(h=>h.solved>=5&&h.correct===h.solved)},
+{id:'streak',icon:'🗓️',name:'꾸준함의 증표',desc:'7일 연속 학습',ok:()=>data.streak>=7},
+{id:'speed',icon:'⚡',name:'스피드 러너',desc:'타임어택 20문제 정답',ok:()=>data.bestTime>=20},
+{id:'master',icon:'🐉',name:'마스터 정복자',desc:'마스터전 5문제 모두 정답',ok:()=>data.history.some(h=>h.mode==='master'&&h.solved===5&&h.correct===5)},
+{id:'addition',icon:'➕',name:'덧셈 장인',desc:'덧셈 25문제 정답',ok:()=>data.ops['+'].c>=25},
+{id:'subtraction',icon:'➖',name:'뺄셈 수호자',desc:'뺄셈 25문제 정답',ok:()=>data.ops['-'].c>=25},
+{id:'multiply',icon:'✖️',name:'곱셈 마법사',desc:'곱셈 25문제 정답',ok:()=>data.ops['×'].c>=25},
+{id:'divide',icon:'➗',name:'나눗셈 현자',desc:'나눗셈 25문제 정답',ok:()=>data.ops['÷'].c>=25},
+{id:'xp500',icon:'👑',name:'황금 탐험가',desc:'경험치 500 XP 달성',ok:()=>data.xp>=500},
+{id:'xp1000',icon:'🏵️',name:'전설의 모험가',desc:'경험치 1,000 XP 달성',ok:()=>data.xp>=1000}
+]}
+function updateBadges(){badgeDefs().forEach(b=>{if(b.ok()&&!data.badges.includes(b.id)){data.badges.push(b.id);toast('배지 획득! '+b.icon+' '+b.name);sound('level')}})}
+function badgeHtml(){return badgeDefs().map(b=>`<span class="badge ${data.badges.includes(b.id)?'':'locked'}">${b.icon} ${b.name}</span>`).join('')}
+function render(){
+ let lv=levelFor(data.xp),into=data.xp%100,counts=dayCounts(),acc=data.solved?Math.round(data.correct/data.solved*100):0;
+ data.level=lv;$('levelValue').textContent='Lv. '+lv;$('xpFill').style.width=into+'%';$('xpText').textContent=into+' / 100 XP';$('totalXp').textContent=data.xp+' XP';$('streakValue').textContent='🔥 '+data.streak+'일';$('accuracyValue').textContent=acc+'%';$('totalSolved').textContent=data.solved+'문제 풀이';$('heroAvatar').textContent=data.avatar;
+ $('todaySolved').textContent=counts.todayN+'개';$('weekSolved').textContent=counts.weekN+'개';$('bestTime').textContent=data.bestTime+'개';$('bestCombo').textContent=data.bestCombo+'회';$('homeBadges').innerHTML=badgeHtml();$('allBadges').innerHTML=badgeHtml();
+ $('dashToday').textContent=counts.todayN;$('dashWeek').textContent=counts.weekN;$('dashAll').textContent=data.solved;$('dashAccuracy').textContent=acc+'%';$('dashBestTime').textContent=data.bestTime+'개';$('dashCombo').textContent=data.bestCombo+'회';$('dashLevel').textContent='Lv. '+lv;
+ $('operationBars').innerHTML=['+','-','×','÷'].map(k=>{let o=data.ops[k],p=o.n?Math.round(o.c/o.n*100):0;return `<div class="barrow"><b>${k==='+'?'덧셈':k==='-'?'뺄셈':k==='×'?'곱셈':'나눗셈'}</b><div class="bar"><i style="width:${p}%"></i></div><span>${p}%</span></div>`}).join('');
+ $('recentHistory').innerHTML=data.history.length?data.history.slice(-5).reverse().map(h=>`${h.date} · ${modeName(h.mode)} · ${h.correct}/${h.solved} 정답`).join('<br>'):'아직 기록이 없어요.';
+ const avatarItems=[['🧙','기본 마법사',true],['🧝','숲의 요정',data.badges.includes('first')],['🦊','여우 탐험가',data.badges.includes('ten')],['🐱','고양이 기사',data.badges.includes('fifty')],['🐼','판다 현자',data.badges.includes('hundred')],['🐸','개구리 용사',data.badges.includes('combo')],['🦄','유니콘',data.badges.includes('streak')],['🐲','드래곤',data.badges.includes('master')]];
+ $('avatarGrid').innerHTML=avatarItems.map(([a,n,unlocked])=>`<button class="avatar ${data.avatar===a?'selected':''} ${unlocked?'':'locked'}" data-avatar="${a}" title="${unlocked?n:'배지를 획득하면 해금'}">${unlocked?a:'🔒'}</button>`).join('');
+ const accessories=[['none','✨','장식 없음',true],['crown','👑','왕관',data.badges.includes('xp500')],['flame','🔥','불꽃 오라',data.badges.includes('combo20')],['halo','😇','빛의 후광',data.badges.includes('perfect')],['star','⭐','별 장식',data.badges.includes('fifty')],['wings','🪽','날개',data.badges.includes('xp1000')]];
+ $('accessoryGrid').innerHTML=accessories.map(([id,icon,n,unlocked])=>`<button class="avatar ${data.accessory===id?'selected':''} ${unlocked?'':'locked'}" data-accessory="${id}" title="${unlocked?n:'배지를 획득하면 해금'}">${unlocked?icon:'🔒'}</button>`).join('');
+ const chosen=avatarItems.find(x=>x[0]===data.avatar);$('avatarPreview').textContent=data.avatar+(data.accessory==='none'?'':({crown:'👑',flame:'🔥',halo:'😇',star:'⭐',wings:'🪽'}[data.accessory]||''));$('avatarTitle').textContent=chosen?chosen[1]:'탐험가';$('avatarDescription').textContent='획득 배지 '+data.badges.length+'개 · 장식 '+(accessories.find(x=>x[0]===data.accessory)||[])[2];
+ $('soundToggle').textContent=data.sound?'🔊':'🔇';save();
+}
+function modeName(m){return ({time:'타임어택',infinite:'무한모드',challenge:'챌린지',master:'마스터전'})[m]||m}
+document.querySelectorAll('.mode-card').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;lastMode=mode;$('setupTitle').textContent=modeName(mode)+' 준비';show('setup')});
+function setChoice(container,attr,val){document.querySelectorAll('#'+container+' .choice').forEach(b=>b.classList.toggle('selected',b.dataset[attr]===val))}
+$('opChoices').onclick=e=>{let b=e.target.closest('[data-op]');if(!b)return;op=b.dataset.op;setChoice('opChoices','op',op)};
+$('diffChoices').onclick=e=>{let b=e.target.closest('[data-diff]');if(!b)return;diff=b.dataset.diff;setChoice('diffChoices','diff',diff)};
+$('inputChoices').onclick=e=>{let b=e.target.closest('[data-input]');if(!b)return;inputMode=b.dataset.input;setChoice('inputChoices','input',inputMode)};
+$('backHome').onclick=()=>show('home');
+function rand(n){return Math.floor(Math.random()*n)+1}
+function currentDiff(){if(diff!=='auto')return diff;let a=data.solved?data.correct/data.solved:0.6;return a>=.88?'hard':a>=.65?'medium':'easy'}
+function makeQuestion(){
+ let d=currentDiff(),kind=op==='all'?['+','-','×','÷'][rand(4)-1]:op,a,b,ans;
+ let max=d==='easy'?10:d==='medium'?50:100;
+ if(kind==='+'){a=rand(max);b=rand(max);ans=a+b}
+ if(kind==='-'){a=rand(max);b=rand(max);if(b>a)[a,b]=[b,a];ans=a-b}
+ if(kind==='×'){let m=d==='easy'?10:d==='medium'?12:20;a=rand(m);b=rand(m);ans=a*b}
+ if(kind==='÷'){b=rand(d==='easy'?10:d==='medium'?12:20);ans=rand(d==='easy'?10:d==='medium'?15:20);a=b*ans}
+ return {a,b,kind,ans,text:`${a} ${kind} ${b} = ?`};
+}
+function sceneUpdate(feedback){
+ $('sceneAvatar').textContent=data.avatar+ (data.accessory==='none'?'':({crown:'👑',flame:'🔥',halo:'😇',star:'⭐',wings:'🪽'}[data.accessory]||''));
+ $('sceneAvatar').style.left=Math.min(68,12+game.solved*5)+'%';
+ const monsters=['👾','👹','🧟','🐲','🕷️'];$('sceneMonster').textContent=monsters[Math.floor(game.solved/3)%monsters.length];
+ $('sceneMonster').style.right=Math.max(5,13-game.solved*2)+'%';
+ $('sceneMonster').classList.toggle('defeated',feedback==='good');
+ $('sceneCaption').textContent=feedback==='good'?'몬스터를 물리쳤어요! ⚔️':feedback==='bad'?'몬스터가 가까워지고 있어요!':'모험을 계속하세요!';
+ $('sceneHearts').textContent='❤️'.repeat(Math.max(1,3-Math.floor(game.solved/5)))+'🖤'.repeat(Math.min(2,Math.floor(game.solved/5)));
+ if(feedback){$('sceneFlash').textContent=feedback==='good'?'⚔️ 격파!':'💨 다시 도전!';$('sceneFlash').classList.remove('show');void $('sceneFlash').offsetWidth;$('sceneFlash').classList.add('show')}
+}
+function start(){
+ game={mode,solved:0,correct:0,combo:0,xp:0,seconds:60,question:null,active:true,review:[],timer:null};show('play');sceneUpdate();$('gameModeLabel').textContent=modeName(mode);$('feedback').textContent='';$('feedback').className='feedback';$('gameProgress').style.width='0%';
+ $('timerLabel').textContent=mode==='time'?'⏱ 60초':mode==='master'?'🐉 5문제':'∞ 자유 연습';nextQuestion();
+ if(mode==='time'){game.timer=setInterval(()=>{game.seconds--;$('timerLabel').textContent='⏱ '+game.seconds+'초';if(game.seconds<=0)finish('time')},1000)}
+}
+function nextQuestion(){
+ if(!game||!game.active)return;
+ game.question=makeQuestion();$('question').textContent=game.question.text;$('gameCounter').textContent=game.mode==='master'?`문제 ${game.solved+1} / 5`:game.mode==='challenge'?`연속 정답 ${game.combo} / 10`:`풀이 ${game.solved+1}`;
+ $('gameProgress').style.width=(game.mode==='master'?game.solved/5:game.mode==='challenge'?game.combo/10:game.mode==='time'?(60-game.seconds)/60:0)*100+'%';
+ $('feedback').textContent='';$('feedback').className='feedback';$('answerInput').value='';
+ let useChoices=inputMode==='choice'||(inputMode==='both'&&Math.random()<.5);
+ $('typedArea').classList.toggle('hidden',useChoices);$('choiceArea').classList.toggle('hidden',!useChoices);
+ if(useChoices){let vals=new Set([game.question.ans]);while(vals.size<4){let v=game.question.ans+Math.floor(Math.random()*21)-10;if(v>=0)vals.add(v)}let arr=[...vals].sort(()=>Math.random()-.5);$('choiceArea').innerHTML=arr.map(v=>`<button data-answer="${v}">${v}</button>`).join('');$('choiceArea').querySelectorAll('button').forEach(b=>b.onclick=()=>answer(Number(b.dataset.answer)))}
+ else $('answerInput').focus();
+}
+function answer(v){
+ if(!game||!game.active||v===null||v===''||!Number.isFinite(Number(v)))return;
+ let q=game.question,ok=Number(v)===q.ans;game.solved++;data.solved++;data.ops[q.kind].n++;
+ if(ok){game.correct++;game.combo++;data.correct++;data.ops[q.kind].c++;sceneUpdate('good');let bonus=game.combo%5===0?20:0;let gain=10+bonus;game.xp+=gain;data.xp+=gain;$('feedback').textContent=game.combo%5===0?'✨ '+game.combo+'연속 정답! 보너스 +20 XP':'정답이에요! +' +gain+' XP';$('feedback').className='feedback good';sound('good');if(game.combo>data.bestCombo)data.bestCombo=game.combo;let old=levelFor(data.xp-gain),now=levelFor(data.xp);if(now>old){$('feedback').textContent+=' 🎉 레벨 업!';sound('level');toast('축하해요! 레벨 '+now+' 달성!')}}
+ else{game.combo=0;sceneUpdate('bad');$('feedback').textContent=`아쉬워요! 정답은 ${q.ans}이에요.`;$('feedback').className='feedback bad';sound('bad');game.review.push({q:q.text,answer:q.ans,user:Number(v),date:today()})}
+ updateBadges();render();
+ if(game.mode==='challenge'&&game.combo>=10){setTimeout(()=>finish('challenge'),650);return}
+ if(game.mode==='master'&&game.solved>=5){setTimeout(()=>finish('master'),650);return}
+ if(game.mode==='time'&&game.seconds<=0)return;
+ setTimeout(()=>{if(game&&game.active)nextQuestion()},ok?350:850);
+}
+$('submitAnswer').onclick=()=>answer($('answerInput').value);
+$('answerInput').addEventListener('keydown',e=>{if(e.key==='Enter')answer($('answerInput').value)});
+$('skipQuestion').onclick=()=>{if(!game)return;game.solved++;data.solved++;let q=game.question;game.review.push({q:q.text,answer:q.ans,user:'건너뜀',date:today()});game.combo=0;render();nextQuestion()};
+$('quitGame').onclick=()=>finish('quit');
+function finish(reason){
+ if(!game||!game.active)return;game.active=false;if(game.timer)clearInterval(game.timer);
+ let g=game;if(g.mode==='time'&&g.correct>data.bestTime)data.bestTime=g.correct;
+ let day=today();if(data.lastDate!==day){let yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);let y=yesterday.toLocaleDateString('en-CA');data.streak=data.lastDate===y?data.streak+1:1;data.lastDate=day}
+ data.history.push({date:day,mode:g.mode,solved:g.solved,correct:g.correct,xp:g.xp,review:g.review.filter(Boolean)});if(data.history.length>300)data.history=data.history.slice(-300);
+ updateBadges();render();
+ $('resultIcon').textContent=reason==='challenge'?'🏆':reason==='master'?'🐉':reason==='time'?'⏱️':'🌟';
+ $('resultTitle').textContent=reason==='challenge'?'챌린지 성공!':reason==='master'?(g.correct===5?'마스터 정복!':'마스터전 종료'):reason==='time'?'타임어택 종료!':'모험을 마쳤어요!';
+ $('resultMessage').textContent=reason==='quit'?'도전한 것만으로도 멋져요. 다음 모험에서 이어가 봐요!':`멋진 도전이에요! ${g.correct}문제를 맞혔어요.`;
+ $('resultSolved').textContent=g.solved;$('resultCorrect').textContent=g.correct;$('resultXp').textContent=g.xp;show('result');save();
+}
+$('startGame').onclick=start;$('playAgain').onclick=()=>{mode=lastMode;start()};$('resultHome').onclick=()=>{render();show('home')};
+document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>{if(game&&game.active&&b.dataset.nav!=='home')return;show(b.dataset.nav);render();if(b.dataset.nav==='review')renderReview()}));
+$('soundToggle').onclick=()=>{data.sound=!data.sound;render();toast(data.sound?'효과음을 켰어요':'효과음을 껐어요');if(data.sound)sound('good')};
+$('avatarGrid').onclick=e=>{let b=e.target.closest('[data-avatar]');if(!b)return;const unlock={ '🧙':true,'🧝':data.badges.includes('first'),'🦊':data.badges.includes('ten'),'🐱':data.badges.includes('fifty'),'🐼':data.badges.includes('hundred'),'🐸':data.badges.includes('combo'),'🦄':data.badges.includes('streak'),'🐲':data.badges.includes('master')};if(!unlock[b.dataset.avatar]){toast('해당 캐릭터를 해금할 배지가 필요해요!');return}data.avatar=b.dataset.avatar;render();toast('캐릭터를 변경했어요!')};
+$('accessoryGrid').onclick=e=>{let b=e.target.closest('[data-accessory]');if(!b)return;const unlock={none:true,crown:data.badges.includes('xp500'),flame:data.badges.includes('combo20'),halo:data.badges.includes('perfect'),star:data.badges.includes('fifty'),wings:data.badges.includes('xp1000')};if(!unlock[b.dataset.accessory]){toast('배지를 획득하면 사용할 수 있어요!');return}data.accessory=b.dataset.accessory;render();toast('장식을 장착했어요!')};
+function renderReview(){
+ let rows=[];data.history.forEach((h,hi)=>(h.review||[]).forEach((r,ri)=>rows.push({...r,when:h.date,gameIndex:hi,reviewIndex:ri})));
+ rows=rows.reverse();$('wrongCount').textContent=rows.length+'문제';
+ $('reviewList').innerHTML=rows.length?rows.map((r,i)=>`<div class="review-card"><div class="review-meta">${r.when} · ${r.user==='건너뜀'?'건너뛴 문제':'오답'}</div><div class="review-question">${r.q}</div><div class="review-answer">내 답: <b>${r.user}</b>　정답: <b>${r.answer}</b></div><button class="choice review-toggle" data-review="${i}">정답 확인 / 다시 생각하기</button></div>`).join(''):'<p class="notice">아직 틀린 문제가 없어요. 게임을 하면서 오답 노트를 채워보세요!</p>';
+}
+$('reviewList').onclick=e=>{let b=e.target.closest('[data-review]');if(!b)return;let rows=[];data.history.forEach(h=>(h.review||[]).forEach(r=>rows.push(r)));let r=rows.reverse()[Number(b.dataset.review)];if(r)toast(`${r.q} 정답은 ${r.answer}입니다.`)};
+
+$('backupBtn').onclick=backup;$('restoreBtn').onclick=()=>$('restoreFile').click();
+function backup(){let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='math-adventure-backup-'+today()+'.json';a.click();URL.revokeObjectURL(url);toast('학습 기록 백업 파일을 저장했어요')}
+$('restoreFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let v=JSON.parse(await f.text());if(typeof v.xp!=='number'||!v.ops)throw Error();data={...defaults(),...v};save();render();toast('학습 기록을 복원했어요')}catch(err){toast('올바른 백업 파일이 아니에요')}e.target.value=''};
+function ask(title,msg,ok){$('modalTitle').textContent=title;$('modalText').textContent=msg;$('modal').classList.remove('hidden');$('modalOk').onclick=()=>{$('modal').classList.add('hidden');ok&&ok()};$('modalCancel').onclick=()=>$('modal').classList.add('hidden')}
+$('backupBtn').addEventListener('contextmenu',e=>{e.preventDefault();$('restoreFile').click()});
+$('backupBtn').title='클릭: 백업 다운로드 / 우클릭: 백업 복원';
+$('backupBtn').addEventListener('dblclick',()=>$('restoreFile').click());
+render();renderReview();
+})();
+</script>
+</body>
+</html>

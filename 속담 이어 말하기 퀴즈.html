@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>속담 이어 말하기 퀴즈</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e6f2fb;--card:#ffffff;--ink:#1d2b53;--sub:#53628c;--main:#3b5bdb;--main-d:#2a3fa0;--yel:#ffc93c;--yel-d:#c9961a;--ok:#2fb67c;--okbg:#dff6ec;--bad:#e5534b;--badbg:#fde8e6;--line:#c5d6ea;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141b33;--card:#1f2a4d;--ink:#f1f4ff;--sub:#aab6dc;--main:#6f8bff;--main-d:#3e55c4;--yel-d:#a87a10;--okbg:#14382c;--badbg:#44211f;--line:#34426f}}
+:root[data-theme="dark"]{--bg:#141b33;--card:#1f2a4d;--ink:#f1f4ff;--sub:#aab6dc;--main:#6f8bff;--main-d:#3e55c4;--yel-d:#a87a10;--okbg:#14382c;--badbg:#44211f;--line:#34426f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;min-height:100vh;display:flex;justify-content:center;padding:16px;perspective:1200px}
+main{width:100%;max-width:720px}
+.screen{display:none}.screen.on{display:block}
+.card{background:var(--card);border:3px solid var(--ink);border-radius:24px;padding:24px;box-shadow:0 8px 0 var(--ink);transform:rotateX(2deg);transform-origin:center bottom}
+h1{font-size:clamp(34px,8vw,52px);margin:0 0 8px;line-height:1.15;letter-spacing:-.02em}
+p{margin:0 0 16px;color:var(--sub);font-size:18px;line-height:1.5}
+.btn{font:inherit;font-size:22px;color:#fff;background:var(--main);border:3px solid var(--ink);border-radius:16px;padding:12px 22px;cursor:pointer;box-shadow:0 6px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.btn:active:not(:disabled){transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.yel{background:var(--yel);color:#1d2b53}
+.btn.ghost{background:var(--card);color:var(--ink)}
+.btn.big{width:100%;font-size:28px;padding:16px;margin-top:8px}
+:focus-visible{outline:4px solid var(--yel);outline-offset:2px}
+.set{background:var(--bg);border-radius:16px;padding:16px;margin:18px 0}
+.set b{font-size:20px}.set output{float:right;font-size:28px;color:var(--main)}
+input[type=range]{width:100%;height:36px;accent-color:var(--main);margin-top:10px}
+.scale{display:flex;justify-content:space-between;color:var(--sub);font-size:15px}
+.file{font-size:15px;color:var(--sub);margin-top:6px}
+.file label{text-decoration:underline;cursor:pointer;color:var(--main)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--card);border:3px solid var(--ink);border-radius:16px;padding:8px 6px;text-align:center;box-shadow:0 4px 0 var(--ink)}
+.stat small{display:block;color:var(--sub);font-size:13px}.stat strong{font-size:26px}button.stat{font:inherit;color:var(--ink);cursor:pointer}button.stat:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.stat.low strong{color:var(--bad)}
+.bar{height:12px;border-radius:8px;background:var(--line);overflow:hidden;margin-bottom:18px;border:2px solid var(--ink)}
+.bar i{display:block;height:100%;width:100%;background:var(--ok);transition:width 1s linear}
+.q{font-size:clamp(30px,7vw,46px);line-height:1.35;text-align:center;margin:12px 0 4px;word-break:keep-all}
+.q span{display:inline-block;min-width:3ch;border-bottom:5px dashed var(--yel-d);color:var(--yel-d)}
+.hint{min-height:42px;text-align:center;font-size:26px;letter-spacing:.12em;color:var(--main);margin-bottom:10px}
+.row{display:flex;gap:10px}
+input[type=text]{flex:1;min-width:0;font:inherit;font-size:24px;padding:12px 14px;border:3px solid var(--ink);border-radius:14px;background:var(--bg);color:var(--ink)}
+.fb{margin-top:16px;border-radius:16px;padding:14px 16px;font-size:22px;display:none;line-height:1.5}
+.fb.ok{display:block;background:var(--okbg);border:3px solid var(--ok)}
+.fb.bad{display:block;background:var(--badbg);border:3px solid var(--bad)}
+.fb em{font-style:normal;color:var(--main);font-size:26px}
+.fb .btn{margin-top:10px;font-size:20px}
+.big-num{font-size:72px;color:var(--main);line-height:1;margin:6px 0}
+.res{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;margin:14px 0}
+.res button{font:inherit;color:var(--ink);background:var(--bg);border:3px solid var(--ink);border-radius:14px;padding:10px;cursor:pointer;box-shadow:0 4px 0 var(--ink)}.res button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}.res small{display:block;color:var(--sub)}.res strong{font-size:28px}
+ul.wrong{padding:0;list-style:none;margin:0 0 16px;max-height:260px;overflow-y:auto}
+ul.wrong li{background:var(--badbg);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:18px}
+#modal{position:fixed;inset:0;background:rgba(10,16,40,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}#modal[hidden]{display:none}.mbox{background:var(--card);border:3px solid var(--ink);border-radius:20px;padding:18px;width:100%;max-width:520px;box-shadow:0 6px 0 var(--ink)}.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:24px}.mbox ul.wrong{max-height:55vh;margin:0}.mbox ul.wrong li{background:var(--bg)}
+.mn{display:block;font-size:15px;color:var(--sub);margin-top:3px}li.r,li.r b{color:var(--bad)}.red{color:var(--bad);font-weight:bold}input[type=text].wrongin{border-color:var(--bad);color:var(--bad);background:var(--badbg)}input[type=text]:disabled{opacity:1;-webkit-text-fill-color:currentColor}#wc,#ewr{color:var(--bad)}
+canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9}
+@media (prefers-reduced-motion:reduce){.card{transform:none}.bar i{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<main>
+<section class="screen on" id="start"><div class="card">
+  <h1>속담 이어 말하기 퀴즈</h1>
+  <p>속담의 앞부분을 보고 뒷부분을 맞혀 보세요. 막히면 초성 힌트를 쓸 수 있어요!</p>
+  <div class="set">
+    <b>문제 수</b><output id="qout">10개</output>
+    <input type="range" id="qn" min="1" max="50" step="1" value="10" aria-label="문제 수">
+    <div class="scale"><span>1개</span><span id="qmax">50개</span></div>
+  </div>
+  <div class="set">
+    <b>문제당 제한시간</b><output id="tout">20초</output>
+    <input type="range" id="tr" min="5" max="60" step="5" value="20" aria-label="문제당 제한시간(초)">
+    <div class="scale"><span>5초</span><span>60초</span></div>
+  </div>
+  <button class="btn yel big" id="go">게임 시작</button>
+  <button class="btn ghost big" id="dict">속담 뜻 모아보기</button>
+  <div class="file">문제 <span id="cnt">50</span>개 사용 중 · <label for="csv">선생님 CSV 파일 불러오기</label>
+  <input type="file" id="csv" accept=".csv,text/csv" hidden>
+  <div id="csvmsg"></div></div>
+</div></section>
+
+<section class="screen" id="game">
+  <div class="stats">
+    <div class="stat" id="tbox"><small>남은 시간</small><strong id="tl">0</strong></div>
+    <button class="stat" data-k="solved" title="푼 문제 보기"><small>푼 문제</small><strong id="tried">0</strong></button>
+    <button class="stat" data-k="right" title="맞은 문제 보기"><small>맞은 문제</small><strong id="sc">0</strong></button>
+    <button class="stat" data-k="wrong" title="틀린 문제 보기"><small>틀린 문제</small><strong id="wc">0</strong></button>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="card">
+    <div class="q" id="q"></div>
+    <div class="hint" id="hint" aria-live="polite"></div>
+    <div class="row">
+      <input type="text" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="뒷부분을 입력하세요" aria-label="정답 입력">
+      <button class="btn" id="chk">확인</button>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn yel" id="hb" style="flex:1;font-size:20px">초성 힌트 (2번 남음)</button>
+      <button class="btn ghost" id="skip" style="font-size:20px">넘기기</button>
+    </div>
+    <div class="fb" id="fb" role="status"></div>
+  </div>
+</section>
+
+<section class="screen" id="end"><div class="card" style="text-align:center">
+  <h1 id="etitle">게임 끝!</h1>
+  <div class="res">
+    <button data-k="solved"><small>푼 문제</small><strong id="etry">0</strong></button>
+    <button data-k="right"><small>맞은 문제</small><strong id="eok2">0</strong></button>
+    <button data-k="wrong"><small>틀린 문제</small><strong id="ewr">0</strong></button>
+  </div>
+  <p>정답률 <b id="erate">0%</b><br>숫자를 누르면 속담을 볼 수 있어요.</p>
+  <div id="wrongbox" style="text-align:left"><p style="margin-bottom:8px">다시 보면 좋은 속담</p><ul class="wrong" id="wrong"></ul></div>
+  <button class="btn big" id="rev">틀린 문제만 다시 풀기 (<span id="revn">0</span>개)</button>
+  <button class="btn yel big" id="again">처음부터 다시 도전</button>
+</div></section>
+</main>
+<div id="modal" hidden><div class="mbox" role="dialog" aria-modal="true"><div class="mh"><b id="mt"></b><button class="btn ghost" id="mc" style="font-size:18px;padding:6px 14px">닫기</button></div><ul class="wrong" id="ml"></ul></div></div>
+
+<script>
+const DEFAULT_CSV = `번호,앞부분,뒷부분
+1,가는 말이,고와야 오는 말이 곱다
+2,가재는,게 편이다
+3,갈수록,태산
+4,같은 값이면,다홍치마
+5,개구리 올챙이 적,생각 못 한다
+6,고래 싸움에,새우 등 터진다
+7,공든 탑이,무너지랴
+8,구슬이 서 말이라도,꿰어야 보배
+9,꿩 먹고,알 먹기
+10,남의 떡이,더 커 보인다
+11,낮말은,새가 듣고 밤말은 쥐가 듣는다
+12,누워서,떡 먹기
+13,다 된 밥에,재 뿌리기
+14,돌다리도,두들겨 보고 건너라
+15,등잔 밑이,어둡다
+16,뛰는 놈 위에,나는 놈 있다
+17,말 한마디에,천 냥 빚도 갚는다
+18,믿는 도끼에,발등 찍힌다
+19,바늘 도둑이,소 도둑 된다
+20,백지장도,맞들면 낫다
+21,병 주고,약 준다
+22,보기 좋은 떡이,먹기도 좋다
+23,빈 수레가,요란하다
+24,사공이 많으면,배가 산으로 간다
+25,세 살 버릇,여든까지 간다
+26,소 잃고,외양간 고친다
+27,시작이,반이다
+28,싼 게,비지떡
+29,아는 길도,물어 가라
+30,아니 땐 굴뚝에,연기 날까
+31,우물 안,개구리
+32,원숭이도,나무에서 떨어진다
+33,윗물이,맑아야 아랫물이 맑다
+34,입에 쓴 약이,몸에 좋다
+35,자라 보고 놀란 가슴,솥뚜껑 보고 놀란다
+36,작은 고추가,맵다
+37,천 리 길도,한 걸음부터
+38,콩 심은 데 콩 나고,팥 심은 데 팥 난다
+39,티끌 모아,태산
+40,팔은,안으로 굽는다
+41,하나를 보면,열을 안다
+42,하늘의 별,따기
+43,호랑이도 제 말 하면,온다
+44,호미로 막을 것을,가래로 막는다
+45,금강산도,식후경
+46,꿩 대신,닭
+47,믿는 구석이,있다
+48,백 번 듣는 것이,한 번 보는 것만 못하다
+49,열 번 찍어,안 넘어가는 나무 없다
+50,웃는 얼굴에,침 못 뱉는다`;
+
+const MEAN = {"가는 말이":"내가 남에게 좋게 말해야 남도 나에게 좋게 말한다.","가재는":"모양이나 처지가 비슷한 사람끼리 서로 편이 된다.","갈수록":"일이 갈수록 더 힘들고 어려워진다.","같은 값이면":"값이 같다면 더 좋은 것을 고른다.","개구리 올챙이 적":"형편이 나아진 뒤 어려웠던 때를 잊고 잘난 척한다.","고래 싸움에":"힘센 사람들의 싸움에 약한 사람이 피해를 본다.","공든 탑이":"정성을 다해 한 일은 헛되지 않는다.","구슬이 서 말이라도":"좋은 것도 쓸모 있게 만들어야 가치가 있다.","꿩 먹고":"한 가지 일로 두 가지 이익을 얻는다.","남의 떡이":"남의 것이 내 것보다 더 좋아 보인다.","낮말은":"아무도 없는 것 같아도 말은 조심해야 한다.","누워서":"아주 쉬운 일을 말한다.","다 된 밥에":"거의 다 된 일을 망쳐 놓는다.","돌다리도":"잘 아는 일도 조심해서 확인하며 하라는 뜻이다.","등잔 밑이":"가까이 있는 것을 오히려 잘 모른다.","뛰는 놈 위에":"잘하는 사람 위에는 더 잘하는 사람이 있다.","말 한마디에":"말을 잘하면 어려운 일도 풀 수 있다.","믿는 도끼에":"믿었던 사람에게 배신을 당한다.","바늘 도둑이":"작은 나쁜 짓도 버릇이 되면 큰 잘못이 된다.","백지장도":"쉬운 일도 함께하면 더 쉬워진다.","병 주고":"해를 입히고 나서 도와주는 척한다.","보기 좋은 떡이":"겉모양이 좋으면 속도 좋은 경우가 많다.","빈 수레가":"아는 것이 적은 사람이 더 떠들어 댄다.","사공이 많으면":"간섭하는 사람이 많으면 일이 잘 안 된다.","세 살 버릇":"어릴 때 들인 버릇은 늙어서도 고치기 어렵다.","소 잃고":"일이 잘못된 뒤에야 뒤늦게 대비한다.","시작이":"시작하면 일의 절반을 한 것과 같다.","싼 게":"값이 싼 물건은 품질도 그만큼 나쁘다.","아는 길도":"잘 아는 일도 다시 확인하고 조심하라는 뜻이다.","아니 땐 굴뚝에":"원인이 없으면 결과도 없다. 소문에는 까닭이 있다.","우물 안":"넓은 세상을 모르고 자기만 아는 사람.","원숭이도":"아무리 잘하는 사람도 실수할 때가 있다.","윗물이":"윗사람이 바르게 행동해야 아랫사람도 바르게 행동한다.","입에 쓴 약이":"듣기 싫은 충고가 나중에 도움이 된다.","자라 보고 놀란 가슴":"한 번 크게 놀라면 비슷한 것만 봐도 겁을 먹는다.","작은 고추가":"몸집이 작아도 야무지고 재주가 뛰어나다.","천 리 길도":"큰 일도 작은 것부터 차근차근 시작한다.","콩 심은 데 콩 나고":"원인대로 결과가 나온다.","티끌 모아":"작은 것도 모이면 큰 것이 된다.","팔은":"가깝고 친한 사람 편을 들게 된다.","하나를 보면":"한 가지를 보고 나머지를 짐작할 수 있다.","하늘의 별":"매우 어렵고 이루기 힘든 일.","호랑이도 제 말 하면":"남 이야기를 하는데 마침 그 사람이 나타난다.","호미로 막을 것을":"작을 때 해결하지 않아 나중에 큰 힘이 든다.","금강산도":"아무리 좋은 일도 배가 불러야 즐겁다.","꿩 대신":"꼭 맞는 것이 없을 때 비슷한 것으로 대신한다.","믿는 구석이":"의지할 사람이나 힘이 있어서 믿고 행동한다.","백 번 듣는 것이":"직접 눈으로 보는 것이 가장 확실하다.","열 번 찍어":"끈기 있게 계속하면 결국 이룰 수 있다.","웃는 얼굴에":"상냥하게 대하는 사람에게는 화내기 어렵다."};
+const $ = id => document.getElementById(id);
+const itemHTML = (w, red) => "<li" + (red ? ' class="r"' : "") + ">" + w.front + " <b>" + w.back + "</b>" + (w.note ? '<span class="mn">뜻: ' + w.note + "</span>" : "") + "</li>";
+const CHO = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
+let bank = [], deck = [], cur = null, left = 0, total = 0, timer = null, hints = 0, locked = false, rights = [], wrongs = [], solved = [], review = false, resume = false;
+
+function parseCSV(text){
+  const rows = []; let r = [], f = "", q = false;
+  text = text.replace(/^\uFEFF/, "");
+  for (let i = 0; i < text.length; i++){
+    const c = text[i];
+    if (q){ if (c === '"'){ if (text[i+1] === '"'){ f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ","){ r.push(f); f = ""; }
+    else if (c === "\n" || c === "\r"){ if (c === "\r" && text[i+1] === "\n") i++; r.push(f); rows.push(r); r = []; f = ""; }
+    else f += c;
+  }
+  if (f || r.length){ r.push(f); rows.push(r); }
+  return rows.map(x => x.map(s => s.trim())).filter(x => x.length >= 2 && x[1] && x[2]);
+}
+function toBank(rows){
+  if (rows.length && /앞/.test(rows[0][1]) ) rows = rows.slice(1);
+  return rows.map(r => ({ front: r[1], back: r[2], note: r[3] || MEAN[r[1]] || "" })).filter(x => x.front && x.back);
+}
+function setBank(b){ bank = b; $("cnt").textContent = b.length; const q = $("qn"); q.max = b.length; q.value = Math.min(10, b.length); $("qout").textContent = q.value + "개"; $("qmax").textContent = b.length + "개"; }
+setBank(toBank(parseCSV(DEFAULT_CSV)));
+
+$("csv").addEventListener("change", async e => {
+  const file = e.target.files[0]; if (!file) return;
+  const buf = await file.arrayBuffer();
+  let text = new TextDecoder("utf-8").decode(buf);
+  if (text.includes("\uFFFD")) { try { text = new TextDecoder("euc-kr").decode(buf); } catch (_) {} }
+  const b = toBank(parseCSV(text));
+  if (b.length < 1){ $("csvmsg").textContent = "파일에서 문제를 찾지 못했어요. 번호,앞부분,뒷부분 순서로 적어 주세요."; return; }
+  setBank(b); $("csvmsg").textContent = "불러왔어요: " + file.name;
+});
+
+$("tr").addEventListener("input", () => $("tout").textContent = $("tr").value + "초");
+$("qn").addEventListener("input", () => $("qout").textContent = $("qn").value + "개");
+function show(id){ document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.id === id)); }
+
+const norm = s => s.replace(/[\s.,!?'"’“”~·\-]/g, "").toLowerCase();
+function chosung(s, keepFirst){
+  let n = 0;
+  return [...s].map(ch => {
+    if (ch === " ") return "  ";
+    const c = ch.charCodeAt(0) - 0xAC00;
+    if (c < 0 || c > 11171) return ch;
+    n++;
+    return (keepFirst && n === 1) ? ch : CHO[Math.floor(c / 588)];
+  }).join("");
+}
+
+/* sound */
+let ac;
+function tone(freq, dur, t0, type = "sine", vol = .2){
+  if (!ac) return;
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.value = freq; o.connect(g); g.connect(ac.destination);
+  const t = ac.currentTime + t0;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  o.start(t); o.stop(t + dur);
+}
+const sndOk = () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .25, i * .09, "triangle"));
+const sndBad = () => { tone(220, .25, 0, "sawtooth", .12); tone(165, .35, .15, "sawtooth", .12); };
+
+/* confetti */
+const cv = $("fx"), cx = cv.getContext("2d"); let parts = [], raf = 0;
+function fit(){ cv.width = innerWidth; cv.height = innerHeight; } fit(); addEventListener("resize", fit);
+function boom(){
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  const cols = ["#ffc93c", "#e5534b", "#2fb67c", "#3b5bdb", "#ff8fb1", "#4cc9f0"];
+  for (let k = 0; k < 3; k++){
+    const x = cv.width * (.2 + .3 * k), y = cv.height * .35;
+    for (let i = 0; i < 40; i++){
+      const a = Math.random() * 6.283, s = 4 + Math.random() * 9;
+      parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 3, w: 6 + Math.random() * 6, c: cols[i % 6], life: 70 + Math.random() * 30, r: Math.random() * 6 });
+    }
+  }
+  if (!raf) raf = requestAnimationFrame(tick);
+}
+function tick(){
+  cx.clearRect(0, 0, cv.width, cv.height);
+  parts = parts.filter(p => p.life > 0);
+  parts.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .35; p.vx *= .99; p.life--; p.r += .2;
+    cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.globalAlpha = Math.min(1, p.life / 30); cx.fillStyle = p.c; cx.fillRect(-p.w / 2, -p.w / 4, p.w, p.w / 2); cx.restore(); });
+  raf = parts.length ? requestAnimationFrame(tick) : 0;
+  if (!raf) cx.clearRect(0, 0, cv.width, cv.height);
+}
+
+/* game */
+function tickTime(){ left--; updateTime(); if (left <= 0 && !locked) miss(true, true); }
+function stats(){ $("sc").textContent = rights.length; $("wc").textContent = wrongs.length; $("tried").textContent = solved.length; }
+function start(isReview){
+  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); } catch (_) {}
+  review = !!isReview;
+  const pool = review ? [...wrongs] : [...bank];
+  if (!pool.length) return;
+  total = left = +$("tr").value; const qn = review ? pool.length : Math.min(+$("qn").value, pool.length);
+  rights = []; wrongs = []; solved = []; stats();
+  deck = pool.sort(() => Math.random() - .5).slice(0, qn);
+  document.querySelector(".bar").style.display = review ? "none" : "";
+  show("game"); next();
+}
+function updateTime(){
+  $("tl").textContent = review ? "복습" : left + "초";
+  $("bar").style.width = (left / total * 100) + "%";
+  $("tbox").classList.toggle("low", !review && left <= 10);
+}
+function next(){
+  if (!deck.length){ finish(false); return; }
+  cur = deck.pop(); hints = 0; locked = false;
+  left = total; updateTime(); clearInterval(timer); timer = review ? null : setInterval(tickTime, 1000);
+  $("ans").classList.remove("wrongin");
+  $("q").innerHTML = cur.front + " <span>&nbsp;?&nbsp;</span>";
+  $("hint").textContent = ""; $("fb").className = "fb"; $("fb").innerHTML = "";
+  $("ans").value = ""; $("ans").disabled = false; $("chk").disabled = false; $("skip").disabled = false;
+  $("hb").disabled = false; $("hb").textContent = "초성 힌트 (2번 남음)";
+  $("ans").focus();
+}
+$("hb").onclick = () => {
+  if (locked || hints >= 2) return;
+  hints++;
+  $("hint").textContent = chosung(cur.back, hints === 2);
+  $("hb").textContent = hints >= 2 ? "힌트를 다 썼어요" : "초성 힌트 (1번 남음)";
+  if (hints >= 2) $("hb").disabled = true;
+  $("ans").focus();
+};
+function lock(){ clearInterval(timer); timer = null; locked = true; $("ans").disabled = true; $("chk").disabled = true; $("hb").disabled = true; $("skip").disabled = true; }
+function check(){
+  if (locked) return;
+  const v = norm($("ans").value); if (!v) return;
+  lock();
+  const full = cur.front + " " + cur.back;
+  if (v === norm(cur.back)){
+    rights.push(cur); solved.push(cur); stats();
+    $("fb").className = "fb ok"; $("fb").innerHTML = "정답이에요! 👏<br><em>" + full + "</em>";
+    sndOk(); boom();
+    setTimeout(() => { if (left > 0) next(); }, 1000);
+  } else miss(false);
+}
+function miss(skipped, timedOut){
+  if (skipped) lock();
+  wrongs.push(cur); solved.push(cur); stats();
+  $("ans").classList.add("wrongin");
+  const you = $("ans").value.trim();
+  $("fb").className = "fb bad";
+  $("fb").innerHTML = (timedOut ? "시간 초과! ⏰" : skipped ? "넘어갔어요." : "아쉬워요. 내가 쓴 답: <span class=\"red\">" + you.replace(/</g, "&lt;") + "</span>") +
+    "<br>정답: <em>" + cur.front + " " + cur.back + "</em>" + (cur.note ? "<br>뜻: " + cur.note : "") +
+    '<br><button class="btn" id="nx">다음 문제</button>';
+  sndBad(); $("nx").onclick = next; $("nx").focus();
+}
+$("chk").onclick = check;
+$("skip").onclick = () => { if (!locked) miss(true); };
+$("ans").addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) check(); });
+$("go").onclick = () => start(false); $("rev").onclick = () => start(true); $("again").onclick = () => show("start");
+const LISTS = { all: ["속담 뜻 모아보기", () => bank], solved: ["푼 문제", () => solved], right: ["맞은 문제", () => rights], wrong: ["틀린 문제", () => wrongs] };
+function openList(k){
+  const a = LISTS[k][1]();
+  $("mt").textContent = LISTS[k][0] + " " + a.length + "개";
+  $("ml").innerHTML = a.length ? a.map(w => itemHTML(w, k === "wrong")).join("") : "<li>아직 없어요.</li>";
+  if (timer && $("game").classList.contains("on")){ clearInterval(timer); timer = null; resume = true; }
+  $("modal").hidden = false; $("mc").focus();
+}
+function closeList(){ $("modal").hidden = true; if (resume){ resume = false; timer = setInterval(tickTime, 1000); } if ($("ans") && !locked && $("game").classList.contains("on")) $("ans").focus(); }
+document.querySelectorAll("[data-k]").forEach(b => b.onclick = () => openList(b.dataset.k));
+$("mc").onclick = closeList; $("dict").onclick = () => openList("all");
+$("modal").onclick = e => { if (e.target === $("modal")) closeList(); };
+addEventListener("keydown", e => { if (e.key === "Escape" && !$("modal").hidden) closeList(); });
+
+function finish(timeUp){
+  clearInterval(timer); timer = null;
+  $("etitle").textContent = review ? (wrongs.length ? "복습 끝!" : "모두 맞혔어요! 🎉") : timeUp ? "시간 끝!" : "모든 문제를 풀었어요!";
+  $("etry").textContent = solved.length; $("eok2").textContent = rights.length; $("ewr").textContent = wrongs.length;
+  $("erate").textContent = solved.length ? Math.round(rights.length / solved.length * 100) + "%" : "0%";
+  $("rev").style.display = wrongs.length ? "" : "none"; $("revn").textContent = wrongs.length;
+  $("wrongbox").style.display = wrongs.length ? "block" : "none";
+  $("wrong").innerHTML = wrongs.map(w => itemHTML(w, true)).join("");
+  show("end");
+}
+</script>
+</body>
+</html>
