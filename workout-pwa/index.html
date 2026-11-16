@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#217e65">
+<meta name="description" content="날짜별 운동을 기록하고 월간 통계를 확인하는 운동 관리 앱">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Daily Move">
+<title>Daily Move | 운동 기록</title>
+<style>
+:root{--green:#217e65;--green2:#37a783;--pale:#eaf6f1;--ink:#20312d;--muted:#71817c;--line:#e4ece7;--bg:#f4f8f6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;padding-bottom:env(safe-area-inset-bottom)}
+button,input,select{font:inherit}button{cursor:pointer}.app{max-width:940px;width:calc(100% - 30px);margin:22px auto}
+header,.bar{display:flex;align-items:center;justify-content:space-between;gap:12px}header{margin-bottom:18px}
+.eyebrow{font-size:11px;font-weight:850;letter-spacing:.15em;color:var(--green);margin:0 0 5px}h1{font-size:clamp(25px,5vw,34px);letter-spacing:-.05em;margin:0}.sub{font-size:12px;color:var(--muted);margin:6px 0 0}
+.actions{display:flex;gap:7px;flex-wrap:wrap}.soft,.nav{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:9px 11px;font-size:12px;font-weight:700}.install{display:none;border:0;background:var(--green);color:white;border-radius:10px;padding:10px 12px;font-weight:750;font-size:12px}
+.card{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:15px;box-shadow:0 5px 20px #1e443208}.card h2{font-size:16px;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:15px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#f6faf8;border-radius:12px;padding:11px}.stat label{display:block;color:var(--muted);font-size:11px;margin-bottom:4px}.stat strong{font-size:20px;letter-spacing:-.03em}.stat small{font-size:11px;color:var(--muted)}
+.track{height:9px;background:#edf2ef;border-radius:20px;overflow:hidden;margin-top:13px}.fill{height:100%;width:0;background:linear-gradient(90deg,var(--green2),var(--green));transition:width .2s}.note{font-size:11px;color:var(--muted);line-height:1.6;margin:10px 1px 0}
+.form{display:grid;grid-template-columns:minmax(0,1fr) 105px 90px auto;gap:7px;margin-bottom:13px}
+input,select{min-width:0;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:white;color:var(--ink);outline:none}
+input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 3px #217e6518}.primary{border:0;background:var(--green);color:white;border-radius:10px;padding:10px 15px;font-weight:750}
+.exercise-list{display:flex;flex-direction:column;gap:8px}.exercise{display:grid;grid-template-columns:25px minmax(0,1fr) auto auto;align-items:center;gap:9px;border:1px solid var(--line);border-radius:12px;padding:10px}.exercise.done{background:var(--pale);border-color:#d5eee3}
+.check{width:22px;height:22px;border:2px solid #cbd8d1;border-radius:7px;background:white;color:white;padding:0;font-weight:800}.done .check{background:var(--green);border-color:var(--green)}
+.name{font-size:14px;font-weight:700;overflow-wrap:anywhere}.done .name{color:#6d8b80}.amount{display:flex;align-items:center;gap:5px}.amount input{width:78px;text-align:right;padding:7px;font-size:13px}.amount span{font-size:12px;color:var(--muted);min-width:28px}
+.del{border:0;background:transparent;color:#9aa8a1;font-size:20px;padding:2px 5px}.empty{text-align:center;padding:24px 10px;color:var(--muted);font-size:13px}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.weekday{text-align:center;font-size:11px;color:var(--muted);padding:5px}.day{min-height:48px;border:1px solid transparent;border-radius:9px;background:#f7faf8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;padding:3px}.day.muted{opacity:.3}.day.today{border-color:var(--green)}.day.selected{background:var(--pale);border-color:var(--green);font-weight:800}.dot{width:5px;height:5px;border-radius:50%;background:var(--green)}.dot.none{background:transparent}
+.chart{height:190px}.chart canvas{width:100%;height:100%}.legend{font-size:11px;color:var(--muted);margin:4px 0 0}.totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.total{background:#f6faf8;border-radius:11px;padding:10px;min-width:0}.total span{display:block;color:var(--muted);font-size:11px}.total strong{font-size:16px;overflow-wrap:anywhere}
+footer{text-align:center;color:var(--muted);font-size:11px;line-height:1.6;margin:18px 0}
+@media(max-width:700px){.app{margin:16px auto}.grid{grid-template-columns:1fr}.card{padding:15px}.form{grid-template-columns:minmax(0,1fr) 95px 82px}.form button{grid-column:1/-1}.day{min-height:44px}.stat{padding:9px}.stat strong{font-size:18px}}
+@media(max-width:390px){header{align-items:flex-start}.actions{flex-direction:column}.actions button{padding:8px;font-size:11px}.exercise{gap:5px;padding:8px}.amount input{width:61px}.totals{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<main class="app">
+<header>
+ <div><p class="eyebrow">DAILY MOVE</p><h1>나의 운동 기록</h1><p class="sub">오늘의 움직임을 기록하고 꾸준함을 확인해요.</p></div>
+ <div class="actions"><button class="install" id="installBtn">＋ 홈 화면에 추가</button><button class="soft" id="backupBtn">기록 백업</button><button class="soft" id="restoreBtn">백업 불러오기</button><input id="restoreFile" type="file" accept="application/json,.json" hidden></div>
+</header>
+<section class="card">
+ <div class="bar" style="margin-bottom:14px"><button class="nav" id="prevDay">‹</button><div><strong id="dateLabel"></strong> <button class="nav" id="todayBtn">오늘</button></div><button class="nav" id="nextDay">›</button></div>
+ <div class="stats">
+  <div class="stat"><label>완료 운동</label><strong id="doneCount">0</strong><small> / <span id="allCount">0</span>개</small></div>
+  <div class="stat"><label>달성률</label><strong id="rate">0%</strong></div>
+  <div class="stat"><label>기록한 운동</label><strong id="unitKinds">0</strong><small>종류</small></div>
+ </div>
+ <div class="track"><div class="fill" id="progress"></div></div><p class="note" id="message">운동을 추가해 오늘의 목표를 세워보세요.</p>
+ <p class="note" id="todayTotals"></p>
+</section>
+<div class="grid">
+ <section class="card">
+  <h2>운동 기록 입력</h2>
+  <form class="form" id="addForm">
+   <input id="exerciseName" maxlength="35" placeholder="운동 이름 (예: 달리기)" required>
+   <select id="unit" aria-label="운동 단위">
+    <optgroup label="거리"><option value="km">km</option><option value="m">m</option><option value="mile">mile</option></optgroup>
+    <optgroup label="횟수"><option value="회">회</option><option value="세트">세트</option></optgroup>
+    <optgroup label="시간"><option value="초">초</option><option value="분">분</option><option value="시간">시간</option></optgroup>
+    <optgroup label="기타"><option value="kcal">kcal</option><option value="kg">kg</option><option value="층">층</option></optgroup>
+   </select>
+   <input id="amount" type="number" min="0" step="0.1" value="0" aria-label="운동 수치">
+   <button class="primary" id="addButton" type="submit">추가</button>
+  </form>
+  <div class="exercise-list" id="exerciseList"></div>
+  <p class="note">수치는 선택한 날짜의 실제 달성량으로 입력하세요. 완료 체크와 수치 변경은 자동 저장됩니다.</p>
+ </section>
+ <section class="card">
+  <div class="bar" style="margin-bottom:13px"><button class="nav" id="prevMonth">‹</button><strong id="monthTitle"></strong><button class="nav" id="nextMonth">›</button></div>
+  <div class="calendar" id="calendar"></div>
+  <p class="note">초록 점이 있는 날짜는 운동 기록이 저장된 날입니다. 날짜를 선택하면 기록을 조회하거나 수정할 수 있어요.</p>
+ </section>
+</div>
+<section class="card">
+ <div class="bar"><h2 style="margin:0">월간 누적 통계</h2><strong id="monthRange"></strong></div>
+ <div class="stats" style="margin-top:14px">
+  <div class="stat"><label>운동한 날</label><strong id="activeDays">0</strong><small>일</small></div>
+  <div class="stat"><label>완료한 운동</label><strong id="monthlyDone">0</strong><small>개</small></div>
+  <div class="stat"><label>월간 달성률</label><strong id="monthlyRate">0%</strong></div>
+ </div>
+ <div class="chart"><canvas id="chart" aria-label="날짜별 완료 운동 개수 그래프"></canvas></div>
+ <p class="legend">● 날짜별 완료 운동 개수 (단위가 다른 운동량을 임의로 합산하지 않아요)</p>
+ <div class="totals" id="unitTotals"></div>
+</section>
+<div id="appError" role="status" style="display:none;background:#fff0ed;color:#9b332b;border:1px solid #f2c7c1;border-radius:12px;padding:12px;margin:12px 0;font-size:12px"></div>
+<footer>기록은 현재 브라우저의 기기에 저장됩니다. 브라우저 데이터 삭제 또는 기기 변경 전 백업을 권장해요.<br>홈 화면 설치 및 오프라인 실행은 HTTPS 주소로 배포했을 때 지원됩니다.</footer>
+</main>
+<script>
+'use strict';
+const STORAGE_KEY='dailyMove.records.v2';
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const dateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const fromKey=k=>{const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
+const today=new Date();today.setHours(0,0,0,0);
+let selectedDate=new Date(today);
+let shownMonth=new Date(today.getFullYear(),today.getMonth(),1);
+let records=readRecords();
+
+function readRecords(){
+ try{
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw)return {};
+  const parsed=JSON.parse(raw);
+  return parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?parsed:{};
+ }catch(error){console.error('기록 읽기 실패',error);return {};}
+}
+function persist(){
+ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(records));return true;}
+ catch(error){console.error('기록 저장 실패',error);alert('브라우저 저장소에 기록을 저장하지 못했어요. 저장 공간이나 브라우저 설정을 확인해 주세요.');return false;}
+}
+function getDayItems(date=selectedDate){const value=records[dateKey(date)];return Array.isArray(value)?value:[];}
+function setDayItems(items,date=selectedDate){const k=dateKey(date);if(items.length)records[k]=items;else delete records[k];persist();}
+function formatDate(d){return new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(d);}
+function numberText(n){return Number(n.toFixed(2)).toLocaleString('ko-KR');}
+function unitSummary(items){
+ const totals={};items.forEach(item=>{const u=item.unit||'회';totals[u]=(totals[u]||0)+(Number(item.value)||0);});
+ return Object.entries(totals).map(([u,v])=>`${numberText(v)} ${u}`).join(' · ');
+}
+function renderDay(){
+ const items=getDayItems(),done=items.filter(x=>x.done).length,total=items.length,rate=total?Math.round(done/total*100):0;
+ $('dateLabel').textContent=formatDate(selectedDate);
+ $('doneCount').textContent=done;$('allCount').textContent=total;$('rate').textContent=rate+'%';
+ $('unitKinds').textContent=new Set(items.map(x=>x.unit||'회')).size;
+ $('progress').style.width=rate+'%';
+ $('message').textContent=!total?'운동을 추가해 오늘의 목표를 세워보세요.':done===total?'오늘 계획한 운동을 모두 완료했어요! 🎉':`${total-done}개 운동이 남았어요. 천천히 이어가 봐요!`;
+ $('todayTotals').textContent=items.length?'입력한 운동량: '+unitSummary(items):'';
+ const list=$('exerciseList');list.replaceChildren();
+ if(!items.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='아직 등록된 운동이 없어요. 위에서 운동을 추가해 보세요.';list.append(empty);}
+ items.forEach(item=>{
+  const row=document.createElement('div');row.className='exercise'+(item.done?' done':'');
+  const check=document.createElement('button');check.type='button';check.className='check';check.textContent=item.done?'✓':'';check.setAttribute('aria-label','완료 상태 변경');
+  check.addEventListener('click',()=>{item.done=!item.done;setDayItems(items);renderAll();});
+  const name=document.createElement('span');name.className='name';name.textContent=item.name;
+  const amount=document.createElement('label');amount.className='amount';
+  const input=document.createElement('input');input.type='number';input.min='0';input.step=['회','세트','층'].includes(item.unit)?'1':'0.1';input.value=Number(item.value)||0;input.setAttribute('aria-label',item.name+' 수치');
+  input.addEventListener('change',()=>{let value=Number(input.value);if(!Number.isFinite(value)||value<0)value=0;if(['회','세트','층'].includes(item.unit))value=Math.round(value);item.value=value;setDayItems(items);renderAll();});
+  const unit=document.createElement('span');unit.textContent=item.unit||'회';amount.append(input,unit);
+  const del=document.createElement('button');del.type='button';del.className='del';del.textContent='×';del.setAttribute('aria-label',item.name+' 삭제');
+  del.addEventListener('click',()=>{if(confirm(`"${item.name}" 기록을 삭제할까요?`)){setDayItems(items.filter(x=>x.id!==item.id));renderAll();}});
+  row.append(check,name,amount,del);list.append(row);
+ });
+}
+function keysInShownMonth(){return Object.keys(records).filter(k=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(k))return false;const d=fromKey(k);return d.getFullYear()===shownMonth.getFullYear()&&d.getMonth()===shownMonth.getMonth()&&Array.isArray(records[k])&&records[k].length>0;});}
+function renderCalendar(){
+ $('monthTitle').textContent=`${shownMonth.getFullYear()}년 ${shownMonth.getMonth()+1}월`;
+ const cal=$('calendar');cal.replaceChildren();
+ ['일','월','화','수','목','금','토'].forEach(label=>{const e=document.createElement('div');e.className='weekday';e.textContent=label;cal.append(e);});
+ const first=new Date(shownMonth.getFullYear(),shownMonth.getMonth(),1);const start=new Date(first);start.setDate(1-first.getDay());
+ for(let i=0;i<42;i++){
+  const d=new Date(start);d.setDate(start.getDate()+i);const k=dateKey(d),has=(records[k]||[]).length>0;
+  const b=document.createElement('button');b.type='button';b.className='day'+(d.getMonth()!==shownMonth.getMonth()?' muted':'')+(k===dateKey(today)?' today':'')+(k===dateKey(selectedDate)?' selected':'');
+  const n=document.createElement('span');n.textContent=d.getDate();const dot=document.createElement('i');dot.className='dot'+(has?'':' none');b.append(n,dot);
+  b.addEventListener('click',()=>{selectedDate=new Date(d);selectedDate.setHours(0,0,0,0);shownMonth=new Date(d.getFullYear(),d.getMonth(),1);renderAll();});
+  cal.append(b);
+ }
+}
+function renderMonthlyStats(){
+ const y=shownMonth.getFullYear(),m=shownMonth.getMonth(),days=new Date(y,m+1,0).getDate(),dailyDone=Array(days).fill(0);
+ let active=0,total=0,done=0;const unitTotals={};
+ keysInShownMonth().forEach(k=>{
+  const d=fromKey(k),items=records[k];if(items.length)active++;
+  items.forEach(item=>{total++;if(item.done){done++;dailyDone[d.getDate()-1]++;}const u=item.unit||'회';unitTotals[u]=(unitTotals[u]||0)+(Number(item.value)||0);});
+ });
+ $('monthRange').textContent=`${m+1}월 1일–${days}일`;
+ $('activeDays').textContent=active;$('monthlyDone').textContent=done;$('monthlyRate').textContent=(total?Math.round(done/total*100):0)+'%';
+ const box=$('unitTotals');box.replaceChildren();
+ const entries=Object.entries(unitTotals);
+ if(!entries.length){const p=document.createElement('p');p.className='note';p.textContent='이번 달 누적 운동량이 아직 없습니다.';box.append(p);}
+ entries.forEach(([unit,value])=>{const item=document.createElement('div');item.className='total';const label=document.createElement('span');label.textContent=`누적 ${unit}`;const amount=document.createElement('strong');amount.textContent=`${numberText(value)} ${unit}`;item.append(label,amount);box.append(item);});
+ drawChart(dailyDone);
+}
+function drawChart(values){
+ const canvas=$('chart'),rect=canvas.getBoundingClientRect(),ratio=window.devicePixelRatio||1;
+ const width=Math.max(1,rect.width),height=Math.max(1,rect.height);canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);
+ const ctx=canvas.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,width,height);
+ const left=25,right=8,top=12,bottom=25,plotW=width-left-right,plotH=height-top-bottom,max=Math.max(1,...values),step=plotW/values.length;
+ ctx.strokeStyle='#e8efeb';ctx.lineWidth=1;
+ for(let i=0;i<4;i++){const y=top+plotH*i/3;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(width-right,y);ctx.stroke();}
+ values.forEach((v,i)=>{const bw=Math.max(2,step*.58),bh=v/max*(plotH-4),x=left+i*step+(step-bw)/2,y=top+plotH-bh;ctx.fillStyle=v?'#36a783':'#e8efeb';ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,bw,Math.max(2,bh),3);else ctx.rect(x,y,bw,Math.max(2,bh));ctx.fill();});
+ ctx.fillStyle='#82918a';ctx.font='10px system-ui';ctx.textAlign='center';
+ [1,Math.ceil(values.length/4),Math.ceil(values.length/2),Math.ceil(values.length*3/4),values.length].forEach(day=>ctx.fillText(String(day),left+(day-.5)*step,height-6));
+}
+function renderAll(){renderDay();renderCalendar();renderMonthlyStats();}
+function addExercise(event){
+ if(event) event.preventDefault();
+ const name=$('exerciseName').value.trim();
+ if(!name){$('exerciseName').focus();return;}
+ const unit=$('unit').value;
+ let value=Number($('amount').value);
+ if(!Number.isFinite(value)||value<0)value=0;
+ if(['회','세트','층'].includes(unit))value=Math.round(value);
+ const items=getDayItems();
+ const id=(window.crypto&&typeof window.crypto.randomUUID==='function')
+   ?window.crypto.randomUUID()
+   :`${Date.now()}-${Math.random().toString(16).slice(2)}`;
+ items.push({id,name,unit,value,done:false});
+ setDayItems(items);
+ $('exerciseName').value='';
+ $('amount').value='0';
+ renderAll();
+ $('exerciseName').focus();
+}
+$('addForm').addEventListener('submit',addExercise);
+$('addButton').addEventListener('click',event=>{
+ // The form submit event is the single source of truth; this fallback covers
+ // browsers/webviews that fail to dispatch submit from a button tap.
+ if(!('requestSubmit' in HTMLFormElement.prototype)){
+   addExercise(event);
+ }
+});
+$('unit').addEventListener('change',()=>{$('amount').step=['회','세트','층'].includes($('unit').value)?'1':'0.1';});
+$('prevDay').addEventListener('click',()=>{selectedDate.setDate(selectedDate.getDate()-1);shownMonth=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),1);renderAll();});
+$('nextDay').addEventListener('click',()=>{selectedDate.setDate(selectedDate.getDate()+1);shownMonth=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),1);renderAll();});
+$('todayBtn').addEventListener('click',()=>{selectedDate=new Date(today);shownMonth=new Date(today.getFullYear(),today.getMonth(),1);renderAll();});
+$('prevMonth').addEventListener('click',()=>{shownMonth.setMonth(shownMonth.getMonth()-1);renderCalendar();renderMonthlyStats();});
+$('nextMonth').addEventListener('click',()=>{shownMonth.setMonth(shownMonth.getMonth()+1);renderCalendar();renderMonthlyStats();});
+$('backupBtn').addEventListener('click',()=>{
+ const blob=new Blob([JSON.stringify(records,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=`daily-move-backup-${dateKey(today)}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+$('restoreBtn').addEventListener('click',()=>$('restoreFile').click());
+$('restoreFile').addEventListener('change',async event=>{
+ const file=event.target.files&&event.target.files[0];if(!file)return;
+ try{
+  const imported=JSON.parse(await file.text());
+  if(!imported||typeof imported!=='object'||Array.isArray(imported))throw new Error('invalid');
+  const valid={};
+  for(const [k,v] of Object.entries(imported)){
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(k)||!Array.isArray(v))continue;
+   valid[k]=v.filter(x=>x&&typeof x.name==='string').map(x=>({id:String(x.id||`${Date.now()}-${Math.random()}`),name:x.name,unit:String(x.unit||'회'),value:Math.max(0,Number(x.value)||0),done:Boolean(x.done)}));
+  }
+  if(!Object.keys(valid).length)throw new Error('empty');
+  if(confirm('현재 기록을 백업 파일의 기록으로 교체할까요?')){records=valid;if(persist())renderAll();}
+ }catch(error){alert('올바른 운동 기록 백업 파일이 아니에요.');}
+ event.target.value='';
+});
+let installPrompt=null;
+window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;$('installBtn').style.display='block';});
+$('installBtn').addEventListener('click',async()=>{
+ if(!installPrompt){alert('브라우저 메뉴에서 “홈 화면에 추가” 또는 “앱 설치”를 선택해 주세요.');return;}
+ installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('installBtn').style.display='none';
+});
+if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
+ window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(error=>console.warn('오프라인 기능 등록 실패',error)));
+}
+window.addEventListener('resize',()=>renderMonthlyStats());
+renderAll();
+</script>
+</body>
+</html>
