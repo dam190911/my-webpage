@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>우리 반 스마트 장보기 미션</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<style>
+:root{--bg:#f3faf5;--card:#fff;--ink:#1d2b3a;--sub:#5b6b7a;--line:#d5e6da;--green:#1f8a5b;--green-d:#166b46;--yellow:#ffd23f;--red:#d93a3f;--redbg:#fde8e8;--soft:#e6f5ec;
+--f:'Jua','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10201a;--card:#17302a;--ink:#eaf5ee;--sub:#a5bdb0;--line:#2b4a3f;--green:#4cc38a;--green-d:#6fd8a4;--yellow:#ffd23f;--red:#ff7a7f;--redbg:#3d1f22;--soft:#1f3b32}}
+:root[data-theme="dark"]{--bg:#10201a;--card:#17302a;--ink:#eaf5ee;--sub:#a5bdb0;--line:#2b4a3f;--green:#4cc38a;--green-d:#6fd8a4;--yellow:#ffd23f;--red:#ff7a7f;--redbg:#3d1f22;--soft:#1f3b32}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:17px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+button{font-family:inherit;font-size:inherit;cursor:pointer;color:inherit}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 48px}
+h1,h2,h3{margin:0;font-weight:400;line-height:1.25}
+.hero{text-align:center;padding:28px 0 8px}
+.hero h1{font-size:clamp(30px,6vw,46px)}
+.hero p{color:var(--sub);margin:8px 0 0}
+.missions{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px}
+.mcard{background:var(--card);border:3px solid var(--ink);border-radius:20px;padding:22px 18px;text-align:center;box-shadow:6px 6px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+.mcard:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--ink)}
+.mcard:active{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--ink)}
+.mcard .em{font-size:56px;display:block}
+.mcard h3{font-size:24px;margin:8px 0 6px}
+.mcard .bud{display:inline-block;background:var(--yellow);color:#1d2b3a;border-radius:999px;padding:4px 16px;font-size:20px}
+.mcard .desc{color:var(--sub);font-size:15px;margin:10px 0 0}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:3px solid var(--ink);border-radius:18px;padding:12px 16px;margin-bottom:16px}
+.toprow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.toprow h2{font-size:22px}
+.back{background:none;border:2px solid var(--line);border-radius:10px;padding:4px 12px;color:var(--sub)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;text-align:center}
+.stat{background:var(--soft);border-radius:12px;padding:6px 4px}
+.stat small{display:block;color:var(--sub);font-size:13px}
+.stat b{font-weight:400;font-size:20px}
+.bar{height:14px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:0;background:var(--green);border-radius:99px;transition:width .25s,background .25s}
+.bar.over i{background:var(--red)}
+.warn{display:none;margin-top:10px;background:var(--redbg);color:var(--red);border:2px solid var(--red);border-radius:12px;padding:8px 12px}
+.warn.show{display:block}
+.layout{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:860px){.layout{grid-template-columns:1fr 340px;align-items:start}.cart{position:sticky;top:150px}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.p{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 8px;text-align:center}
+.p .em{font-size:44px;line-height:1.1}
+.p .nm{margin-top:4px}
+.p .pr{color:var(--green-d);font-size:18px}
+.step{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0}
+.step button,.qty button{width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);background:var(--card);line-height:1;padding:0;font-size:20px}
+.step button:active,.qty button:active{background:var(--yellow);color:#1d2b3a}
+.step span{min-width:24px;font-size:20px}
+.add{width:100%;background:var(--green);color:#fff;border:0;border-radius:10px;padding:7px 0}
+.add:active{background:var(--green-d)}
+.cart{background:var(--card);border:3px solid var(--ink);border-radius:18px;padding:14px}
+.cart h3{font-size:21px;margin-bottom:8px}
+.empty{color:var(--sub);text-align:center;padding:18px 0}
+.row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.row .em{font-size:26px}
+.row .info{flex:1;min-width:0}
+.row .info small{display:block;color:var(--sub);font-size:13px}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:28px;height:28px;font-size:16px}
+.rm{background:none;border:0;color:var(--red);font-size:18px;padding:4px}
+.total{display:flex;justify-content:space-between;font-size:20px;margin-top:10px}
+.submit{width:100%;margin-top:12px;background:var(--yellow);color:#1d2b3a;border:3px solid var(--ink);border-radius:14px;padding:12px;font-size:20px}
+.submit:disabled{background:var(--line);color:var(--sub);border-color:var(--line);cursor:not-allowed}
+.receipt{max-width:560px;margin:0 auto;background:var(--card);border:3px solid var(--ink);border-radius:6px 6px 0 0;padding:24px 22px;position:relative}
+.receipt::after{content:"";position:absolute;left:-3px;right:-3px;bottom:-14px;height:14px;background:linear-gradient(-45deg,transparent 8px,var(--card) 0) 0 0/16px 14px,linear-gradient(45deg,transparent 8px,var(--card) 0) 0 0/16px 14px;filter:drop-shadow(0 2px 0 var(--ink))}
+.receipt h2{text-align:center;font-size:26px}
+.receipt .sub{text-align:center;color:var(--sub);margin:2px 0 14px}
+.rl{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.rl.sum{border:0;font-size:19px}
+.rl.big{font-size:22px;color:var(--green-d)}
+.hr{border-top:3px double var(--ink);margin:10px 0}
+.name{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.name input{flex:1;font:inherit;padding:6px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.reason{max-width:560px;margin:34px auto 0}
+.reason h3{font-size:21px;margin-bottom:6px}
+.reason textarea{width:100%;min-height:130px;font:inherit;padding:12px;border:3px solid var(--ink);border-radius:14px;background:var(--card);color:var(--ink);resize:vertical}
+.hint{color:var(--sub);font-size:14px;margin:6px 0 0}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.acts button{flex:1;min-width:130px;border:3px solid var(--ink);border-radius:12px;padding:10px;background:var(--card)}
+.acts .pri{background:var(--green);color:#fff}
+.toast{min-height:24px;text-align:center;color:var(--green-d);margin-top:8px}
+.kind{display:flex;gap:6px;margin:2px 0 8px}.kb{flex:1;border:2px solid var(--line);border-radius:10px;padding:3px 6px;background:var(--bg);font-size:15px}.kb.on{background:var(--yellow);color:#1d2b3a;border-color:var(--ink)}.guide{background:var(--soft);border-radius:12px;padding:10px 14px;margin-bottom:10px}.guide ol{margin:4px 0 0;padding-left:20px}.kl{display:none}.printonly{display:none}
+@media print{body{background:#fff;color:#000}.noprint,.acts,.toast,.hint,body::before{display:none!important}.receipt{box-shadow:none}.reason textarea{display:none}.printonly{display:block;white-space:pre-wrap;border:2px solid #000;border-radius:10px;padding:10px;min-height:80px}.name input{border:0;border-bottom:1px solid #000}}
+@media print{.kl{display:block;color:#000;font-size:14px;margin-bottom:4px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+var MISSIONS=[
+{id:'curry',em:'🍛',title:'카레 만들기',budget:15000,desc:'우리 반 카레 파티! 꼭 필요한 재료만 골라 보세요.',items:[
+['🥔','감자',2500],['🥕','당근',1500],['🧅','양파',2000],['🍗','닭고기',5500],['🥩','소고기',8000],['🍛','카레 가루',2800],['🍚','쌀',4000],['🍎','사과',3500],['🥤','탄산음료',2000],['🍪','과자',1800],['🧄','마늘',1500],['🍅','토마토',3000],['🥚','달걀',4500],['🍰','케이크 조각',3500],['🧃','주스',2500]]},
+{id:'camp',em:'⛺',title:'여름캠핑 준비하기',budget:30000,desc:'신나는 캠핑! 안전하고 즐거운 준비물을 챙겨요.',items:[
+['⛺','텐트 대여',12000],['🔦','랜턴',6000],['🔥','숯',5000],['🥩','삼겹살',9000],['🌭','소시지',4000],['🍡','마시멜로',2500],['💧','생수',1200],['🧴','벌레 퇴치제',4500],['🎒','돗자리',3500],['🍫','초콜릿',1500],['🩹','구급상자',5000],['🧻','휴지',2000],['🧊','아이스박스',7000],['🍉','수박',9000],['🎲','보드게임',8000]]},
+{id:'party',em:'🎂',title:'친구 생일파티 준비하기',budget:50000,desc:'친구를 위한 특별한 날! 알뜰하게 준비해요.',items:[
+['🎂','케이크',18000],['🎈','풍선 세트',5000],['🎩','고깔모자',3000],['🍕','피자',20000],['🍗','치킨',19000],['🥤','음료수',2000],['🍟','과자',1800],['🎁','선물 포장지',4000],['🕯️','초',2500],['🍦','아이스크림',1500],['🧻','냅킨·접시 세트',3500],['📸','사진 인화',3000],['🧸','곰인형 선물',12000],['🍬','사탕',2000],['🎶','파티 조명',6000]]}];
+var app=document.getElementById('app'),M=null,cart={},pend={},kind={},screen='start',reason='',who='';
+function kindSum(){var r={n:0,w:0,u:0};M.items.forEach(function(it,i){if(!cart[i])return;var v=it[2]*cart[i];if(kind[i]==='n')r.n+=v;else if(kind[i]==='w')r.w+=v;else r.u+=v});return r}
+function kindLabel(i){return kind[i]==='n'?'꼭 필요한 물건':kind[i]==='w'?'갖고 싶은 물건':'아직 고르지 않음'}
+function won(n){return n.toLocaleString('ko-KR')+'원'}
+function total(){var t=0;M.items.forEach(function(it,i){t+=(cart[i]||0)*it[2]});return t}
+function count(){var c=0;for(var k in cart)c+=cart[k];return c}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function start(){
+ screen='start';
+ app.innerHTML='<div class="hero"><h1>🛒 우리 반 스마트 장보기 미션</h1><p>미션을 고르고, 정해진 예산 안에서 알뜰하게 장을 봐요.</p></div><div class="missions">'+
+ MISSIONS.map(function(m,i){return '<button class="mcard" data-m="'+i+'"><span class="em">'+m.em+'</span><h3>'+m.title+'</h3><span class="bud">예산 '+won(m.budget)+'</span><p class="desc">'+m.desc+'</p></button>'}).join('')+'</div>';
+}
+function shop(){
+ screen='shop';
+ app.innerHTML='<div class="top"><div class="toprow"><h2>'+M.em+' '+M.title+'</h2><button class="back" data-a="home">미션 다시 고르기</button></div>'+
+ '<div class="stats"><div class="stat"><small>예산</small><b>'+won(M.budget)+'</b></div><div class="stat"><small>사용 금액</small><b id="s-used"></b></div><div class="stat"><small>남은 잔액</small><b id="s-left"></b></div></div>'+
+ '<div class="bar" id="bar"><i id="barfill"></i></div><div class="warn" id="warn" role="alert">⚠️ 예산을 넘었어요! 수량을 줄이거나 물건을 빼서 예산 안으로 맞춰 보세요.</div></div>'+
+ '<div class="layout"><div class="grid">'+M.items.map(function(it,i){return '<div class="p"><div class="em">'+it[0]+'</div><div class="nm">'+it[1]+'</div><div class="pr">'+won(it[2])+'</div>'+
+ '<div class="step"><button data-a="pm" data-i="'+i+'" aria-label="'+it[1]+' 수량 줄이기">−</button><span id="pq'+i+'">'+(pend[i]||1)+'</span><button data-a="pp" data-i="'+i+'" aria-label="'+it[1]+' 수량 늘리기">+</button></div>'+
+ '<button class="add" data-a="add" data-i="'+i+'">담기</button></div>'}).join('')+'</div>'+
+ '<aside class="cart"><h3>🧺 내 장바구니</h3><div id="cartbody"></div><div class="total"><span>합계</span><b id="ctotal"></b></div><button class="submit" id="submit" data-a="submit">제출하기</button></aside></div>';
+ upd();
+}
+function upd(){
+ var t=total(),left=M.budget-t,over=left<0;
+ document.getElementById('s-used').textContent=won(t);
+ var l=document.getElementById('s-left');l.textContent=won(Math.max(0,left));l.style.color='';if(over)document.getElementById('warn').textContent='⚠️ 예산을 '+won(-left)+' 넘었어요! 수량을 줄이거나 물건을 빼서 예산 안으로 맞춰 보세요.';
+ document.getElementById('barfill').style.width=Math.min(100,t/M.budget*100)+'%';
+ document.getElementById('bar').className='bar'+(over?' over':'');
+ document.getElementById('warn').className='warn'+(over?' show':'');
+ document.getElementById('ctotal').textContent=won(t);
+ var sb=document.getElementById('submit');sb.disabled=over||count()===0;
+ sb.textContent=over?'예산 초과! 제출할 수 없어요':(count()===0?'물건을 담아 보세요':'제출하기');
+ var h='';M.items.forEach(function(it,i){var q=cart[i];if(!q)return;
+  h+='<div class="row"><span class="em">'+it[0]+'</span><div class="info">'+it[1]+'<small>'+won(it[2])+' × '+q+' = '+won(it[2]*q)+'</small></div><div class="qty"><button data-a="cm" data-i="'+i+'" aria-label="'+it[1]+' 하나 빼기">−</button><span>'+q+'</span><button data-a="cp" data-i="'+i+'" aria-label="'+it[1]+' 하나 더하기">+</button></div><button class="rm" data-a="rm" data-i="'+i+'" aria-label="'+it[1]+' 장바구니에서 빼기">✕</button></div>'});
+ document.getElementById('cartbody').innerHTML=h||'<div class="empty">아직 비어 있어요.<br>마음에 드는 물건을 담아 보세요.</div>';
+}
+function result(){
+ screen='result';
+ var t=total(),ks=kindSum(),rows=M.items.map(function(it,i){return cart[i]?'<div class="rl"><span>'+it[0]+' '+it[1]+' × '+cart[i]+'</span><span>'+won(it[2]*cart[i])+'</span></div><div class="kind noprint"><button class="kb'+(kind[i]==='n'?' on':'')+'" data-a="kn" data-i="'+i+'">✅ 꼭 필요해요</button><button class="kb'+(kind[i]==='w'?' on':'')+'" data-a="kw" data-i="'+i+'">💖 갖고 싶어요</button></div><div class="kl">→ '+kindLabel(i)+'</div>':''}).join('');
+ var sumH='<div class="rl"><span>✅ 꼭 필요한 물건</span><span>'+won(ks.n)+'</span></div><div class="rl"><span>💖 갖고 싶은 물건</span><span>'+won(ks.w)+'</span></div>'+(ks.u?'<div class="rl noprint"><span>아직 고르지 않은 물건</span><span>'+won(ks.u)+'</span></div>':'');
+ app.innerHTML='<div class="noprint hero" style="padding-top:8px"><h1>🧾 장보기 결과</h1><p>영수증을 확인하고, 왜 이렇게 골랐는지 적어 보세요.</p></div>'+
+ '<div class="receipt"><h2>스마트 장보기 영수증</h2><div class="sub">'+M.em+' '+M.title+'</div>'+
+ '<div class="name"><label for="who">이름</label><input id="who" maxlength="20" placeholder="이름을 적어요" value="'+esc(who)+'"></div>'+
+ rows+'<div class="hr"></div>'+sumH+'<div class="hr"></div><div class="rl sum"><span>구매 품목</span><span>'+count()+'개</span></div><div class="rl sum"><span>예산</span><span>'+won(M.budget)+'</span></div><div class="rl sum"><span>사용 금액</span><span>'+won(t)+'</span></div><div class="rl sum big"><span>남은 잔액</span><span>'+won(M.budget-t)+'</span></div>'+
+ '<div class="printonly" id="pr-reason"></div></div>'+
+ '<div class="reason noprint"><h3>✏️ 이 물건들을 선택한 이유를 작성해 주세요</h3><textarea id="reason" placeholder="예) 꼭 필요한 물건은 ~해서 먼저 골랐고, 갖고 싶은 물건은 ~해서 골랐어요.">'+esc(reason)+'</textarea>'+
+ '<div class="guide"><b>이렇게 생각해 보세요</b><ol><li>꼭 필요한 물건은 왜 꼭 필요한가요?</li><li>갖고 싶은 물건은 왜 골랐나요? 사지 않아도 미션을 해낼 수 있나요?</li><li>예산이 모자랐다면 무엇을 먼저 포기할 건가요?</li><li>다시 장을 본다면 무엇을 바꾸고 싶나요?</li></ol></div><p class="hint">영수증에서 물건마다 \'꼭 필요해요\' 또는 \'갖고 싶어요\'를 먼저 골라 보세요.</p></div>'+
+ '<div class="reason"><div class="acts"><button data-a="print" class="pri">🖨️ 인쇄 / PDF로 저장</button><button data-a="copy">📋 결과 복사하기</button><button data-a="back">← 다시 고르기</button></div><div class="toast" id="toast" role="status"></div></div>';
+}
+function text(){
+ var t=total(),s='[스마트 장보기 미션] '+M.title+'\n';
+ if(who)s+='이름: '+who+'\n';
+ s+='\n';M.items.forEach(function(it,i){if(cart[i])s+='- '+it[1]+' '+cart[i]+'개: '+won(it[2]*cart[i])+' ('+kindLabel(i)+')\n'});var ks=kindSum();s+='\n꼭 필요한 물건: '+won(ks.n)+'\n갖고 싶은 물건: '+won(ks.w)+(ks.u?'\n아직 고르지 않은 물건: '+won(ks.u):'');
+ s+='\n예산: '+won(M.budget)+'\n사용 금액: '+won(t)+'\n남은 잔액: '+won(M.budget-t)+'\n\n[구매 이유]\n'+(reason||'(아직 작성하지 않았어요)');
+ return s;
+}
+function toast(m){var e=document.getElementById('toast');if(e)e.textContent=m}
+function copy(){
+ var s=text();
+ function fb(){var ta=document.createElement('textarea');ta.value=s;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);toast(ok?'복사했어요! 문서나 메신저에 붙여 넣으세요.':'복사에 실패했어요. 인쇄(PDF) 기능을 써 주세요.')}
+ try{navigator.clipboard.writeText(s).then(function(){toast('복사했어요! 문서나 메신저에 붙여 넣으세요.')},fb)}catch(e){fb()}
+}
+app.addEventListener('input',function(e){if(e.target.id==='reason')reason=e.target.value;if(e.target.id==='who')who=e.target.value});
+app.addEventListener('click',function(e){
+ var b=e.target.closest('button');if(!b)return;
+ if(b.dataset.m!==undefined){M=MISSIONS[+b.dataset.m];cart={};pend={};kind={};reason='';shop();window.scrollTo(0,0);return}
+ var a=b.dataset.a,i=+b.dataset.i;
+ if(a==='home'||a==='back'){if(a==='back'&&!confirm('처음 화면으로 돌아가면 쓴 내용이 지워져요. 돌아갈까요?'))return;M=null;start();window.scrollTo(0,0)}
+ else if(a==='pm'){pend[i]=Math.max(1,(pend[i]||1)-1);document.getElementById('pq'+i).textContent=pend[i]}
+ else if(a==='pp'){pend[i]=Math.min(20,(pend[i]||1)+1);document.getElementById('pq'+i).textContent=pend[i]}
+ else if(a==='add'){cart[i]=Math.min(99,(cart[i]||0)+(pend[i]||1));pend[i]=1;document.getElementById('pq'+i).textContent=1;upd()}
+ else if(a==='cp'){cart[i]=Math.min(99,cart[i]+1);upd()}
+ else if(a==='cm'){cart[i]--;if(cart[i]<=0)delete cart[i];upd()}
+ else if(a==='rm'){delete cart[i];upd()}
+ else if(a==='submit'){if(total()<=M.budget&&count()>0){result();window.scrollTo(0,0)}}
+ else if(a==='print'){document.getElementById('pr-reason').textContent='[구매 이유]\n'+(reason||'(아직 작성하지 않았어요)');try{window.print()}catch(x){toast('인쇄를 열 수 없어요. 복사하기를 써 주세요.')}}
+ else if(a==='kn'){kind[i]='n';result()}
+ else if(a==='kw'){kind[i]='w';result()}
+ else if(a==='copy')copy();
+});
+start();
+</script>
+</body>
+</html>
