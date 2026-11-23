@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>반짝반짝 우리 반 포인트 상점</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Sans KR & Jua (친근한 학급 분위기용) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'sans-serif'],
+                        display: ['"Jua"', 'sans-serif'],
+                    },
+                    colors: {
+                        pastel: {
+                            blue: '#EBF5FF',
+                            blueDark: '#3B82F6',
+                            yellow: '#FEF9C3',
+                            yellowDark: '#F59E0B',
+                            mint: '#ECFDF5',
+                            mintDark: '#10B981',
+                            pink: '#FDF2F8',
+                            pinkDark: '#EC4899',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8FAFC;
+            background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .font-jua { font-family: 'Jua', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+        /* Bounce Animation for Rewards */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- ==================== 상단 글로벌 네비게이션 헤더 ==================== -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <!-- 로고 & 앱 타이틀 -->
+            <div class="flex items-center gap-2.5 cursor-pointer" onclick="resetToHome()">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center shadow-md text-white">
+                    <i data-lucide="sparkles" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-jua text-xl sm:text-2xl text-slate-800 tracking-wide flex items-center gap-1.5">
+                        반짝반짝 우리 반 포인트 상점
+                    </h1>
+                    <p class="text-xs text-slate-500 hidden sm:block">칭찬 포인트로 꿈을 키우는 디지털 학급 상점</p>
+                </div>
+            </div>
+
+            <!-- 우측 연동 모드 상태 및 구글 시트 설정 버튼 -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- 연동 모드 토글/표시 배지 -->
+                <button onclick="openSheetsModal()" id="connectionBadge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm border">
+                    <span class="w-2 h-2 rounded-full animate-pulse bg-emerald-500" id="connectionDot"></span>
+                    <span id="connectionText">데모 체험 모드</span>
+                </button>
+
+                <!-- 구글 시트 연동 가이드 & 코드 버튼 -->
+                <button onclick="openSheetsModal()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl transition shadow-sm">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
+                    <span>시트 연동 & 백엔드 코드</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== 메인 컨텐츠 컨테이너 ==================== -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6 sm:py-8">
+
+        <!-- [화면 1] 역할 선택 및 로그인 화면 -->
+        <section id="loginView" class="max-w-4xl mx-auto">
+            <div class="text-center mb-8">
+                <span class="inline-block px-3.5 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold mb-2">
+                    🏫 2026학년도 우리 반 디지털 경제 교실
+                </span>
+                <h2 class="font-jua text-3xl sm:text-4xl text-slate-800 mb-2">오늘도 반짝반짝 칭찬을 모아볼까요?</h2>
+                <p class="text-slate-600 text-sm sm:text-base">학생은 이름과 4자리 비밀번호(PIN)로 로그인하고, 선생님은 관리자 암호로 접속해 주세요.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 학생 로그인 카드 -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-blue-100 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-28 h-28 bg-blue-50 rounded-bl-full -z-0"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-500 text-white flex items-center justify-center shadow-md">
+                                <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-jua text-2xl text-slate-800">학생 로그인</h3>
+                                <p class="text-xs text-slate-500">내 포인트 확인 및 보상 상점 이용</p>
+                            </div>
+                        </div>
+
+                        <!-- 샘플 계정 팁 -->
+                        <div class="bg-blue-50/80 border border-blue-200 rounded-2xl p-3 mb-5 text-xs text-blue-800 flex items-start gap-2">
+                            <i data-lucide="info" class="w-4 h-4 text-blue-600 shrink-0 mt-0.5"></i>
+                            <div>
+                                <span class="font-bold">체험용 샘플 학생 계정:</span><br>
+                                1번 <b>김민준</b> (PIN: <code class="bg-white px-1.5 py-0.5 rounded font-bold text-blue-600">1234</code>) / 2번 <b>이서연</b> (PIN: <code class="bg-white px-1.5 py-0.5 rounded font-bold text-blue-600">0512</code>)
+                            </div>
+                        </div>
+
+                        <form onsubmit="handleStudentLogin(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">이름 선택 (출석번호순)</label>
+                                <select id="studentSelect" required class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-sm font-medium transition">
+                                    <!-- JS로 동적 렌더링 -->
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">4자리 비밀 번호 (PIN)</label>
+                                <input type="password" id="studentPinInput" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" placeholder="••••" required
+                                    class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-center text-2xl tracking-[0.5em] font-bold transition">
+                                
+                                <!-- 터치 친화형 간편 숫자 키패드 -->
+                                <div class="grid grid-cols-5 gap-1.5 mt-2.5">
+                                    <button type="button" onclick="appendPin('1')" class="py-2 rounded-xl bg-slate-100 hover:bg-blue-100 active:scale-95 font-bold text-slate-700 transition">1</button>
+                                    <button type="button" onclick="appendPin('2')" class="py-2 rounded-xl bg-slate-100 hover:bg-blue-100 active:scale-95 font-bold text-slate-700 transition">2</button>
+                                    <button type="button" onclick="appendPin('3')" class="py-2 rounded-xl bg-slate-100 hover:bg-blue-100 active:scale-95 font-bold text-slate-700 transition">3</button>
+                                    <button type="button" onclick="appendPin('4')" class="py-2 rounded-xl bg-slate-100 hover:bg-blue-100 active:scale-95 font-bold text-slate-700 transition">4</button>
+                                    <button type="button" onclick="appendPin('5')" class="py-2 rounded-xl bg-slate-100 hover:bg-blue-100 active:scale-95 font-bold text-slate-700 transition">5</button>
+                                    <button type="button" onclick="appendPin('6')" class="py-2 rounded-xl bg-slate-100 hover:bg-blue-100 active:scale-95 font-bold text-slate-700 transition">6</button>
+                                    <button type="button" onclick="appendPin('7')" class="py-2 rounded-xl bg-slate-100 hover:bg-blue-100 active:scale-95 font-bold text-slate-700 transition">7</button>
+                                    <button type="button" onclick="appendPin('8')" class="py-2 rounded-xl bg-slate-100 hover:bg-blue-100 active:scale-95 font-bold text-slate-700 transition">8</button>
+                                    <button type="button" onclick="appendPin('9')" class="py-2 rounded-xl bg-slate-100 hover:bg-blue-100 active:scale-95 font-bold text-slate-700 transition">9</button>
+                                    <button type="button" onclick="appendPin('0')" class="py-2 rounded-xl bg-slate-100 hover:bg-blue-100 active:scale-95 font-bold text-slate-700 transition">0</button>
+                                </div>
+                                <div class="flex justify-end mt-1">
+                                    <button type="button" onclick="clearPin()" class="text-xs text-slate-400 hover:text-slate-600 underline">지우기</button>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-3.5 rounded-2xl bg-blue-500 hover:bg-blue-600 active:scale-[0.99] text-white font-bold text-base shadow-md shadow-blue-200 transition flex items-center justify-center gap-2">
+                                <span>상점 입장하기</span>
+                                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 교사 관리자 로그인 카드 -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-amber-100 relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute top-0 right-0 w-28 h-28 bg-amber-50 rounded-bl-full -z-0"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md">
+                                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-jua text-2xl text-slate-800">선생님 관리자 모드</h3>
+                                <p class="text-xs text-slate-500">포인트 지급, 구매 승인 및 상점 관리</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 mb-5 text-xs text-amber-800 flex items-start gap-2">
+                            <i data-lucide="key-round" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                            <div>
+                                <span class="font-bold">교사 전용 접속 안내:</span><br>
+                                기본 샘플 관리자 암호는 <code class="bg-white px-1.5 py-0.5 rounded font-bold text-amber-600">0000</code> 입니다.
+                            </div>
+                        </div>
+
+                        <form onsubmit="handleTeacherLogin(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">선생님 관리자 암호</label>
+                                <input type="password" id="teacherPinInput" maxlength="8" placeholder="관리자 암호 입력 (기본: 0000)" required
+                                    class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none text-center text-lg font-bold transition">
+                            </div>
+
+                            <button type="submit" class="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-white font-bold text-base shadow-md shadow-amber-200 transition flex items-center justify-center gap-2">
+                                <i data-lucide="settings" class="w-5 h-5"></i>
+                                <span>교사 대시보드 열기</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- 하단 요약 안내 -->
+                    <div class="relative z-10 mt-6 pt-5 border-t border-slate-100">
+                        <div class="flex items-center justify-between text-xs text-slate-500">
+                            <span>📊 구글 시트 3개 테이블 완벽 호환</span>
+                            <span class="font-semibold text-emerald-600">Students · Items · History</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- [화면 2] 학생용 마이페이지 & 실시간 상점 -->
+        <section id="studentView" class="hidden space-y-6">
+            <!-- 상단 학생 프로필 배너 -->
+            <div class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-3xl p-6 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4 text-center sm:text-left flex-col sm:flex-row">
+                    <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl shadow-inner border border-white/30 animate-float">
+                        🎒
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                            <span id="stuProfileId" class="px-2.5 py-0.5 rounded-full bg-white/20 text-xs font-bold">1번</span>
+                            <span class="text-blue-100 text-xs">반짝반짝 우리 반 학생</span>
+                        </div>
+                        <h2 class="font-jua text-2xl sm:text-3xl"><span id="stuProfileName">김민준</span> 학생, 환영해요!</h2>
+                    </div>
+                </div>
+
+                <!-- 보유 포인트 카드 & 로그아웃 -->
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end bg-white/15 backdrop-blur-md px-5 py-3.5 rounded-2xl border border-white/20">
+                    <div>
+                        <p class="text-xs text-blue-100 font-medium">현재 보유 포인트</p>
+                        <p class="font-jua text-3xl text-yellow-300 flex items-center gap-1">
+                            <span id="stuProfilePoints">0</span>
+                            <span class="text-lg">P</span>
+                        </p>
+                    </div>
+                    <button onclick="logout()" class="ml-3 px-3.5 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition flex items-center gap-1.5">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        <span>로그아웃</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 학생 메뉴 탭 버튼 -->
+            <div class="flex flex-wrap gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
+                <button onclick="switchStudentTab('store')" id="stuTabBtn-store" class="flex-1 min-w-[110px] py-2.5 px-4 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 bg-blue-500 text-white shadow-sm">
+                    <i data-lucide="store" class="w-4 h-4"></i>
+                    <span>보상 상점</span>
+                </button>
+                <button onclick="switchStudentTab('history')" id="stuTabBtn-history" class="flex-1 min-w-[110px] py-2.5 px-4 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 text-slate-600 hover:bg-slate-100">
+                    <i data-lucide="receipt" class="w-4 h-4"></i>
+                    <span>나의 이용 내역</span>
+                    <span id="stuHistoryCountBadge" class="px-2 py-0.5 text-xs rounded-full bg-slate-200 text-slate-700">0</span>
+                </button>
+                <button onclick="switchStudentTab('pin')" id="stuTabBtn-pin" class="flex-1 min-w-[110px] py-2.5 px-4 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 text-slate-600 hover:bg-slate-100">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                    <span>비밀번호(PIN) 변경</span>
+                </button>
+            </div>
+
+            <!-- 학생 탭 1: 보상 상점 -->
+            <div id="stuTab-store" class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-jua text-xl text-slate-800 flex items-center gap-2">
+                        <span>🎁 교환 가능한 우리 반 보상 아이템</span>
+                    </h3>
+                    <button onclick="syncWithGoogleSheets(true)" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-xl">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        <span>새로고침</span>
+                    </button>
+                </div>
+
+                <!-- 아이템 그리드 -->
+                <div id="storeItemsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- JS로 아이템 카드 렌더링 -->
+                </div>
+            </div>
+
+            <!-- 학생 탭 2: 나의 이용 내역 -->
+            <div id="stuTab-history" class="hidden">
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+                    <h3 class="font-jua text-xl text-slate-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="history" class="w-5 h-5 text-blue-500"></i>
+                        <span>내 포인트 사용 및 구매 신청 내역</span>
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs font-bold text-slate-500 bg-slate-50">
+                                    <th class="py-3 px-4 rounded-tl-xl">신청 일시</th>
+                                    <th class="py-3 px-4">구매 아이템</th>
+                                    <th class="py-3 px-4">차감 포인트</th>
+                                    <th class="py-3 px-4 rounded-tr-xl">선생님 승인 상태</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stuHistoryTableBody" class="divide-y divide-slate-100 text-sm">
+                                <!-- JS로 렌더링 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 학생 탭 3: 비밀번호(PIN) 변경 -->
+            <div id="stuTab-pin" class="hidden max-w-md mx-auto">
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200">
+                    <div class="text-center mb-6">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="key" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-jua text-2xl text-slate-800">내 비밀 번호(PIN) 변경</h3>
+                        <p class="text-xs text-slate-500 mt-1">나만 알 수 있는 4자리 숫자로 안전하게 변경하세요.<br>구글 시트(Students)에도 즉시 반영됩니다.</p>
+                    </div>
+
+                    <form onsubmit="handleChangeStudentPin(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">현재 4자리 PIN</label>
+                            <input type="password" id="oldPinInput" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" required placeholder="현재 비밀번호 4자리"
+                                class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none text-center tracking-widest font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">새로운 4자리 PIN</label>
+                            <input type="password" id="newPinInput" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" required placeholder="새 숫자 4자리"
+                                class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none text-center tracking-widest font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">새로운 4자리 PIN 확인</label>
+                            <input type="password" id="confirmNewPinInput" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" required placeholder="새 숫자 4자리 다시 입력"
+                                class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none text-center tracking-widest font-bold">
+                        </div>
+                        <button type="submit" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition">
+                            새 비밀번호 저장하기
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- [화면 3] 교사 관리자 화면 -->
+        <section id="teacherView" class="hidden space-y-6">
+            <!-- 상단 교사 요약 대시보드 -->
+            <div class="bg-slate-800 rounded-3xl p-6 text-white shadow-lg">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold shadow">
+                            <i data-lucide="crown" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-jua text-2xl sm:text-3xl text-white">선생님 학급 포인트 관리실</h2>
+                            <p class="text-xs text-slate-300">학생별 포인트 부여, 구매 요청 승인 및 상점 재고를 실시간 관리합니다.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="syncWithGoogleSheets(true)" class="px-3.5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-xs font-bold flex items-center gap-1.5 transition">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-400"></i>
+                            <span>시트 동기화</span>
+                        </button>
+                        <button onclick="logout()" class="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-xs font-bold flex items-center gap-1.5 transition">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                            <span>로그아웃</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3개 핵심 지표 카드 -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-slate-700/60 border border-slate-600 rounded-2xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-slate-300">등록된 우리 반 학생</p>
+                            <p class="font-jua text-2xl sm:text-3xl text-white mt-1"><span id="dashTotalStudents">0</span>명</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-700/60 border border-slate-600 rounded-2xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-slate-300">승인 대기 중인 구매 요청</p>
+                            <p class="font-jua text-2xl sm:text-3xl text-amber-400 mt-1"><span id="dashPendingCount">0</span>건</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center">
+                            <i data-lucide="bell-ring" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-700/60 border border-slate-600 rounded-2xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-slate-300">학급 전체 보유 포인트</p>
+                            <p class="font-jua text-2xl sm:text-3xl text-emerald-400 mt-1"><span id="dashTotalPoints">0</span>P</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
+                            <i data-lucide="coins" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 교사 탭 네비게이션 -->
+            <div class="flex flex-wrap gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
+                <button onclick="switchTeacherTab('approvals')" id="tchTabBtn-approvals" class="flex-1 min-w-[130px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 bg-amber-500 text-white shadow-sm">
+                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                    <span>구매 승인 관리</span>
+                    <span id="tchPendingBadge" class="px-2 py-0.5 text-xs rounded-full bg-white text-amber-600 font-extrabold">0</span>
+                </button>
+                <button onclick="switchTeacherTab('students')" id="tchTabBtn-students" class="flex-1 min-w-[130px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 text-slate-600 hover:bg-slate-100">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    <span>학생 포인트 & PIN</span>
+                </button>
+                <button onclick="switchTeacherTab('items')" id="tchTabBtn-items" class="flex-1 min-w-[130px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 text-slate-600 hover:bg-slate-100">
+                    <i data-lucide="package-plus" class="w-4 h-4"></i>
+                    <span>상점 아이템 관리</span>
+                </button>
+                <button onclick="switchTeacherTab('sheetsPreview')" id="tchTabBtn-sheetsPreview" class="flex-1 min-w-[130px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 text-slate-600 hover:bg-slate-100">
+                    <i data-lucide="table" class="w-4 h-4"></i>
+                    <span>구글 시트 DB 뷰어</span>
+                </button>
+            </div>
+
+            <!-- 교사 탭 1: 구매 승인 관리 (History) -->
+            <div id="tchTab-approvals" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 class="font-jua text-xl text-slate-800">📋 학생 아이템 구매 신청 내역 (History 시트)</h3>
+                        <p class="text-xs text-slate-500">승인 완료 시 쿠폰 사용이 확정되며, 거절 시 차감된 포인트와 재고가 자동 복구됩니다.</p>
+                    </div>
+                    <!-- 상태 필터 버튼 -->
+                    <div class="flex gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+                        <button onclick="setHistoryFilter('ALL')" id="filterBtn-ALL" class="px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm">전체</button>
+                        <button onclick="setHistoryFilter('승인대기')" id="filterBtn-승인대기" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800">승인대기</button>
+                        <button onclick="setHistoryFilter('승인완료')" id="filterBtn-승인완료" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800">승인완료</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-xs font-bold text-slate-500 bg-slate-50">
+                                <th class="py-3 px-4 rounded-tl-xl">신청 일시</th>
+                                <th class="py-3 px-4">학생 이름</th>
+                                <th class="py-3 px-4">구매 아이템</th>
+                                <th class="py-3 px-4">차감 포인트</th>
+                                <th class="py-3 px-4">상태</th>
+                                <th class="py-3 px-4 rounded-tr-xl text-right">승인 처리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tchHistoryTableBody" class="divide-y divide-slate-100 text-sm">
+                            <!-- JS로 렌더링 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 교사 탭 2: 학생 포인트 & PIN 관리 (Students) -->
+            <div id="tchTab-students" class="hidden space-y-6">
+                <!-- 빠른 포인트 지급 & 신규 학생 등록 2단 그리드 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 맞춤형 포인트 지급/차감 폼 -->
+                    <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-jua text-xl text-slate-800 mb-3 flex items-center gap-2">
+                            <i data-lucide="award" class="w-5 h-5 text-amber-500"></i>
+                            <span>칭찬 포인트 지급 / 차감하기</span>
+                        </h3>
+                        <form onsubmit="handleCustomPointSubmit(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                            <select id="pointTargetStudent" required class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium outline-none focus:ring-2 focus:ring-amber-400">
+                                <!-- JS 렌더링 -->
+                            </select>
+                            <input type="number" id="pointCustomAmount" required placeholder="포인트 (예: 20 또는 -10)" class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:ring-2 focus:ring-amber-400">
+                            <input type="text" id="pointCustomReason" placeholder="사유 (예: 발표왕 칭찬)" class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-amber-400">
+                            <button type="submit" class="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-sm transition">
+                                포인트 반영
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- 신규 학생 추가 폼 -->
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-jua text-xl text-slate-800 mb-3 flex items-center gap-2">
+                            <i data-lucide="user-plus" class="w-5 h-5 text-blue-500"></i>
+                            <span>신규 학생 등록</span>
+                        </h3>
+                        <form onsubmit="handleAddStudent(event)" class="flex gap-2">
+                            <input type="text" id="newStuId" required placeholder="학번(예: 6)" class="w-20 px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-center font-bold outline-none focus:ring-2 focus:ring-blue-400">
+                            <input type="text" id="newStuName" required placeholder="학생 이름" class="flex-1 px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-blue-400">
+                            <button type="submit" class="px-4 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold text-sm transition shrink-0">
+                                추가
+                            </button>
+                        </form>
+                        <p class="text-[11px] text-slate-400 mt-2">* 초기 PIN은 <code class="font-bold text-slate-600">0000</code>, 초기 포인트는 <code class="font-bold text-slate-600">50P</code>로 생성됩니다.</p>
+                    </div>
+                </div>
+
+                <!-- 학생 목록 테이블 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+                    <h3 class="font-jua text-xl text-slate-800 mb-4">👨‍🎓 우리 반 학생 명부 및 원클릭 포인트 관리 (Students 시트)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs font-bold text-slate-500 bg-slate-50">
+                                    <th class="py-3 px-4 rounded-tl-xl">학생 ID</th>
+                                    <th class="py-3 px-4">학생 이름</th>
+                                    <th class="py-3 px-4">현재 잔액</th>
+                                    <th class="py-3 px-4">빠른 포인트 지급/차감</th>
+                                    <th class="py-3 px-4 rounded-tr-xl text-right">비밀번호(PIN) 관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tchStudentsTableBody" class="divide-y divide-slate-100 text-sm">
+                                <!-- JS 렌더링 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 교사 탭 3: 상점 아이템 관리 (Items) -->
+            <div id="tchTab-items" class="hidden space-y-6">
+                <!-- 새 보상 아이템 등록 폼 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+                    <h3 class="font-jua text-xl text-slate-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="plus-circle" class="w-5 h-5 text-emerald-500"></i>
+                        <span>새 보상 아이템 등록하기</span>
+                    </h3>
+                    <form onsubmit="handleAddItem(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        <input type="text" id="newItemName" required placeholder="상품명 (예: 급식 1등 줄서기권)" class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-400">
+                        <input type="number" id="newItemPrice" required min="1" placeholder="가격 (P)" class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-400">
+                        <input type="number" id="newItemStock" required min="1" placeholder="초기 재고 수량" class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-400">
+                        <input type="text" id="newItemDesc" required placeholder="아이템 설명" class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-emerald-400">
+                        <button type="submit" class="py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-sm transition">
+                            + 상점에 등록
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 등록된 아이템 관리 테이블 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+                    <h3 class="font-jua text-xl text-slate-800 mb-4">🛍️ 판매 중인 보상 아이템 목록 (Items 시트)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs font-bold text-slate-500 bg-slate-50">
+                                    <th class="py-3 px-4 rounded-tl-xl">상품 ID</th>
+                                    <th class="py-3 px-4">상품명</th>
+                                    <th class="py-3 px-4">설명</th>
+                                    <th class="py-3 px-4">가격</th>
+                                    <th class="py-3 px-4">남은 재고</th>
+                                    <th class="py-3 px-4 rounded-tr-xl text-right">재고 조절 / 삭제</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tchItemsTableBody" class="divide-y divide-slate-100 text-sm">
+                                <!-- JS 렌더링 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 교사 탭 4: 구글 시트 DB 미리보기 -->
+            <div id="tchTab-sheetsPreview" class="hidden space-y-6">
+                <div class="bg-emerald-50 border border-emerald-200 rounded-3xl p-5 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center">
+                            <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-emerald-900">구글 스프레드시트 3단 DB 구조 실시간 미러링</h3>
+                            <p class="text-xs text-emerald-700">현재 앱에 저장된 데이터가 구글 시트의 3개 탭(Students, Items, History)에 저장되는 형태입니다.</p>
+                        </div>
+                    </div>
+                    <button onclick="exportAllCsv()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>CSV 백업 다운로드</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5" id="sheetsMirrorContainer">
+                    <!-- JS로 Students, Items, History 시트 미리보기 렌더링 -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== 모달 1: 아이템 구매 확인 모달 ==================== -->
+    <div id="purchaseModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all">
+            <div class="text-center">
+                <div class="w-16 h-16 rounded-2xl bg-amber-100 text-amber-500 flex items-center justify-center text-3xl mx-auto mb-3">
+                    🎁
+                </div>
+                <h3 class="font-jua text-2xl text-slate-800">이 아이템을 구매할까요?</h3>
+                <p class="text-xs text-slate-500 mt-1">구매 신청 후 선생님 승인이 완료되면 사용할 수 있어요.</p>
+            </div>
+
+            <div class="bg-slate-50 rounded-2xl p-4 my-5 space-y-2 border border-slate-200/70">
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">선택 아이템</span>
+                    <span id="modalItemName" class="font-bold text-slate-800">-</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">차감 포인트</span>
+                    <span id="modalItemPrice" class="font-bold text-rose-600">- 0P</span>
+                </div>
+                <div class="border-t border-slate-200 pt-2 flex justify-between text-sm">
+                    <span class="text-slate-600 font-semibold">구매 후 예상 잔액</span>
+                    <span id="modalAfterBalance" class="font-extrabold text-blue-600">0P</span>
+                </div>
+            </div>
+
+            <div class="flex gap-2.5">
+                <button onclick="closePurchaseModal()" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition">
+                    취소
+                </button>
+                <button onclick="confirmPurchase()" class="flex-1 py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold text-sm shadow-md shadow-blue-200 transition">
+                    네, 구매할래요!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 모달 2: 구글 시트 연동 설정 & Apps Script 백엔드 코드 ==================== -->
+    <div id="sheetsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <!-- 모달 헤더 -->
+            <div class="px-6 py-4 bg-slate-800 text-white flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="file-spreadsheet" class="w-6 h-6 text-emerald-400"></i>
+                    <div>
+                        <h3 class="font-jua text-xl">구글 스프레드시트 실시간 연동 설정</h3>
+                        <p class="text-xs text-slate-300">별도 서버 없이 선생님의 구글 시트를 데이터베이스로 연결합니다.</p>
+                    </div>
+                </div>
+                <button onclick="closeSheetsModal()" class="p-1.5 rounded-xl hover:bg-slate-700 text-slate-300">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- 모달 본문 (스크롤 가능) -->
+            <div class="p-6 overflow-y-auto space-y-6 text-sm">
+                <!-- 1. 현재 연동 URL 입력 및 모드 전환 -->
+                <div class="bg-blue-50/70 border border-blue-200 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-blue-900 flex items-center gap-1.5">
+                            <i data-lucide="link" class="w-4 h-4"></i>
+                            1단계: Google Apps Script 웹 앱 URL 연결
+                        </span>
+                        <span id="modalModeStatus" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">현재: 데모 체험 모드</span>
+                    </div>
+                    <p class="text-xs text-slate-600">아래 가이드를 따라 배포한 <b>웹 앱 URL(https://script.google.com/macros/s/...)</b>을 입력하면 실제 구글 시트와 즉시 동기화됩니다.</p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="url" id="gasUrlInput" placeholder="https://script.google.com/macros/s/여러분의스크립트ID/exec" 
+                            class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-mono outline-none focus:ring-2 focus:ring-blue-500">
+                        <button onclick="saveGasUrl()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shrink-0 transition">
+                            실제 시트 연동 시작
+                        </button>
+                        <button onclick="switchToDemoMode()" class="px-3.5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs shrink-0 transition">
+                            데모 모드로 전환
+                        </button>
+                    </div>
+
+                    <!-- 원격 시트 3개 자동 생성 실행 바 -->
+                    <div class="pt-2 border-t border-blue-200/70 flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-[11px] text-blue-800">💡 새 빈 스프레드시트를 연결하셨나요? 버튼 하나로 필수 시트 3개와 샘플 데이터를 자동 세팅하세요!</span>
+                        <button onclick="triggerRemoteSetupSheets()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 shrink-0">
+                            <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
+                            <span>원격으로 시트 3개 자동 생성하기</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. 구글 시트 탭 자동 생성 안내 -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
+                        <span class="w-5 h-5 rounded-full bg-slate-800 text-white text-xs flex items-center justify-center">2</span>
+                        구글 스프레드시트 3개 시트(탭) 자동 생성 구조
+                    </h4>
+                    <p class="text-xs text-slate-600">이제 시트를 수동으로 만들 필요가 없습니다! 아래 코드를 붙여넣고 시트를 새로고침하면 상단 메뉴 <b>[🏫 우리 반 포인트 상점] → [1. 필수 시트 3개 자동 생성 및 초기 세팅]</b> 또는 위 원격 버튼으로 자동 생성됩니다.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <p class="font-bold text-blue-600 mb-1">① Students 시트</p>
+                            <code class="block bg-white p-1.5 rounded border text-[11px]">학생ID | 학생이름 | 비밀번호(PIN) | 잔액포인트</code>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <p class="font-bold text-emerald-600 mb-1">② Items 시트</p>
+                            <code class="block bg-white p-1.5 rounded border text-[11px]">상품ID | 상품명 | 가격 | 재고 | 설명</code>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <p class="font-bold text-amber-600 mb-1">③ History 시트</p>
+                            <code class="block bg-white p-1.5 rounded border text-[11px]">일시 | 학생이름 | 구매아이템 | 차감포인트 | 승인상태</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Apps Script 전체 코드 복사 -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-slate-800 text-white text-xs flex items-center justify-center">3</span>
+                            Google Apps Script 백엔드 코드 (Code.gs)
+                        </h4>
+                        <button onclick="copyGasCode()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-1.5 transition">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                            <span>코드 전체 복사</span>
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-600">시트 상단 메뉴 <b>[확장 프로그램] → [Apps Script]</b>에 아래 코드를 붙여넣고 저장한 뒤, <b>[배포] → [새 배포] → 유형: 웹 앱 (액세스 권한: 모든 사용자)</b>로 배포하세요.</p>
+                    <pre id="gasCodeBlock" class="bg-slate-900 text-emerald-300 p-4 rounded-2xl text-[11px] font-mono overflow-x-auto max-h-56 leading-relaxed select-all">// 반짝반짝 우리 반 포인트 상점 - Google Apps Script 백엔드 (Code.gs)
+
+// 1. 스프레드시트를 열 때 상단 커스텀 메뉴 추가
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('🏫 우리 반 포인트 상점')
+    .addItem('1. 필수 시트 3개 자동 생성 및 초기 세팅', 'setupSheets')
+    .addToUi();
+}
+
+// 2. 필수 시트 3개(Students, Items, History) 자동 생성 및 스타일/샘플 세팅
+function setupSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const created = [];
+  const skipped = [];
+
+  // (1) Students 시트 생성
+  let stuSheet = ss.getSheetByName('Students');
+  if (!stuSheet) {
+    stuSheet = ss.insertSheet('Students');
+    const stuHeaders = [['학생ID', '학생이름', '비밀번호(PIN)', '잔액포인트']];
+    stuSheet.getRange(1, 1, 1, 4).setValues(stuHeaders);
+    styleHeaderRow(stuSheet, 4, '#DBEAFE', '#1E3A8A');
+
+    // PIN 컬럼(C열) 앞자리 0 보존을 위해 텍스트 서식(@) 지정
+    stuSheet.getRange('C2:C100').setNumberFormat('@');
+
+    const stuSamples = [
+      ['S01', '김민준', '1234', 150],
+      ['S02', '이서연', '0412', 230],
+      ['S03', '박지훈', '0000', 80],
+      ['S04', '최수아', '1004', 310],
+      ['S05', '정우진', '0925', 45]
+    ];
+    stuSheet.getRange(2, 1, stuSamples.length, 4).setValues(stuSamples);
+    stuSheet.autoResizeColumns(1, 4);
+    created.push('Students');
+  } else {
+    skipped.push('Students');
+  }
+
+  // (2) Items 시트 생성
+  let itemSheet = ss.getSheetByName('Items');
+  if (!itemSheet) {
+    itemSheet = ss.insertSheet('Items');
+    const itemHeaders = [['상품ID', '상품명', '가격', '재고', '설명']];
+    itemSheet.getRange(1, 1, 1, 5).setValues(itemHeaders);
+    styleHeaderRow(itemSheet, 5, '#D1FAE5', '#065F46');
+
+    const itemSamples = [
+      ['ITEM-01', '숙제 1회 면제권', 200, 3, '알림장 기본 숙제 1회를 기분 좋게 패스할 수 있는 황금 쿠폰!'],
+      ['ITEM-02', '짝꿍 자리 선택권', 150, 5, '다음 자리 바꾸기 때 내가 원하는 자리와 짝꿍을 먼저 골라요.'],
+      ['ITEM-03', '급식 1등 줄서기권', 100, 10, '점심시간에 우리 반에서 가장 먼저 급식실로 출발할 수 있어요.'],
+      ['ITEM-04', '선생님과 보드게임 1판', 120, 4, '쉬는 시간 또는 점심시간에 선생님과 신나는 보드게임 대결!'],
+      ['ITEM-05', '달콤한 간식 뽑기권', 50, 15, '선생님의 비밀 간식 상자에서 맛있는 간식 1개를 뽑아요.']
+    ];
+    itemSheet.getRange(2, 1, itemSamples.length, 5).setValues(itemSamples);
+    itemSheet.autoResizeColumns(1, 5);
+    created.push('Items');
+  } else {
+    skipped.push('Items');
+  }
+
+  // (3) History 시트 생성
+  let histSheet = ss.getSheetByName('History');
+  if (!histSheet) {
+    histSheet = ss.insertSheet('History');
+    const histHeaders = [['일시', '학생이름', '구매아이템', '차감포인트', '승인상태']];
+    histSheet.getRange(1, 1, 1, 5).setValues(histHeaders);
+    styleHeaderRow(histSheet, 5, '#FEF3C7', '#92400E');
+
+    const histSamples = [
+      ['2026-11-22 14:20', '이서연', '달콤한 간식 뽑기권', 50, '승인완료'],
+      ['2026-11-23 10:15', '김민준', '급식 1등 줄서기권', 100, '승인대기']
+    ];
+    histSheet.getRange(2, 1, histSamples.length, 5).setValues(histSamples);
+    histSheet.autoResizeColumns(1, 5);
+    created.push('History');
+  } else {
+    skipped.push('History');
+  }
+
+  // 기본 빈 시트('시트1' 또는 'Sheet1')가 남아있고 다른 시트가 생성되었다면 정리
+  const defaultSheet = ss.getSheetByName('시트1') || ss.getSheetByName('Sheet1');
+  if (defaultSheet && ss.getSheets().length > 1 && defaultSheet.getLastRow() === 0) {
+    ss.deleteSheet(defaultSheet);
+  }
+
+  // UI 실행 환경일 경우 알림창 표시
+  try {
+    let msg = '';
+    if (created.length > 0) msg += '✅ 새로 생성된 시트: ' + created.join(', ') + '\n';
+    if (skipped.length > 0) msg += 'ℹ️ 이미 존재하여 보존된 시트: ' + skipped.join(', ');
+    SpreadsheetApp.getUi().alert('우리 반 포인트 상점 시트 세팅 완료', msg, SpreadsheetApp.getUi().ButtonSet.OK);
+  } catch (e) {
+    // 웹 앱(doPost) 원격 호출 시 UI 객체가 없으므로 무시
+  }
+
+  return { created: created, skipped: skipped };
+}
+
+function styleHeaderRow(sheet, colCount, bgColor, fontColor) {
+  const headerRange = sheet.getRange(1, 1, 1, colCount);
+  headerRange
+    .setBackground(bgColor)
+    .setFontColor(fontColor)
+    .setFontWeight('bold')
+    .setHorizontalAlignment('center')
+    .setVerticalAlignment('middle');
+  sheet.setRowHeight(1, 30);
+  sheet.setFrozenRows(1);
+}
+
+// 3. 웹 앱 데이터 조회 (GET)
+function doGet(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const students = sheetToJson(ss.getSheetByName('Students'));
+  const items = sheetToJson(ss.getSheetByName('Items'));
+  const history = sheetToJson(ss.getSheetByName('History'));
+  
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'success',
+    students: students,
+    items: items,
+    history: history
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+// 4. 웹 앱 데이터 변경 및 원격 세팅 (POST)
+function doPost(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const data = JSON.parse(e.postData.contents);
+  const action = data.action;
+
+  if (action === 'setup') {
+    const res = setupSheets();
+    return ContentService.createTextOutput(JSON.stringify({ status: 'ok', result: res }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  if (action === 'PURCHASE') {
+    const stuSheet = ss.getSheetByName('Students');
+    const itemSheet = ss.getSheetByName('Items');
+    const histSheet = ss.getSheetByName('History');
+    
+    updateCellById(stuSheet, 0, data.studentId, 3, data.newBalance);
+    updateCellById(itemSheet, 0, data.itemId, 3, data.newStock);
+    histSheet.appendRow([data.timestamp, data.studentName, data.itemName, data.price, '승인대기']);
+  } 
+  else if (action === 'CHANGE_PIN') {
+    const stuSheet = ss.getSheetByName('Students');
+    updateCellById(stuSheet, 0, data.studentId, 2, "'" + data.newPin);
+  }
+  else if (action === 'UPDATE_POINTS') {
+    const stuSheet = ss.getSheetByName('Students');
+    updateCellById(stuSheet, 0, data.studentId, 3, data.newBalance);
+  }
+  else if (action === 'UPDATE_HISTORY_STATUS') {
+    const histSheet = ss.getSheetByName('History');
+    const rows = histSheet.getDataRange().getValues();
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i][0] == data.timestamp && rows[i][1] == data.studentName && rows[i][2] == data.itemName) {
+        histSheet.getRange(i + 1, 5).setValue(data.status);
+        break;
+      }
+    }
+    if (data.status === '거절됨') {
+      const stuSheet = ss.getSheetByName('Students');
+      const itemSheet = ss.getSheetByName('Items');
+      updateCellById(stuSheet, 1, data.studentName, 3, data.refundBalance);
+      updateCellById(itemSheet, 1, data.itemName, 3, data.restoredStock);
+    }
+  }
+  else if (action === 'ADD_STUDENT') {
+    const stuSheet = ss.getSheetByName('Students');
+    const nextRow = stuSheet.getLastRow() + 1;
+    stuSheet.getRange(nextRow, 3).setNumberFormat('@');
+    stuSheet.appendRow([data.id, data.name, '0000', 50]);
+  }
+  else if (action === 'ADD_ITEM') {
+    ss.getSheetByName('Items').appendRow([data.id, data.name, data.price, data.stock, data.desc]);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function sheetToJson(sheet) {
+  if (!sheet) return [];
+  const rows = sheet.getDataRange().getValues();
+  if (rows.length <= 1) return [];
+  const headers = rows[0];
+  return rows.slice(1).map(row => {
+    let obj = {};
+    headers.forEach((h, i) => obj[h] = row[i]);
+    return obj;
+  });
+}
+
+function updateCellById(sheet, idColIndex, targetId, targetColIndex, newValue) {
+  if (!sheet) return;
+  const rows = sheet.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][idColIndex]) === String(targetId)) {
+      sheet.getRange(i + 1, targetColIndex + 1).setValue(newValue);
+      break;
+    }
+  }
+}</pre>
+                </div>
+            </div>
+
+            <!-- 모달 푸터 -->
+            <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button onclick="closeSheetsModal()" class="px-5 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-slate-700 transition">
+                    닫기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 토스트 알림 컨테이너 ==================== -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ==================== 애플리케이션 로직 (JavaScript) ==================== -->
+    <script>
+        // 1. 초기 샘플 데이터 (데모 체험 모드용 - 즉시 작동)
+        const DEFAULT_DATA = {
+            teacherPin: '0000',
+            students: [
+                { id: '1', name: '김민준', pin: '1234', points: 150 },
+                { id: '2', name: '이서연', pin: '0512', points: 230 },
+                { id: '3', name: '박지훈', pin: '0000', points: 80 },
+                { id: '4', name: '최수아', pin: '1004', points: 310 },
+                { id: '5', name: '정우진', pin: '2222', points: 45 }
+            ],
+            items: [
+                { id: 'ITEM-01', name: '숙제 1회 면제권', price: 200, stock: 3, desc: '알림장 기본 숙제 1회를 기분 좋게 패스할 수 있는 황금 쿠폰!', icon: '🎫' },
+                { id: 'ITEM-02', name: '짝꿍 자리 선택권', price: 150, stock: 5, desc: '다음 자리 바꾸기 때 내가 원하는 자리와 짝꿍을 먼저 골라요.', icon: '🪑' },
+                { id: 'ITEM-03', name: '급식 1등 줄서기권', price: 100, stock: 10, desc: '점심시간에 우리 반에서 가장 먼저 급식실로 출발할 수 있어요.', icon: '🍱' },
+                { id: 'ITEM-04', name: '선생님과 보드게임 1판', price: 120, stock: 4, desc: '쉬는 시간 또는 점심시간에 선생님과 신나는 보드게임 대결!', icon: '🎲' },
+                { id: 'ITEM-05', name: '달콤한 간식 뽑기권', price: 50, stock: 15, desc: '선생님의 비밀 간식 상자에서 맛있는 간식 1개를 뽑아요.', icon: '🍭' },
+                { id: 'ITEM-06', name: '1일 학급 DJ 신청권', price: 70, stock: 8, desc: '청소 시간이나 아침 활동 시간에 내가 고른 노래를 틀어요.', icon: '🎧' }
+            ],
+            history: [
+                { timestamp: '2026-11-22 14:20', studentName: '이서연', itemName: '달콤한 간식 뽑기권', price: 50, status: '승인완료' },
+                { timestamp: '2026-11-23 10:15', studentName: '김민준', itemName: '급식 1등 줄서기권', price: 100, status: '승인대기' },
+                { timestamp: '2026-11-23 13:40', studentName: '최수아', itemName: '짝꿍 자리 선택권', price: 150, status: '승인대기' }
+            ]
+        };
+
+        // 2. 앱 상태 관리 (State)
+        let appState = {
+            mode: 'DEMO', // 'DEMO' 또는 'LIVE'
+            gasUrl: '',
+            currentRole: null, // 'STUDENT' 또는 'TEACHER'
+            currentStudentId: null,
+            selectedItemToBuy: null,
+            historyFilter: 'ALL',
+            data: JSON.parse(JSON.stringify(DEFAULT_DATA))
+        };
+
+        // 초기화 실행
+        window.addEventListener('DOMContentLoaded', () => {
+            loadLocalState();
+            updateConnectionBadge();
+            renderLoginStudentDropdown();
+            lucide.createIcons();
+        });
+
+        // 로컬 스토리지 저장 및 불러오기
+        function saveLocalState() {
+            localStorage.setItem('classroomStoreState_v1', JSON.stringify({
+                mode: appState.mode,
+                gasUrl: appState.gasUrl,
+                data: appState.data
+            }));
+        }
+
+        function loadLocalState() {
+            const saved = localStorage.getItem('classroomStoreState_v1');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    appState.mode = parsed.mode || 'DEMO';
+                    appState.gasUrl = parsed.gasUrl || '';
+                    if (parsed.data) appState.data = parsed.data;
+                    document.getElementById('gasUrlInput').value = appState.gasUrl;
+                } catch (e) {
+                    console.error('로컬 데이터 파싱 오류:', e);
+                }
+            }
+        }
+
+        // ==================== 토스트 메시지 유틸리티 ====================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const styles = {
+                success: 'bg-emerald-600 text-white border-emerald-500',
+                error: 'bg-rose-600 text-white border-rose-500',
+                warning: 'bg-amber-500 text-white border-amber-400',
+                info: 'bg-slate-800 text-white border-slate-700'
+            };
+
+            toast.className = `${styles[type] || styles.info} px-4 py-3 rounded-2xl shadow-xl border text-xs sm:text-sm font-bold flex items-center gap-2 pointer-events-auto transform transition-all duration-300 translate-y-2 opacity-0`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // ==================== 구글 시트 연동 & API 통신 ====================
+        function updateConnectionBadge() {
+            const badge = document.getElementById('connectionBadge');
+            const dot = document.getElementById('connectionDot');
+            const text = document.getElementById('connectionText');
+            const modalStatus = document.getElementById('modalModeStatus');
+
+            if (appState.mode === 'LIVE' && appState.gasUrl) {
+                badge.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm border bg-blue-50 text-blue-700 border-blue-200';
+                dot.className = 'w-2 h-2 rounded-full animate-pulse bg-blue-600';
+                text.textContent = '구글 시트 실시간 연동중';
+                if (modalStatus) {
+                    modalStatus.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700';
+                    modalStatus.textContent = '현재: 구글 시트 실시간 연동 모드';
+                }
+            } else {
+                badge.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm border bg-emerald-50 text-emerald-700 border-emerald-200';
+                dot.className = 'w-2 h-2 rounded-full animate-pulse bg-emerald-500';
+                text.textContent = '데모 체험 모드';
+                if (modalStatus) {
+                    modalStatus.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700';
+                    modalStatus.textContent = '현재: 데모 체험 모드';
+                }
+            }
+        }
+
+        async function syncWithGoogleSheets(showNotification = false) {
+            if (appState.mode !== 'LIVE' || !appState.gasUrl) {
+                if (showNotification) showToast('현재 데모 모드입니다. 화면이 최신화되었습니다.', 'info');
+                refreshCurrentView();
+                return;
+            }
+
+            try {
+                if (showNotification) showToast('구글 시트에서 최신 데이터를 불러오는 중...', 'info');
+                const response = await fetch(appState.gasUrl);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // 구글 시트 데이터를 앱 형식으로 매핑 (헤더 '비밀번호(PIN)' 및 '비밀번호' 모두 호환)
+                    if (result.students && result.students.length > 0) {
+                        appState.data.students = result.students.map(s => ({
+                            id: String(s['학생ID'] || s.id),
+                            name: String(s['학생이름'] || s.name),
+                            pin: String(s['비밀번호(PIN)'] || s['비밀번호'] || s.pin || '0000').replace(/^'/, '').padStart(4, '0'),
+                            points: Number(s['잔액포인트'] ?? s.points ?? 0)
+                        }));
+                    }
+                    if (result.items && result.items.length > 0) {
+                        appState.data.items = result.items.map((it, idx) => ({
+                            id: String(it['상품ID'] || `ITEM-0${idx+1}`),
+                            name: String(it['상품명'] || ''),
+                            price: Number(it['가격'] || 0),
+                            stock: Number(it['재고'] || 0),
+                            desc: String(it['설명'] || ''),
+                            icon: '🎁'
+                        }));
+                    }
+                    if (result.history) {
+                        appState.data.history = result.history.map(h => ({
+                            timestamp: String(h['일시'] || ''),
+                            studentName: String(h['학생이름'] || ''),
+                            itemName: String(h['구매아이템'] || ''),
+                            price: Number(h['차감포인트'] || 0),
+                            status: String(h['승인상태'] || '승인대기')
+                        })).reverse();
+                    }
+
+                    saveLocalState();
+                    renderLoginStudentDropdown();
+                    refreshCurrentView();
+                    if (showNotification) showToast('구글 시트와 동기화가 완료되었습니다!', 'success');
+                }
+            } catch (error) {
+                console.error('구글 시트 연동 오류:', error);
+                showToast('구글 시트 통신 중 오류가 발생했습니다. URL과 배포 권한을 확인하세요.', 'error');
+            }
+        }
+
+        async function triggerRemoteSetupSheets() {
+            const urlInput = document.getElementById('gasUrlInput').value.trim();
+            const targetUrl = urlInput || appState.gasUrl;
+
+            if (!targetUrl || !targetUrl.startsWith('https://script.google.com/')) {
+                showToast('먼저 상단 입력창에 Google Apps Script 웹 앱 URL을 입력해 주세요!', 'warning');
+                return;
+            }
+
+            appState.gasUrl = targetUrl;
+            appState.mode = 'LIVE';
+            saveLocalState();
+            updateConnectionBadge();
+
+            showToast('구글 시트에 필수 시트 3개(Students, Items, History) 생성을 요청 중...', 'info');
+            await postToGoogleSheets({ action: 'setup' });
+
+            setTimeout(async () => {
+                await syncWithGoogleSheets(true);
+            }, 1800);
+        }
+
+        async function postToGoogleSheets(payload) {
+            if (appState.mode !== 'LIVE' || !appState.gasUrl) return;
+            try {
+                await fetch(appState.gasUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', // Apps Script CORS 우회 전송
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (error) {
+                console.error('구글 시트 전송 오류:', error);
+                showToast('시트 저장 요청 중 네트워크 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // ==================== 로그인 & 네비게이션 로직 ====================
+        function renderLoginStudentDropdown() {
+            const select = document.getElementById('studentSelect');
+            if (!select) return;
+            select.innerHTML = appState.data.students.map(s => 
+                `<option value="${s.id}">${s.id}번 ${s.name}</option>`
+            ).join('');
+        }
+
+        function appendPin(num) {
+            const input = document.getElementById('studentPinInput');
+            if (input.value.length < 4) {
+                input.value += num;
+            }
+        }
+
+        function clearPin() {
+            document.getElementById('studentPinInput').value = '';
+        }
+
+        function handleStudentLogin(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('studentSelect').value;
+            const enteredPin = document.getElementById('studentPinInput').value.trim();
+            
+            const student = appState.data.students.find(s => String(s.id) === String(studentId));
+            if (!student) {
+                showToast('학생 정보를 찾을 수 없습니다.', 'error');
+                return;
+            }
+
+            if (String(student.pin) !== enteredPin) {
+                showToast('비밀번호(PIN) 4자리가 일치하지 않습니다!', 'error');
+                document.getElementById('studentPinInput').value = '';
+                return;
+            }
+
+            appState.currentRole = 'STUDENT';
+            appState.currentStudentId = student.id;
+            document.getElementById('studentPinInput').value = '';
+
+            showView('studentView');
+            switchStudentTab('store');
+            renderStudentDashboard();
+            showToast(`${student.name} 학생, 반가워요! 🎉`, 'success');
+        }
+
+        function handleTeacherLogin(e) {
+            e.preventDefault();
+            const pin = document.getElementById('teacherPinInput').value.trim();
+            if (pin !== appState.data.teacherPin) {
+                showToast('선생님 관리자 암호가 올바르지 않습니다. (기본: 0000)', 'error');
+                return;
+            }
+
+            appState.currentRole = 'TEACHER';
+            document.getElementById('teacherPinInput').value = '';
+            showView('teacherView');
+            switchTeacherTab('approvals');
+            renderTeacherDashboard();
+            showToast('선생님 관리자 모드로 접속했습니다.', 'success');
+        }
+
+        function logout() {
+            appState.currentRole = null;
+            appState.currentStudentId = null;
+            resetToHome();
+            showToast('안전하게 로그아웃되었습니다.', 'info');
+        }
+
+        function resetToHome() {
+            appState.currentRole = null;
+            appState.currentStudentId = null;
+            renderLoginStudentDropdown();
+            showView('loginView');
+        }
+
+        function showView(viewId) {
+            ['loginView', 'studentView', 'teacherView'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function refreshCurrentView() {
+            if (appState.currentRole === 'STUDENT') renderStudentDashboard();
+            if (appState.currentRole === 'TEACHER') renderTeacherDashboard();
+        }
+
+        // ==================== 학생 화면 렌더링 & 기능 ====================
+        function switchStudentTab(tabName) {
+            ['store', 'history', 'pin'].forEach(t => {
+                document.getElementById(`stuTab-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`stuTabBtn-${t}`);
+                btn.className = 'flex-1 min-w-[110px] py-2.5 px-4 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 text-slate-600 hover:bg-slate-100';
+            });
+
+            document.getElementById(`stuTab-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`stuTabBtn-${tabName}`);
+            activeBtn.className = 'flex-1 min-w-[110px] py-2.5 px-4 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 bg-blue-500 text-white shadow-sm';
+            
+            renderStudentDashboard();
+            lucide.createIcons();
+        }
+
+        function renderStudentDashboard() {
+            const student = appState.data.students.find(s => String(s.id) === String(appState.currentStudentId));
+            if (!student) return;
+
+            // 프로필 상단 바 업데이트
+            document.getElementById('stuProfileId').textContent = `${student.id}번`;
+            document.getElementById('stuProfileName').textContent = student.name;
+            document.getElementById('stuProfilePoints').textContent = student.points.toLocaleString();
+
+            // 1. 보상 상점 아이템 카드 렌더링
+            const grid = document.getElementById('storeItemsGrid');
+            grid.innerHTML = appState.data.items.map(item => {
+                const canAfford = student.points >= item.price;
+                const inStock = item.stock > 0;
+                const isAvailable = canAfford && inStock;
+
+                let btnText = '포인트로 구매하기';
+                let btnClass = 'bg-blue-500 hover:bg-blue-600 text-white shadow-md shadow-blue-100 active:scale-[0.98]';
+                if (!inStock) {
+                    btnText = '품절된 상품이에요';
+                    btnClass = 'bg-slate-200 text-slate-400 cursor-not-allowed';
+                } else if (!canAfford) {
+                    btnText = `${item.price - student.points}P 더 필요해요`;
+                    btnClass = 'bg-amber-100 text-amber-700 cursor-not-allowed';
+                }
+
+                return `
+                    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition flex flex-col justify-between relative overflow-hidden">
+                        <div>
+                            <div class="flex items-start justify-between gap-2 mb-3">
+                                <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-2xl">
+                                    ${item.icon || '🎁'}
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold ${inStock ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}">
+                                    남은 수량: ${item.stock}개
+                                </span>
+                            </div>
+                            <h4 class="font-jua text-xl text-slate-800 mb-1">${item.name}</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed mb-4">${item.desc}</p>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs text-slate-400 font-medium">교환 가격</span>
+                                <span class="font-jua text-2xl text-blue-600">${item.price}P</span>
+                            </div>
+                            <button onclick="openPurchaseModal('${item.id}')" ${!isAvailable ? 'disabled' : ''}
+                                class="w-full py-3 rounded-2xl font-bold text-sm transition ${btnClass}">
+                                ${btnText}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 2. 학생 이용 내역 테이블 렌더링
+            const myHistory = appState.data.history.filter(h => h.studentName === student.name);
+            document.getElementById('stuHistoryCountBadge').textContent = myHistory.length;
+
+            const tbody = document.getElementById('stuHistoryTableBody');
+            if (myHistory.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400 text-sm">아직 구매한 아이템이 없어요. 상점에서 첫 보상을 골라보세요!</td></tr>`;
+            } else {
+                tbody.innerHTML = myHistory.map(h => {
+                    const badgeStyle = getStatusBadgeStyle(h.status);
+                    return `
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="py-3.5 px-4 text-xs text-slate-500">${h.timestamp}</td>
+                            <td class="py-3.5 px-4 font-bold text-slate-800">${h.itemName}</td>
+                            <td class="py-3.5 px-4 font-bold text-rose-600">-${h.price}P</td>
+                            <td class="py-3.5 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold ${badgeStyle}">${h.status}</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // 구매 확인 모달 열기 & 확정
+        function openPurchaseModal(itemId) {
+            const student = appState.data.students.find(s => String(s.id) === String(appState.currentStudentId));
+            const item = appState.data.items.find(i => i.id === itemId);
+            if (!student || !item) return;
+
+            appState.selectedItemToBuy = item;
+            document.getElementById('modalItemName').textContent = item.name;
+            document.getElementById('modalItemPrice').textContent = `- ${item.price}P`;
+            document.getElementById('modalAfterBalance').textContent = `${student.points - item.price}P`;
+            document.getElementById('purchaseModal').classList.remove('hidden');
+        }
+
+        function closePurchaseModal() {
+            document.getElementById('purchaseModal').classList.add('hidden');
+            appState.selectedItemToBuy = null;
+        }
+
+        async function confirmPurchase() {
+            const student = appState.data.students.find(s => String(s.id) === String(appState.currentStudentId));
+            const item = appState.selectedItemToBuy;
+            if (!student || !item) return;
+
+            if (student.points < item.price || item.stock <= 0) {
+                showToast('포인트가 부족하거나 재고가 소진되었습니다.', 'error');
+                closePurchaseModal();
+                return;
+            }
+
+            // 로컬 데이터 즉시 차감 및 기록
+            student.points -= item.price;
+            item.stock -= 1;
+            const nowStr = getFormattedNow();
+            
+            appState.data.history.unshift({
+                timestamp: nowStr,
+                studentName: student.name,
+                itemName: item.name,
+                price: item.price,
+                status: '승인대기'
+            });
+
+            saveLocalState();
+            closePurchaseModal();
+            renderStudentDashboard();
+            showToast(`'${item.name}' 구매 신청 완료! 선생님 승인을 기다려주세요.`, 'success');
+
+            // 구글 시트 연동 전송
+            await postToGoogleSheets({
+                action: 'PURCHASE',
+                studentId: student.id,
+                studentName: student.name,
+                newBalance: student.points,
+                itemId: item.id,
+                itemName: item.name,
+                price: item.price,
+                newStock: item.stock,
+                timestamp: nowStr
+            });
+        }
+
+        // 학생 PIN 변경 처리
+        async function handleChangeStudentPin(e) {
+            e.preventDefault();
+            const student = appState.data.students.find(s => String(s.id) === String(appState.currentStudentId));
+            if (!student) return;
+
+            const oldPin = document.getElementById('oldPinInput').value.trim();
+            const newPin = document.getElementById('newPinInput').value.trim();
+            const confirmPin = document.getElementById('confirmNewPinInput').value.trim();
+
+            if (oldPin !== String(student.pin)) {
+                showToast('현재 비밀번호(PIN)가 틀렸습니다.', 'error');
+                return;
+            }
+            if (!/^\d{4}$/.test(newPin)) {
+                showToast('새 비밀번호는 숫자 4자리로 입력해야 합니다.', 'error');
+                return;
+            }
+            if (newPin !== confirmPin) {
+                showToast('새 비밀번호 확인이 일치하지 않습니다.', 'error');
+                return;
+            }
+
+            student.pin = newPin;
+            saveLocalState();
+
+            document.getElementById('oldPinInput').value = '';
+            document.getElementById('newPinInput').value = '';
+            document.getElementById('confirmNewPinInput').value = '';
+
+            showToast('비밀번호(PIN)가 성공적으로 변경되었습니다! 🔐', 'success');
+
+            await postToGoogleSheets({
+                action: 'CHANGE_PIN',
+                studentId: student.id,
+                newPin: newPin
+            });
+        }
+
+        // ==================== 교사 관리자 화면 렌더링 & 기능 ====================
+        function switchTeacherTab(tabName) {
+            ['approvals', 'students', 'items', 'sheetsPreview'].forEach(t => {
+                document.getElementById(`tchTab-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`tchTabBtn-${t}`);
+                btn.className = 'flex-1 min-w-[130px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 text-slate-600 hover:bg-slate-100';
+            });
+
+            document.getElementById(`tchTab-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tchTabBtn-${tabName}`);
+            activeBtn.className = 'flex-1 min-w-[130px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 bg-amber-500 text-white shadow-sm';
+
+            renderTeacherDashboard();
+            lucide.createIcons();
+        }
+
+        function renderTeacherDashboard() {
+            // 1. 상단 지표 업데이트
+            const totalStudents = appState.data.students.length;
+            const pendingCount = appState.data.history.filter(h => h.status === '승인대기').length;
+            const totalPoints = appState.data.students.reduce((sum, s) => sum + Number(s.points), 0);
+
+            document.getElementById('dashTotalStudents').textContent = totalStudents;
+            document.getElementById('dashPendingCount').textContent = pendingCount;
+            document.getElementById('tchPendingBadge').textContent = pendingCount;
+            document.getElementById('dashTotalPoints').textContent = totalPoints.toLocaleString();
+
+            // 2. 구매 승인 관리 테이블 (History)
+            renderTeacherHistoryTable();
+
+            // 3. 학생 포인트 관리 테이블 (Students)
+            const targetSelect = document.getElementById('pointTargetStudent');
+            targetSelect.innerHTML = appState.data.students.map(s => 
+                `<option value="${s.id}">${s.id}번 ${s.name} (${s.points}P)</option>`
+            ).join('');
+
+            const stuTbody = document.getElementById('tchStudentsTableBody');
+            stuTbody.innerHTML = appState.data.students.map(s => `
+                <tr class="hover:bg-slate-50/80">
+                    <td class="py-3.5 px-4 font-bold text-slate-500">${s.id}번</td>
+                    <td class="py-3.5 px-4 font-bold text-slate-800">${s.name}</td>
+                    <td class="py-3.5 px-4">
+                        <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-extrabold text-xs">${s.points}P</span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                        <div class="flex flex-wrap gap-1.5">
+                            <button onclick="quickAdjustPoints('${s.id}', 10)" class="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-xs transition">+10P</button>
+                            <button onclick="quickAdjustPoints('${s.id}', 50)" class="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs transition">+50P</button>
+                            <button onclick="quickAdjustPoints('${s.id}', -10)" class="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold text-xs transition">-10P</button>
+                        </div>
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                        <button onclick="resetStudentPin('${s.id}')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition" title="현재 PIN: ${s.pin}">
+                            PIN 초기화 (0000)
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // 4. 상점 아이템 관리 테이블 (Items)
+            const itemTbody = document.getElementById('tchItemsTableBody');
+            itemTbody.innerHTML = appState.data.items.map(it => `
+                <tr class="hover:bg-slate-50/80">
+                    <td class="py-3.5 px-4 text-xs font-mono text-slate-400">${it.id}</td>
+                    <td class="py-3.5 px-4 font-bold text-slate-800">${it.icon || '🎁'} ${it.name}</td>
+                    <td class="py-3.5 px-4 text-xs text-slate-500 max-w-xs truncate">${it.desc}</td>
+                    <td class="py-3.5 px-4 font-bold text-blue-600">${it.price}P</td>
+                    <td class="py-3.5 px-4 font-bold ${it.stock > 0 ? 'text-emerald-600' : 'text-rose-500'}">${it.stock}개</td>
+                    <td class="py-3.5 px-4 text-right space-x-1">
+                        <button onclick="adjustItemStock('${it.id}', 1)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold text-xs">+1</button>
+                        <button onclick="adjustItemStock('${it.id}', -1)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold text-xs">-1</button>
+                        <button onclick="deleteItem('${it.id}')" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs">삭제</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // 5. 구글 시트 DB 뷰어 렌더링
+            renderSheetsMirror();
+        }
+
+        function setHistoryFilter(filter) {
+            appState.historyFilter = filter;
+            ['ALL', '승인대기', '승인완료'].forEach(f => {
+                const btn = document.getElementById(`filterBtn-${f}`);
+                btn.className = f === filter 
+                    ? 'px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm' 
+                    : 'px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800';
+            });
+            renderTeacherHistoryTable();
+        }
+
+        function renderTeacherHistoryTable() {
+            const tbody = document.getElementById('tchHistoryTableBody');
+            let list = appState.data.history;
+            if (appState.historyFilter !== 'ALL') {
+                list = list.filter(h => h.status === appState.historyFilter);
+            }
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 text-sm">해당 조건의 구매 내역이 없습니다.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((h) => {
+                // 원본 배열 인덱스 찾기
+                const realIdx = appState.data.history.indexOf(h);
+                const badgeStyle = getStatusBadgeStyle(h.status);
+                const actionButtons = h.status === '승인대기' ? `
+                    <div class="flex justify-end gap-1.5">
+                        <button onclick="processPurchaseApproval(${realIdx}, '승인완료')" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-sm transition">
+                            승인 완료
+                        </button>
+                        <button onclick="processPurchaseApproval(${realIdx}, '거절됨')" class="px-3 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold text-xs transition">
+                            거절(환불)
+                        </button>
+                    </div>
+                ` : `<span class="text-xs text-slate-400">처리 완료</span>`;
+
+                return `
+                    <tr class="hover:bg-slate-50/80">
+                        <td class="py-3.5 px-4 text-xs text-slate-500">${h.timestamp}</td>
+                        <td class="py-3.5 px-4 font-bold text-slate-800">${h.studentName}</td>
+                        <td class="py-3.5 px-4 font-semibold text-blue-700">${h.itemName}</td>
+                        <td class="py-3.5 px-4 font-bold text-slate-700">${h.price}P</td>
+                        <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${badgeStyle}">${h.status}</span></td>
+                        <td class="py-3.5 px-4 text-right">${actionButtons}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 구매 승인 또는 거절(환불) 처리
+        async function processPurchaseApproval(historyIndex, newStatus) {
+            const record = appState.data.history[historyIndex];
+            if (!record || record.status !== '승인대기') return;
+
+            record.status = newStatus;
+            let refundBalance = null;
+            let restoredStock = null;
+
+            if (newStatus === '거절됨') {
+                // 포인트 환불 및 아이템 재고 복구
+                const stu = appState.data.students.find(s => s.name === record.studentName);
+                const itm = appState.data.items.find(i => i.name === record.itemName);
+                if (stu) {
+                    stu.points += Number(record.price);
+                    refundBalance = stu.points;
+                }
+                if (itm) {
+                    itm.stock += 1;
+                    restoredStock = itm.stock;
+                }
+                showToast(`${record.studentName} 학생의 구매를 거절하고 ${record.price}P를 환불했습니다.`, 'warning');
+            } else {
+                showToast(`${record.studentName} 학생의 '${record.itemName}' 사용을 승인했습니다!`, 'success');
+            }
+
+            saveLocalState();
+            renderTeacherDashboard();
+
+            await postToGoogleSheets({
+                action: 'UPDATE_HISTORY_STATUS',
+                timestamp: record.timestamp,
+                studentName: record.studentName,
+                itemName: record.itemName,
+                status: newStatus,
+                refundBalance: refundBalance,
+                restoredStock: restoredStock
+            });
+        }
+
+        // 빠른 포인트 지급/차감
+        async function quickAdjustPoints(studentId, delta) {
+            const stu = appState.data.students.find(s => String(s.id) === String(studentId));
+            if (!stu) return;
+
+            stu.points = Math.max(0, Number(stu.points) + Number(delta));
+            saveLocalState();
+            renderTeacherDashboard();
+
+            const sign = delta > 0 ? `+${delta}` : `${delta}`;
+            showToast(`${stu.name} 학생에게 ${sign}P 반영 완료! (현재 ${stu.points}P)`, delta > 0 ? 'success' : 'info');
+
+            await postToGoogleSheets({
+                action: 'UPDATE_POINTS',
+                studentId: stu.id,
+                newBalance: stu.points
+            });
+        }
+
+        async function handleCustomPointSubmit(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('pointTargetStudent').value;
+            const amount = parseInt(document.getElementById('pointCustomAmount').value, 10);
+            const reason = document.getElementById('pointCustomReason').value.trim();
+
+            if (isNaN(amount) || amount === 0) {
+                showToast('0이 아닌 올바른 포인트를 입력하세요.', 'error');
+                return;
+            }
+
+            await quickAdjustPoints(studentId, amount);
+            document.getElementById('pointCustomAmount').value = '';
+            document.getElementById('pointCustomReason').value = '';
+        }
+
+        async function resetStudentPin(studentId) {
+            const stu = appState.data.students.find(s => String(s.id) === String(studentId));
+            if (!stu) return;
+
+            stu.pin = '0000';
+            saveLocalState();
+            renderTeacherDashboard();
+            showToast(`${stu.name} 학생의 비밀번호가 '0000'으로 초기화되었습니다.`, 'info');
+
+            await postToGoogleSheets({
+                action: 'CHANGE_PIN',
+                studentId: stu.id,
+                newPin: '0000'
+            });
+        }
+
+        async function handleAddStudent(e) {
+            e.preventDefault();
+            const id = document.getElementById('newStuId').value.trim();
+            const name = document.getElementById('newStuName').value.trim();
+
+            if (appState.data.students.some(s => String(s.id) === id)) {
+                showToast('이미 등록된 학번(학생 ID)입니다.', 'error');
+                return;
+            }
+
+            appState.data.students.push({ id, name, pin: '0000', points: 50 });
+            saveLocalState();
+            renderTeacherDashboard();
+            renderLoginStudentDropdown();
+
+            document.getElementById('newStuId').value = '';
+            document.getElementById('newStuName').value = '';
+            showToast(`${id}번 ${name} 학생이 등록되었습니다. (초기 50P 지급)`, 'success');
+
+            await postToGoogleSheets({ action: 'ADD_STUDENT', id, name });
+        }
+
+        async function handleAddItem(e) {
+            e.preventDefault();
+            const name = document.getElementById('newItemName').value.trim();
+            const price = parseInt(document.getElementById('newItemPrice').value, 10);
+            const stock = parseInt(document.getElementById('newItemStock').value, 10);
+            const desc = document.getElementById('newItemDesc').value.trim();
+            const id = `ITEM-${String(appState.data.items.length + 1).padStart(2, '0')}`;
+
+            appState.data.items.push({ id, name, price, stock, desc, icon: '🌟' });
+            saveLocalState();
+            renderTeacherDashboard();
+
+            e.target.reset();
+            showToast(`새 보상 아이템 '${name}'이 상점에 등록되었습니다!`, 'success');
+
+            await postToGoogleSheets({ action: 'ADD_ITEM', id, name, price, stock, desc });
+        }
+
+        function adjustItemStock(itemId, delta) {
+            const item = appState.data.items.find(i => i.id === itemId);
+            if (!item) return;
+            item.stock = Math.max(0, item.stock + delta);
+            saveLocalState();
+            renderTeacherDashboard();
+        }
+
+        function deleteItem(itemId) {
+            appState.data.items = appState.data.items.filter(i => i.id !== itemId);
+            saveLocalState();
+            renderTeacherDashboard();
+            showToast('아이템이 상점에서 삭제되었습니다.', 'info');
+        }
+
+        // ==================== 구글 시트 DB 미러링 & CSV 내보내기 ====================
+        function renderSheetsMirror() {
+            const container = document.getElementById('sheetsMirrorContainer');
+            if (!container) return;
+
+            const studentsRows = appState.data.students.map(s => 
+                `<tr class="border-b"><td class="p-1.5">${s.id}</td><td class="p-1.5 font-bold">${s.name}</td><td class="p-1.5 font-mono">${s.pin}</td><td class="p-1.5 text-blue-600 font-bold">${s.points}</td></tr>`
+            ).join('');
+
+            const itemsRows = appState.data.items.map(i => 
+                `<tr class="border-b"><td class="p-1.5 font-mono">${i.id}</td><td class="p-1.5 font-bold">${i.name}</td><td class="p-1.5">${i.price}</td><td class="p-1.5">${i.stock}</td></tr>`
+            ).join('');
+
+            const histRows = appState.data.history.slice(0, 8).map(h => 
+                `<tr class="border-b"><td class="p-1.5 text-[10px]">${h.timestamp.slice(5)}</td><td class="p-1.5 font-bold">${h.studentName}</td><td class="p-1.5">${h.itemName}</td><td class="p-1.5">${h.status}</td></tr>`
+            ).join('');
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                    <div class="text-xs font-bold text-blue-600 mb-2 flex items-center gap-1">📄 시트 1: Students</div>
+                    <table class="w-full text-[11px] text-left">
+                        <thead class="bg-slate-100 text-slate-600"><tr><th class="p-1.5">ID</th><th class="p-1.5">이름</th><th class="p-1.5">PIN</th><th class="p-1.5">포인트</th></tr></thead>
+                        <tbody>${studentsRows}</tbody>
+                    </table>
+                </div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                    <div class="text-xs font-bold text-emerald-600 mb-2 flex items-center gap-1">📄 시트 2: Items</div>
+                    <table class="w-full text-[11px] text-left">
+                        <thead class="bg-slate-100 text-slate-600"><tr><th class="p-1.5">ID</th><th class="p-1.5">상품명</th><th class="p-1.5">가격</th><th class="p-1.5">재고</th></tr></thead>
+                        <tbody>${itemsRows}</tbody>
+                    </table>
+                </div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                    <div class="text-xs font-bold text-amber-600 mb-2 flex items-center gap-1">📄 시트 3: History (최근)</div>
+                    <table class="w-full text-[11px] text-left">
+                        <thead class="bg-slate-100 text-slate-600"><tr><th class="p-1.5">일시</th><th class="p-1.5">학생</th><th class="p-1.5">아이템</th><th class="p-1.5">상태</th></tr></thead>
+                        <tbody>${histRows}</tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function exportAllCsv() {
+            let csv = '\uFEFF[Students 시트]\n학생ID,학생이름,비밀번호(PIN),잔액포인트\n';
+            appState.data.students.forEach(s => { csv += `${s.id},${s.name},"${s.pin}",${s.points}\n`; });
+            csv += '\n[Items 시트]\n상품ID,상품명,가격,재고,설명\n';
+            appState.data.items.forEach(i => { csv += `${i.id},"${i.name}",${i.price},${i.stock},"${i.desc}"\n`; });
+            csv += '\n[History 시트]\n일시,학생이름,구매아이템,차감포인트,승인상태\n';
+            appState.data.history.forEach(h => { csv += `${h.timestamp},${h.studentName},"${h.itemName}",${h.price},${h.status}\n`; });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `우리반_포인트상점_백업_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('CSV 백업 파일이 다운로드되었습니다.', 'success');
+        }
+
+        // ==================== 구글 시트 모달 제어 ====================
+        function openSheetsModal() {
+            document.getElementById('sheetsModal').classList.remove('hidden');
+            updateConnectionBadge();
+            lucide.createIcons();
+        }
+
+        function closeSheetsModal() {
+            document.getElementById('sheetsModal').classList.add('hidden');
+        }
+
+        function saveGasUrl() {
+            const url = document.getElementById('gasUrlInput').value.trim();
+            if (!url.startsWith('https://script.google.com/')) {
+                showToast('올바른 Google Apps Script 웹 앱 URL을 입력해 주세요.', 'error');
+                return;
+            }
+            appState.gasUrl = url;
+            appState.mode = 'LIVE';
+            saveLocalState();
+            updateConnectionBadge();
+            syncWithGoogleSheets(true);
+            closeSheetsModal();
+        }
+
+        function switchToDemoMode() {
+            appState.mode = 'DEMO';
+            saveLocalState();
+            updateConnectionBadge();
+            showToast('데모 체험 모드로 전환되었습니다.', 'info');
+        }
+
+        function copyGasCode() {
+            const codeText = document.getElementById('gasCodeBlock').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = codeText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('Apps Script 백엔드 코드가 클립보드에 복사되었습니다! 📋', 'success');
+        }
+
+        // ==================== 헬퍼 함수 ====================
+        function getStatusBadgeStyle(status) {
+            if (status === '승인완료') return 'bg-emerald-100 text-emerald-700';
+            if (status === '거절됨') return 'bg-rose-100 text-rose-700';
+            return 'bg-amber-100 text-amber-700';
+        }
+
+        function getFormattedNow() {
+            const d = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+    </script>
+</body>
+</html>
